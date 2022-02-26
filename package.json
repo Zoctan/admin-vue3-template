@@ -1,0 +1,49 @@
+{
+  "name": "admin-vue",
+  "private": true,
+  "version": "1.0.0",
+  "author": "Zoctan <zoctan@163.com> (https://github.com/Zoctan)",
+  "description": "A Vue.js admin project",
+  "keywords": [
+    "Vue.js",
+    "admin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zoctan/php-seed"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Zoctan/php-seed/issues",
+    "email": "zoctan@163.com"
+  },
+  "contributors": [],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^0.2.7",
+    "axios": "^0.26.0",
+    "element-plus": "^2.0.2",
+    "nprogress": "^0.2.0",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.12",
+    "vuex": "^4.0.2",
+    "vuex-persistedstate": "^4.1.0"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.17.0",
+    "@vitejs/plugin-vue": "^2.2.2",
+    "@vue/cli-plugin-babel": "^5.0.1",
+    "@vue/cli-plugin-eslint": "^5.0.1",
+    "babel-plugin-import": "^1.13.3",
+    "eslint": "^8.9.0",
+    "eslint-plugin-vue": "^8.5.0",
+    "sass": "^1.49.9",
+    "unplugin-auto-import": "^0.6.1",
+    "unplugin-vue-components": "^0.17.20",
+    "vite": "^2.8.4"
+  }
+}
