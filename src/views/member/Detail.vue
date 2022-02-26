@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-form
       v-loading.body="loading"
-      v-model="tmpAccount"
+      :model="tmpAccount"
       :rules="updateDetailRules"
       ref="tmpAccount"
       label-width="115px"
@@ -57,7 +57,7 @@
         label-position="left"
         label-width="115px"
         style="width: 400px; margin-left:50px;"
-        v-model="tmpPassword"
+        :model="tmpPassword"
         :rules="updatePasswordRules"
         ref="tmpPassword"
       >

@@ -21,10 +21,10 @@
 
         <span v-if="hasPermission('account:search')">
           <el-form-item>
-            <el-input v-model="search.accountName" placeholder="账户名"></el-input>
+            <el-input :model="search.accountName" placeholder="账户名"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-select v-model="search.roleName" placeholder="角色">
+            <el-select :model="search.roleName" placeholder="角色">
               <el-option label="请选择" value />
               <div v-for="(role, index) in roleList" :key="index">
                 <el-option :label="role.name" :value="role.name"/>
@@ -99,7 +99,7 @@
         label-position="left"
         label-width="75px"
         style="width: 300px; margin-left:50px;"
-        v-model="tmpAccount"
+        :model="tmpAccount"
         :rules="createRules"
         ref="tmpAccount"
       >

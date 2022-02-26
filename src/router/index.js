@@ -10,9 +10,10 @@ const _import = (file) => modules[`/src/views/${file}.vue`]
 
 export const noAuthRouters = [
     { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
-    { path: '/404', component: _import('error/404'), meta: { hidden: true } },
-    { path: '/401', component: _import('error/401'), meta: { hidden: true } },
+    { path: '/404', component: _import('Error/404'), meta: { hidden: true } },
+    { path: '/401', component: _import('Error/401'), meta: { hidden: true } },
     { path: '/login', name: '登录', component: _import('Login'), meta: { hidden: true } },
+    { path: '/register', name: '注册', component: _import('Register'), meta: { hidden: true } },
     { path: '/', redirect: '/dashboard', meta: { hidden: true } },
     {
         path: '/dashboard',
@@ -46,37 +47,42 @@ export const noAuthRouters = [
 
 export const authRouters = [
     // {
-    //     path: '/member',
+    //     path: '/profile',
     //     component: Layout,
-    //     meta: { icon: 'name', requiresAuth: true, },
-    //     children: [{
-    //         path: 'list',
-    //         name: '账户管理',
-    //         component: _import('member/list'),
-    //         meta: { auth: ['member:list'] }
-    //     }]
-    // },
-    // {
-    //     path: '/member',
-    //     component: Layout,
-    //     meta: { icon: 'name', requiresAuth: true, },
+    //     meta: { icon: 'avatar', requiresAuth: true, },
     //     children: [{
     //         path: 'detail',
-    //         name: '账户中心',
-    //         component: _import('member/detail')
+    //         name: '个人中心',
+    //         component: _import('Profile/Detail')
     //     }]
     // },
-    // {
-    //     path: '/role',
-    //     component: Layout,
-    //     meta: { icon: 'role', requiresAuth: true, },
-    //     children: [{
-    //         path: 'list',
-    //         name: '角色管理',
-    //         component: _import('role/list'),
-    //         meta: { auth: ['role:list'] }
-    //     }]
-    // }
+    {
+        path: '/member',
+        component: Layout,
+        meta: { icon: 'user', requiresAuth: false, },
+        children: [{
+            path: 'list',
+            name: '成员管理',
+            component: _import('Member/List'),
+            meta: { icon: 'user', auth: ['member:list'] }
+        }, {
+            path: 'detail',
+            name: '成员信息',
+            component: _import('Member/Detail'),
+            meta: { icon: 'user', auth: ['member:detail'], hidden: true }
+        },]
+    },
+    {
+        path: '/role',
+        component: Layout,
+        meta: { icon: 'role', requiresAuth: false, },
+        children: [{
+            path: 'list',
+            name: '角色管理',
+            component: _import('Role/List'),
+            meta: { auth: ['role:list'] }
+        }]
+    }
 ]
 
 const router = createRouter({
@@ -120,6 +126,8 @@ router.beforeEach((to, from, next) => {
         if (!localStorage.getItem('token')) {
             next({ path: '/login' })
         } else {
+            // 检查权限
+            //to.meta.auth
             // 有 token 的情况下不要重复访问 login 页面
             if (to.path !== '/login') next()
             else next({ path: '/' })

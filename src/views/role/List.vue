@@ -84,7 +84,7 @@
         label-position="left"
         label-width="100px"
         style="width: 500px; margin-left:50px;"
-        v-model="tempRole"
+        :model="tempRole"
         :rules="createRules"
         ref="tempRole"
       >

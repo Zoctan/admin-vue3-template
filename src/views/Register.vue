@@ -1,5 +1,5 @@
 <template>
-  <div class="title">后台登录</div>
+  <div class="title">后台注册</div>
   <el-card class="box-card">
     <el-form
       autocomplete="on"
@@ -13,7 +13,7 @@
       <el-form-item label="用户名" prop="username" required>
         <el-input
           type="text"
-          autocomplete="on"
+          autocomplete="off"
           prefix-icon="user"
           v-model="form.username"
           placeholder="请输入用户名"
@@ -22,17 +22,30 @@
       <el-form-item label="密码" prop="password" required>
         <el-input
           type="password"
-          autocomplete="on"
+          autocomplete="off"
           prefix-icon="lock"
           v-model="form.password"
           placeholder="请输入密码"
           show-password
         />
       </el-form-item>
+      <el-form-item label="二次密码" prop="password" required>
+        <el-input
+          type="password"
+          autocomplete="off"
+          prefix-icon="lock"
+          v-model="form.checkPassword"
+          placeholder="请第二次输入密码"
+          show-password
+        />
+      </el-form-item>
       <el-form-item>
-        <el-button type="primary" :loading="submitLoading" @click="handleLogin(formRef)">登录</el-button>
-        <el-button type="info" @click="toRegister">注册</el-button>
-        <el-button @click="resetForm(formRef)">重置</el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleRegister(formRef)"
+        >注册</el-button>
+        <el-button type="info" @click="toLogin">登录</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -45,11 +58,12 @@ import { ref, reactive } from 'vue'
 
 let submitLoading = ref(false)
 
-const formRef = ref(null)
+const formRef = ref()
 
 const form = reactive({
-  username: 'admin',
-  password: 'admin123',
+  username: '',
+  password: '',
+  checkPassword: '',
 })
 
 const validateUsername = (rule, value, callback) => {
@@ -72,6 +86,24 @@ const validatePassword = (rule, value, callback) => {
     if (value.length < 6) {
       callback(new Error('密码长度必须超过6位以上'))
     } else {
+      if (form.checkPassword !== '') {
+        if (!formRef.value) return
+        formRef.value.validateField('checkPassword', () => null)
+      }
+      callback()
+    }
+  }, 600)
+}
+const validateCheckPassword = (rule, value, callback) => {
+  if (!value) {
+    return callback(new Error('请输入密码'))
+  }
+  setTimeout(() => {
+    if (value.length < 6) {
+      callback(new Error('密码长度必须超过6位以上'))
+    } else if (value !== form.password) {
+      callback(new Error('两次输入的密码不一致'))
+    } else {
       callback()
     }
   }, 600)
@@ -79,22 +111,16 @@ const validatePassword = (rule, value, callback) => {
 
 const rules = reactive({
   username: [{ trigger: 'blur', validator: validateUsername }],
-  password: [{ trigger: 'blur', validator: validatePassword }]
+  password: [{ trigger: 'blur', validator: validatePassword }],
+  checkPassword: [{ trigger: 'blur', validator: validateCheckPassword }]
 })
 
 const store = useStore()
 const router = useRouter()
 
-const toRegister = () => router.push({ path: '/register' })
+const toLogin = () => router.push({ path: '/login' })
 
-const resetForm = (form) => {
-  if (!form) return
-  // 重置回初始状态，如果表单初始化了数据，就是那个原始数据，而不是清空
-  form.resetFields()
-}
-
-const handleLogin = (form) => {
-  console.debug('form', form)
+const handleRegister = (form) => {
   if (!form) return
   form.validate((valid) => {
     if (!valid) {
@@ -107,7 +133,7 @@ const handleLogin = (form) => {
       return false
     } else {
       submitLoading = true
-      store.dispatch('memberLogin', form).then(
+      store.dispatch('memberregister', form).then(
         () => {
           submitLoading = false
           router.push({ path: '/' })

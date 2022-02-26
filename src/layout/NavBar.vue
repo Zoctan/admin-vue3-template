@@ -8,7 +8,10 @@
 
     <div class="rightbar">
       <el-link icon="link">
-        <a href="https://github.com/Zoctan/php-seed" target="_blank">Github</a>
+        <a href="https://github.com/Zoctan/admin-seed" target="_blank">Github</a>
+      </el-link>
+      <el-link icon="question-filled">
+        <a href="https://github.com/Zoctan/admin-seed/issues" target="_blank">Issues</a>
       </el-link>
       <el-dropdown class>
         <span class="el-dropdown-link">
@@ -68,7 +71,7 @@ const logout = () => store.dispatch('memberLogout').then(() => router.push({ pat
     right: 2%;
     width: 500px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
   }
   .el-dropdown-link {
