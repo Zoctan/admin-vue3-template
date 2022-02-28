@@ -49,7 +49,7 @@ export const authRouters = [
     // {
     //     path: '/profile',
     //     component: Layout,
-    //     meta: { icon: 'avatar', requiresAuth: true, },
+    //     meta: { icon: 'avatar', },
     //     children: [{
     //         path: 'detail',
     //         name: '个人中心',
@@ -59,7 +59,7 @@ export const authRouters = [
     {
         path: '/member',
         component: Layout,
-        meta: { icon: 'user', requiresAuth: false, },
+        meta: { icon: 'user', },
         children: [{
             path: 'list',
             name: '成员管理',
@@ -75,7 +75,7 @@ export const authRouters = [
     {
         path: '/role',
         component: Layout,
-        meta: { icon: 'role', requiresAuth: false, },
+        meta: { icon: 'role', },
         children: [{
             path: 'list',
             name: '角色管理',

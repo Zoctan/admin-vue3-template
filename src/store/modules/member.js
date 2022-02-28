@@ -1,10 +1,11 @@
-import { login, logout, detail } from '@/api/member'
+import { login, logout, profile } from '@/api/member'
 
 const defaultMember = {
   id: -1,
   name: null,
+  roleId: -1,
   roleName: null,
-  ruleList: []
+  permissionList: []
 }
 
 export default {
@@ -38,9 +39,9 @@ export default {
         })
       })
     },
-    memberDetail({ commit }) {
+    memberProfile({ commit }) {
       return new Promise((resolve, reject) => {
-        detail().then(response => {
+        profile().then(response => {
           commit('SET_MEMBER', response.data)
           resolve(response)
         }).catch(error => {

@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import store from './store'
 import router from './router'
 import App from './App.vue'
+import permission from '@/directive/permission'
 import * as ElIcons from '@element-plus/icons-vue'
 
 // 创建实例
@@ -14,5 +15,8 @@ app.use(store)
 for (const name in ElIcons) {
     app.component(name, ElIcons[name])
 }
+
+// v-permission
+app.directive('permission', permission)
 
 app.mount('#app')

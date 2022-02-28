@@ -1,78 +1,62 @@
 import request from '@/utils/request'
 
-export function search(params) {
+export function register(data) {
   return request({
-    url: '/member/search',
-    method: 'post',
-    params
+    url: '/member/register',
+    method: 'POST',
+    data: data
   })
 }
 
-export function list(params) {
+export function login(data) {
   return request({
-    url: '/member',
-    method: 'get',
-    params
-  })
-}
-
-export function validatePassword(params) {
-  return request({
-    url: '/member/password',
-    method: 'post',
-    params
-  })
-}
-
-export function update(params) {
-  return request({
-    url: '/member/detail',
-    method: 'put',
-    params
-  })
-}
-
-export function updatemember(params) {
-  return request({
-    url: '/member/' + params.Id,
-    method: 'put',
-    params
-  })
-}
-
-export function remove(memberId) {
-  return request({
-    url: '/member/' + memberId,
-    method: 'delete'
-  })
-}
-
-export function register(memberForm) {
-  return request({
-    url: '/member',
-    method: 'post',
-    data: memberForm
-  })
-}
-
-export function login(memberForm) {
-  return request({
-    url: '/member/token',
-    method: 'post',
-    data: memberForm
-  })
-}
-
-export function detail() {
-  return request({
-    url: '/member/detail',
-    method: 'get'
+    url: '/member/login',
+    method: 'POST',
+    data: data
   })
 }
 
 export function logout() {
   return request({
-    url: '/member/token',
-    method: 'delete'
+    url: '/member/logout',
+    method: 'DELETE'
+  })
+}
+
+export function refreshToken() {
+  return request({
+    url: '/member/refreshToken',
+    method: 'PUT'
+  })
+}
+
+export function profile() {
+  return request({
+    url: '/member/profile',
+    method: 'GET'
+  })
+}
+
+export function list(data) {
+  return request({
+    url: '/member/list',
+    method: 'POST',
+    data: data
+  })
+}
+
+export function update(data) {
+  return request({
+    url: '/member/update',
+    method: 'PUT',
+    data: data
+  })
+}
+
+export function remove(data) {
+  return request({
+    url: '/member/delete',
+    method: 'DELETE',
+    data: data
   })
 }

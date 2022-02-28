@@ -49,7 +49,7 @@ const formRef = ref(null)
 
 const form = reactive({
   username: 'admin',
-  password: 'admin123',
+  password: 'admin',
 })
 
 const validateUsername = (rule, value, callback) => {
@@ -69,8 +69,8 @@ const validatePassword = (rule, value, callback) => {
     return callback(new Error('请输入密码'))
   }
   setTimeout(() => {
-    if (value.length < 6) {
-      callback(new Error('密码长度必须超过6位以上'))
+    if (value.length < 5) {
+      callback(new Error('密码长度必须超过5位以上'))
     } else {
       callback()
     }
@@ -93,10 +93,10 @@ const resetForm = (form) => {
   form.resetFields()
 }
 
-const handleLogin = (form) => {
-  console.debug('form', form)
-  if (!form) return
-  form.validate((valid) => {
+const handleLogin = (formEl) => {
+  console.debug('formEl', formEl)
+  if (!formEl) return
+  formEl.validate((valid) => {
     if (!valid) {
       ElNotification({
         title: '错误',

@@ -3,7 +3,7 @@ import router from '../router'
 
 // 创建 axios 实例
 const instance = axios.create({
-    baseURL: import.meta.env.BASE_API,
+    baseURL: import.meta.env.VITE_API_DOMAIN,
     withCredentials: false,
     // 请求超时时间
     timeout: 5000,
