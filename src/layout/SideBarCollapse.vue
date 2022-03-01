@@ -14,7 +14,6 @@ import { useStore } from 'vuex'
 const store = useStore()
 
 const sidebar = computed(() => store.getters.sidebar)
-
 const toggleSideBar = () => store.dispatch('toggleSideBar')
 </script>
 

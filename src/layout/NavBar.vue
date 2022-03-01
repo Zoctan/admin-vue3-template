@@ -15,8 +15,8 @@
       </el-link>
       <el-dropdown class>
         <span class="el-dropdown-link">
-          <el-image class="avatar" :src="member.avatar || avatar"></el-image>
-          {{ member.name || '测试' }}
+          <el-image class="avatar" :src="memberData.avatar || avatar"></el-image>
+          {{ memberData.nickname || '测试' }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -24,11 +24,9 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item icon="avatar">
-              <router-link to="/member/detail">账户中心</router-link>
+              <router-link to="/member/profile">个人中心</router-link>
             </el-dropdown-item>
-            <el-dropdown-item icon="back">
-              <span @click="logout">注销</span>
-            </el-dropdown-item>
+            <el-dropdown-item icon="back" @click="logout">注销</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -47,7 +45,7 @@ import logo from '@/assets/image/logo.png'
 const store = useStore()
 const router = useRouter()
 
-const member = computed(() => store.getters.member)
+const memberData = computed(() => store.getters.member.memberData)
 
 const logout = () => store.dispatch('memberLogout').then(() => router.push({ path: '/login' }))
 </script>

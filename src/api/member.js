@@ -45,9 +45,17 @@ export function list(data) {
   })
 }
 
-export function update(data) {
+export function updateProfile(data) {
   return request({
-    url: '/member/update',
+    url: '/member/updateProfile',
+    method: 'PUT',
+    data: data
+  })
+}
+
+export function updateDetail(data) {
+  return request({
+    url: '/member/updateDetail',
     method: 'PUT',
     data: data
   })

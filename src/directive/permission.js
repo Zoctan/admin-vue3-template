@@ -1,3 +1,5 @@
+import store from '@/store'
+
 export default {
   // 当被绑定的元素挂载到 DOM 中时
   mounted(el, binding) {

@@ -1,28 +1,29 @@
 import { login, logout, profile } from '@/api/member'
 
-const defaultMember = {
-  id: -1,
-  name: null,
-  roleId: -1,
-  roleName: null,
-  permissionList: []
+const defaultState = () => {
+  return {
+    token: null,
+    memberData: null,
+    role: null,
+    permissionList: []
+  }
 }
 
 export default {
-  state: {
-    token: null,
-    member: defaultMember
-  },
+  state: defaultState(),
 
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
     },
     SET_MEMBER: (state, member) => {
-      state.member = member
+      const { memberData, role, permissionList } = member
+      state.memberData = memberData
+      state.role = role
+      state.permissionList = permissionList
     },
     RESET_MEMBER: (state) => {
-      state.member = defaultMember
+      Object.assign(state, defaultState())
     }
   },
 
@@ -30,11 +31,8 @@ export default {
     memberLogin({ commit }, params) {
       return new Promise((resolve, reject) => {
         login(params).then(response => {
-          if (response.code === 200) {
-            commit('SET_TOKEN', response.data)
-            return resolve(response)
-          }
-          reject()
+          commit('SET_TOKEN', response.data)
+          resolve(response.data)
         }).catch(error => {
           reject(error)
         })
@@ -44,7 +42,7 @@ export default {
       return new Promise((resolve, reject) => {
         profile().then(response => {
           commit('SET_MEMBER', response.data)
-          resolve(response)
+          resolve(response.data)
         }).catch(error => {
           reject(error)
         })
@@ -54,6 +52,7 @@ export default {
       return new Promise((resolve, reject) => {
         logout().then(() => {
           commit('RESET_MEMBER')
+          commit('RESET_ROUTERS')
           resolve()
         }).catch(error => {
           reject(error)

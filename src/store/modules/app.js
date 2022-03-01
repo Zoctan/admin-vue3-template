@@ -6,14 +6,9 @@ export default {
   },
 
   mutations: {
-    OPEN_SIDEBAR: (state) => {
-      state.sidebar.opened = true
-    },
-    CLOSED_SIDEBAR: (state) => {
-      state.sidebar.opened = false
-    },
     TOGGLE_SIDEBAR: (state) => {
       state.sidebar.opened = !state.sidebar.opened
+      console.debug('state.sidebar',state.sidebar)
     }
   },
   

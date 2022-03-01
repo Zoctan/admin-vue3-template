@@ -1,14 +1,17 @@
 <template>
-  <div class="error401">
-    <el-button @click="onBack" type="primary" icon="arrow-left">返回</el-button>
-    <h1>你没有权限访问页面</h1>
-    <img :src="error401Gif" width="313" height="428" alt="Girl has dropped her ice cream." />
-  </div>
+  <el-result title="401 No Auth" sub-title="您无权访问该网址">
+    <template #icon>
+      <el-image :src="coffee"></el-image>
+    </template>
+    <template #extra>
+      <el-button @click="onBack" type="primary" icon="arrow-left">返回</el-button>
+    </template>
+  </el-result>
 </template>
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import error401Gif from '@/assets/image/401.gif'
+import coffee from '@/assets/image/coffee.png'
 
 const router = useRouter()
 const route = useRoute()

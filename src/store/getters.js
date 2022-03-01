@@ -2,8 +2,8 @@
 export default {
     sidebar: state => state.app.sidebar,
 
-    token: state => state.member.token,
-    member: state => state.member.member,
+    member: state => state.member,
 
-    routers: state => state.router.accessedRouters
+    routers: state => state.router.accessedRouters,
+    addRouters: state => state.router.accessedAsyncRouters
 }
