@@ -32,8 +32,9 @@ export default {
         login(params).then(response => {
           if (response.code === 200) {
             commit('SET_TOKEN', response.data)
+            return resolve(response)
           }
-          resolve(response)
+          reject()
         }).catch(error => {
           reject(error)
         })
