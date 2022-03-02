@@ -1,10 +1,10 @@
 <template>
-  <el-result title="404 Not Found" sub-title="请检查您输入的网址是否正确">
+  <el-result title="404 Not Found" sub-title="please check your url">
     <template #icon>
       <el-image :src="coffee"></el-image>
     </template>
     <template #extra>
-      <el-button @click="onBack" type="primary" icon="arrow-left">返回</el-button>
+      <el-button @click="onBack" type="primary" icon="arrow-left">Back</el-button>
     </template>
   </el-result>
 </template>

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
 import localStore from '@/utils/localStore'
+import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
 const instance = axios.create({
@@ -33,25 +34,15 @@ instance.interceptors.response.use(
     (response) => {
         if (response.data.errno === 0) {
             return Promise.resolve(response.data)
+        } else if (response.data.errno === 4002) {
+            ElMessage.error('auth error, please login')
+            router.push({ path: '/login' })
         } else {
             return Promise.reject(response.data)
         }
     },
     (error) => {
-        if (error.response.data.errno === 4002) {
-            ElNotification({
-                title: '错误',
-                message: '认证异常，请重新登录！',
-                type: 'error',
-            })
-            router.push({ path: '/login' })
-        } else {
-            ElNotification({
-                title: '错误',
-                message: error.response.data.msg,
-                type: 'error',
-            })
-        }
+        ElMessage.error(error.response.data.msg)
         return Promise.reject(error)
     }
 )

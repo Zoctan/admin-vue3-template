@@ -15,8 +15,8 @@
       </el-link>
       <el-dropdown class>
         <span class="el-dropdown-link">
-          <el-image class="avatar" :src="memberData.avatar || avatar"></el-image>
-          {{ memberData.nickname || '测试' }}
+          <el-image class="avatar" :src="memberData && (memberData.avatar || avatar)"></el-image>
+          {{ memberData && (memberData.nickname || 'Test') }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -24,9 +24,9 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item icon="avatar">
-              <router-link to="/member/profile">个人中心</router-link>
+              <router-link to="/member/profile">Profile</router-link>
             </el-dropdown-item>
-            <el-dropdown-item icon="back" @click="logout">注销</el-dropdown-item>
+            <el-dropdown-item icon="back" @click="logout">Logout</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>

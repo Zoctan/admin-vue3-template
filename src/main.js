@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
-import store from './store'
-import router from './router'
-import App from './App.vue'
+import store from '@/store'
+import router from '@/router'
+import App from '@/App.vue'
 import permission from '@/directive/permission'
 import * as ElIcons from '@element-plus/icons-vue'
 

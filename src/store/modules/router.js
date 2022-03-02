@@ -19,8 +19,8 @@ function hasPermission(permissionList, route) {
  */
 function filterAsyncRouter(asyncRouters, permissionList) {
   return asyncRouters.filter(route => {
-    console.debug('permissionList', permissionList)
-    console.debug('route', route)
+    // console.debug('permissionList', permissionList)
+    // console.debug('route', route)
     if (hasPermission(permissionList, route)) {
       if (route.children && route.children.length > 0) {
         // 如果这个路由下面还有下一级的话，递归调用

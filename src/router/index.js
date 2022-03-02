@@ -4,6 +4,7 @@ import 'nprogress/nprogress.css'
 import Layout from '@/layout/index.vue'
 import localStore from '@/utils/localStore'
 import hasPermission from '@/utils/hasPermission'
+import { ElMessage } from 'element-plus'
 
 // 使用 Glob 动态引入：https://cn.vitejs.dev/guide/features.html#glob-import
 const modules = import.meta.glob('/src/views/**/**.vue')
@@ -11,38 +12,38 @@ const _import = (file) => modules[`/src/views/${file}.vue`]
 // console.debug('modules', modules)
 
 export const constRouters = [
-    { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
+    // { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
     { path: '/404', component: _import('error/404'), meta: { hidden: true } },
     { path: '/401', component: _import('error/401'), meta: { hidden: true } },
-    { path: '/login', name: '登录', component: _import('Login'), meta: { hidden: true } },
-    { path: '/register', name: '注册', component: _import('Register'), meta: { hidden: true } },
+    { path: '/login', name: 'Login', component: _import('member/login'), meta: { hidden: true } },
+    { path: '/register', name: 'Register', component: _import('member/register'), meta: { hidden: true } },
     { path: '/', redirect: '/dashboard', meta: { hidden: true } },
     {
         path: '/dashboard',
         component: Layout,
-        name: '控制台',
+        name: 'Dashboard',
         meta: { icon: 'house', requiresAuth: true, },
         children: [{
             path: '',
-            component: _import('Dashboard')
+            component: _import('dashboard')
         }],
     },
     {
         path: '/test',
         component: Layout,
-        name: '测试',
+        name: 'Test',
         meta: { icon: 'sunny', dropDown: true, },
         children: [{
             path: 'sub1',
-            name: '测试子页面1',
+            name: 'Test Sub 1',
             icon: 'soccer',
-            meta: { icon: 'soccer' },
-            component: _import('TestSub1')
+            component: _import('testSub1'),
+            meta: { icon: 'soccer' }
         }, {
             path: 'sub2',
-            name: '测试子页面2',
-            meta: { icon: 'star' },
-            component: _import('TestSub2')
+            name: 'Test Sub 2',
+            component: _import('testSub2'),
+            meta: { icon: 'star' }
         }],
     },
 ]
@@ -51,34 +52,34 @@ export const asyncRouters = [
     {
         path: '/member',
         component: Layout,
-        name: '成员',
+        name: 'Member',
         meta: { icon: 'user', dropDown: true, },
         children: [{
             path: 'list',
-            name: '成员管理',
-            component: _import('Member/List'),
+            name: 'Member manage',
+            component: _import('member/list'),
             meta: { icon: 'user', requiresAuth: true, auth: ['member:list'] }
         }, {
             path: 'detail/:id',
-            name: '成员信息',
-            component: _import('Member/Detail'),
-            meta: { icon: 'user', requiresAuth: true, auth: ['member:detail'] }
+            name: 'Member detail',
+            component: _import('member/detail'),
+            meta: { hidden: true, requiresAuth: true, auth: ['member:detail'] }
         }, {
             path: 'profile',
-            name: '个人中心',
-            component: _import('Member/Profile'),
-            meta: { icon: 'avatar', requiresAuth: true, hidden: true }
+            name: 'Profile',
+            component: _import('member/profile'),
+            meta: { hidden: true, requiresAuth: true }
         },]
     },
     {
         path: '/role',
         component: Layout,
-        name: '角色',
+        name: 'Role',
         meta: { icon: 'user-filled', dropDown: true, },
         children: [{
             path: 'list',
-            name: '角色管理',
-            component: _import('Role/List'),
+            name: 'Role manage',
+            component: _import('role/list'),
             meta: { icon: 'user-filled', requiresAuth: true, auth: ['role:list'] }
         }]
     }
@@ -140,11 +141,7 @@ router.beforeEach((to, from, next) => {
                     if (hasPermission(to.meta.auth)) {
                         next()
                     } else {
-                        ElNotification({
-                            title: '错误',
-                            message: '无权访问该路径',
-                            type: 'error',
-                        })
+                        ElMessage.error(`no permission to visit ${to.path}`)
                     }
                 }
             }

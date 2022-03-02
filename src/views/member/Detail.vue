@@ -5,7 +5,7 @@
       :model="tmpAccount"
       :rules="updateDetailRules"
       ref="tmpAccount"
-      label-width="115px"
+      label-width="100px"
     >
       <el-row :gutter="18">
         <el-col :span="9">
@@ -55,7 +55,7 @@
         status-icon
         class="small-space"
         label-position="left"
-        label-width="115px"
+        label-width="100px"
         style="width: 400px; margin-left:50px;"
         :model="tmpPassword"
         :rules="updatePasswordRules"

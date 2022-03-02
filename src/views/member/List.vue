@@ -97,7 +97,7 @@
         status-icon
         class="small-space"
         label-position="left"
-        label-width="75px"
+        label-width="100px"
         style="width: 300px; margin-left:50px;"
         :model="tmpAccount"
         :rules="createRules"

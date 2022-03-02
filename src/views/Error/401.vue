@@ -1,10 +1,10 @@
 <template>
-  <el-result title="401 No Auth" sub-title="您无权访问该网址">
+  <el-result title="401 No Auth" sub-title="no permission to visit this url">
     <template #icon>
       <el-image :src="coffee"></el-image>
     </template>
     <template #extra>
-      <el-button @click="onBack" type="primary" icon="arrow-left">返回</el-button>
+      <el-button @click="onBack" type="primary" icon="arrow-left">Back</el-button>
     </template>
   </el-result>
 </template>

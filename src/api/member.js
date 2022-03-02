@@ -8,6 +8,14 @@ export function checkExist(data) {
   })
 }
 
+export function checkOldPassword(data) {
+  return request({
+    url: '/member/checkOldPassword',
+    method: 'POST',
+    data: data
+  })
+}
+
 export function register(data) {
   return request({
     url: '/member/register',
@@ -49,6 +57,14 @@ export function list(data) {
   return request({
     url: '/member/list',
     method: 'POST',
+    data: data
+  })
+}
+
+export function updatePassword(data) {
+  return request({
+    url: '/member/updatePassword',
+    method: 'PUT',
     data: data
   })
 }

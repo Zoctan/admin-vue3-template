@@ -1,297 +1,256 @@
 <template>
-  <div class="app-container">
-    <el-form
-      v-loading.body="loading"
-      :model="tmpAccount"
-      :rules="updateDetailRules"
-      ref="tmpAccount"
-      label-width="115px"
-    >
-      <el-row :gutter="18">
-        <el-col :span="9">
-          <el-form-item label="账户名" prop="name">
-            <el-input v-if="toUpdate" v-model="tmpAccount.name" />
-            <span v-else>{{ tmpAccount.name }}</span>
-          </el-form-item>
-        </el-col>
-        <el-col :span="9">
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-if="toUpdate" v-model="tmpAccount.email" />
-            <span v-else>{{ tmpAccount.email }}</span>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="18">
-        <el-col :span="9">
-          <el-form-item label="注册时间"><span>{{ unix2CurrentTime(account.registerTime) }}</span></el-form-item>
-        </el-col>
-        <el-col :span="9">
-          <el-form-item label="最后登录时间"><span>{{ unix2CurrentTime(account.loginTime) }}</span></el-form-item>
-        </el-col>
-      </el-row>
-      <el-form-item>
-        <el-row :gutter="18">
-          <el-col :span="6">
-            <el-button type="success" :loading="btnLoading" @click.native.prevent="regainAccountDetail">重新获取信息</el-button>
-          </el-col>
+  <el-card class="box-card">
+    <template #header>
+      <div class="card-header">
+        <span>About me</span>
+        <el-button
+          class="button"
+          type="text"
+          @click="dialogProfileFormVisible = true"
+        >update profile</el-button>
+        <el-button
+          class="button"
+          type="text"
+          @click="dialogPasswordFormVisible = true"
+        >update password</el-button>
+      </div>
+    </template>
+  </el-card>
 
-          <el-col :span="6" v-if="!toUpdate">
-            <el-button type="primary" :loading="btnLoading" @click.native.prevent="toUpdate = !toUpdate">修改信息</el-button>
-          </el-col>
-          <el-col :span="6" v-else>
-            <el-button type="primary" :loading="btnLoading" @click.native.prevent="updateDetail">确认修改</el-button>
-            <el-button type="warning" @click.native.prevent="toUpdate = !toUpdate">取消修改</el-button>
-          </el-col>
-          
-          <el-col :span="6">
-            <el-button type="danger" @click.native.prevent="showUpdatePasswordDialog">修改密码</el-button>
-          </el-col>
-        </el-row>
+  <el-dialog v-model="dialogProfileFormVisible" title="Update Profile">
+    <el-form
+      autocomplete="off"
+      ref="profileFormRef"
+      :model="profileForm"
+      :rules="profileFormRules"
+      status-icon
+      label-position="left"
+      label-width="100px"
+    >
+      <el-form-item label="Nickname" prop="nickname" required>
+        <el-input
+          type="text"
+          autocomplete="off"
+          prefix-icon="user"
+          v-model="profileForm.nickname"
+          placeholder="please input nickname"
+        />
+      </el-form-item>
+      <el-form-item label="Gender" prop="gender" required>
+        <el-radio-group v-model="profileForm.gender">
+          <el-radio-button label="0">None</el-radio-button>
+          <el-radio-button label="1">Man</el-radio-button>
+          <el-radio-button label="2">Female</el-radio-button>
+        </el-radio-group>
       </el-form-item>
     </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogProfileFormVisible = false">Cancel</el-button>
+        <el-button type="danger" @click="resetForm(profileFormRef)">Reset</el-button>
+        <el-button
+          type="primary"
+          :loading="submitProfileLoading"
+          :disabled="submitProfileDisabled"
+          @click="onUpdateProfile(profileFormRef)"
+        >Confirm</el-button>
+      </span>
+    </template>
+  </el-dialog>
 
-    <el-dialog title="修改密码" :visible.sync="dialogFormVisible">
-      <el-form
-        status-icon
-        class="small-space"
-        label-position="left"
-        label-width="115px"
-        style="width: 400px; margin-left:50px;"
-        :model="tmpPassword"
-        :rules="updatePasswordRules"
-        ref="tmpPassword"
-      >
-        <el-form-item label="旧密码" prop="oldPassword" required>
-          <el-input
-            type="password"
-            prefix-icon="el-icon-edit"
-            auto-complete="off"
-            placeholder="请输入旧密码"
-            v-model="tmpPassword.oldPassword"
-          />
-        </el-form-item>
-        <el-form-item label="新密码" prop="newPassword" required>
-          <el-input
-            type="password"
-            prefix-icon="el-icon-edit"
-            auto-complete="off"
-            placeholder="请输入新密码"
-            v-model="tmpPassword.newPassword"
-          />
-        </el-form-item>
-        <el-form-item label="新密码" prop="newPassword2" required>
-          <el-input
-            type="password"
-            prefix-icon="el-icon-edit"
-            auto-complete="off"
-            placeholder="请再次输入新密码"
-            v-model="tmpPassword.newPassword2"
-          />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click.native.prevent="dialogFormVisible = false">取消</el-button>
-        <el-button type="danger" @click.native.prevent="$refs['tmpPassword'].resetFields()">重置</el-button>
-        <el-button type="primary" :loading="btnLoading" @click.native.prevent="updatePassword">更新</el-button>
-      </div>
-    </el-dialog>
-  </div>
+  <el-dialog v-model="dialogPasswordFormVisible" title="Update Password">
+    <el-form
+      autocomplete="off"
+      ref="passwordFormRef"
+      :model="passwordForm"
+      :rules="passwordFormRules"
+      status-icon
+      label-position="left"
+      label-width="100px"
+    >
+      <el-form-item label="Old Password" prop="oldPassword" required>
+        <el-input
+          type="password"
+          autocomplete="off"
+          prefix-icon="lock"
+          v-model="passwordForm.oldPassword"
+          placeholder="please input old password"
+          show-password
+        />
+      </el-form-item>
+      <el-form-item label="New Password" prop="newPassword" required>
+        <el-input
+          type="password"
+          autocomplete="off"
+          prefix-icon="lock"
+          v-model="passwordForm.newPassword"
+          placeholder="please input new password"
+          show-password
+        />
+      </el-form-item>
+      <el-form-item label="New Password Again" prop="checkPassword" required>
+        <el-input
+          type="password"
+          autocomplete="off"
+          prefix-icon="lock"
+          v-model="passwordForm.checkPassword"
+          placeholder="please input new password again"
+          show-password
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogPasswordFormVisible = false">Cancel</el-button>
+        <el-button type="danger" @click="resetForm(passwordFormRef)">Reset</el-button>
+        <el-button
+          type="primary"
+          :loading="submitPasswordLoading"
+          :disabled="submitPasswordDisabled"
+          @click="onUpdatePassword(passwordFormRef)"
+        >Confirm</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
-<script>
-import store from '@/store'
-import { update as updateAccount, validatePassword } from '@/api/account'
-import { unix2CurrentTime } from '@/utils'
-import { isValidateEmail } from '@/utils/validate'
-import { setToken } from '@/utils/token'
-import { mapState } from 'vuex'
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import { useStore } from 'vuex'
+import { resetForm } from '@/utils/form'
+import { updateProfile, checkOldPassword, updatePassword } from '@/api/member'
 
-export default {
-  created() {
-    this.setDetail()
-  },
-  data() {
-    const validateOldPassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码长度必须在6或以上'))
-      }
-      // promise异步查询后端密码
-      this.validateOldPassword(value).then(isValidate => {
-        if (!isValidate) {
-          callback(new Error('旧密码不正确'))
-        } else {
-          callback()
-        }
-      })
-    }
-    const validateNewPassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码长度必须在6或以上'))
-      } else if (this.isOldNewPasswordSame()) {
-        callback(new Error('新旧密码不能一样'))
-      } else {
-        callback()
-      }
-    }
-    const validateNewPassword2 = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码长度必须在6或以上'))
-      } else if (!this.isNewPasswordSame()) {
-        callback(new Error('两次输入的密码不一致'))
-      } else {
-        callback()
-      }
-    }
-    const validateName = (rule, value, callback) => {
-      if (value.length < 3) {
-        callback(new Error('账户名长度必须在3或以上'))
-      } else {
-        callback()
-      }
-    }
-    const validateEmail = (rule, value, callback) => {
-      if (!isValidateEmail(value)) {
-        callback(new Error('邮箱格式错误'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      loading: false,
-      btnLoading: false,
-      dialogFormVisible: false,
-      toUpdate: false,
-      tmpPassword: {
-        oldPassword: '',
-        newPassword: '',
-        newPassword2: ''
-      },
-      updatePasswordRules: {
-        oldPassword: [
-          { required: true, trigger: 'blur', validator: validateOldPassword }
-        ],
-        newPassword: [
-          { required: true, trigger: 'blur', validator: validateNewPassword }
-        ],
-        newPassword2: [
-          { required: true, trigger: 'blur', validator: validateNewPassword2 }
-        ]
-      },
-      tmpAccount: {
-        id: '',
-        name: '',
-        email: ''
-      },
-      updateDetailRules: {
-        name: [{ required: true, trigger: 'blur', validator: validateName }],
-        email: [{ required: true, trigger: 'blur', validator: validateEmail }]
-      }
-    }
-  },
-  computed: {
-    ...mapState({
-      account: state => state.account
-    })
-  },
-  methods: {
-    unix2CurrentTime,
-    /**
-     * 设置成员资料
-     */
-    setDetail() {
-      this.tmpAccount.name = this.account.name
-      this.tmpAccount.email = this.account.email
-    },
-    /**
-     * 验证旧密码
-     * @param oldPassword 旧密码
-     */
-    validateOldPassword(oldPassword) {
-      const account = {
-        id: this.account.accountId,
-        password: oldPassword
-      }
-      return validatePassword(account).then(response => response.data)
-    },
-    /**
-     * 新旧密码是否相同
-     */
-    isOldNewPasswordSame() {
-      return this.tmpPassword.oldPassword === this.tmpPassword.newPassword
-    },
-    /**
-     * 新密码1和2是否相同
-     */
-    isNewPasswordSame() {
-      return this.tmpPassword.newPassword === this.tmpPassword.newPassword2
-    },
-    /**
-     * 重置token
-     */
-    resetToken(token) {
-      setToken(token)
-      this.account.token = token
-    },
-    /**
-     * 重新获取成员信息
-     */
-    regainAccountDetail() {
-      this.loading = true
-      this.btnLoading = true
-      store.dispatch('Detail').then(() => {
-        this.loading = false
-        this.btnLoading = false
-      })
-    },
-    /**
-     * 更新成员
-     * @param account 成员
-     */
-    updateAccount(account) {
-      this.btnLoading = true
-      updateAccount(account).then(response => {
-        this.$message.success('更新成功')
-        this.resetToken(response.data)
-        this.regainAccountDetail()
-        this.btnLoading = false
-      }).catch(res => {
-        this.$message.error('更新失败')
-      })
-    },
-    /**
-     * 更新成员信息
-     */
-    updateDetail() {
-      this.$refs.tmpAccount.validate(valid => {
-        if (valid) {
-          this.tmpAccount.id = this.account.accountId
-          this.updateAccount(this.tmpAccount)
-        }
-      })
-    },
-    /**
-     * 显示更新密码对话框
-     */
-    showUpdatePasswordDialog() {
-      this.dialogFormVisible = true
-      this.tmpPassword.oldPassword = ''
-      this.tmpPassword.newPassword = ''
-      this.tmpPassword.newPassword2 = ''
-    },
-    /**
-     * 更新密码
-     */
-    updatePassword() {
-      this.$refs.tmpPassword.validate(valid => {
-        if (valid) {
-          const account = {}
-          account.id = this.account.accountId
-          account.password = this.tmpPassword.newPassword
-          this.updateAccount(account)
-          this.dialogFormVisible = false
-        }
-      })
+const store = useStore()
+
+const memberData = computed(() => store.getters.member.memberData)
+
+// ------- profile -------
+const submitProfileLoading = ref(false)
+const submitProfileDisabled = ref(false)
+const dialogProfileFormVisible = ref(false)
+
+const profileFormRef = ref(null)
+
+const profileForm = reactive({
+  nickname: memberData.value.nickname,
+  gender: memberData.value.gender,
+})
+
+const validateNickname = (rule, value, callback) => {
+  if (!value) {
+    submitProfileDisabled.value = true
+    return callback(new Error('please input nickname'))
+  } else {
+    if (value.length < 3) {
+      submitProfileDisabled.value = true
+      callback(new Error('nickname length must be over 3'))
+    } else {
+      submitProfileDisabled.value = false
+      callback()
     }
   }
+}
+
+const profileFormRules = reactive({
+  nickname: [{ trigger: ['change', 'blur'], validator: validateNickname }]
+})
+
+const onUpdateProfile = (formEl) => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (!valid) {
+      return ElMessage.error('profile form error')
+    }
+    submitProfileLoading.value = true
+    updateProfile(profileForm).then(() => {
+      submitProfileLoading.value = false
+      return ElMessage.success('update profile success')
+    }).catch((error) => {
+      submitProfileLoading.value = false
+      return ElMessage.error(`update profile error: ${error.msg}`)
+    })
+  })
+}
+
+// ------- password -------
+const submitPasswordLoading = ref(false)
+const submitPasswordDisabled = ref(false)
+const dialogPasswordFormVisible = ref(false)
+
+const passwordFormRef = ref(null)
+
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  checkPassword: '',
+})
+
+const validateOldPassword = (rule, value, callback) => {
+  if (!value) {
+    submitPasswordDisabled.value = true
+    callback(new Error('please input old password'))
+  } else {
+    checkOldPassword({ oldPassword: value }).then(() => {
+      submitPasswordDisabled.value = false
+      callback()
+    }).catch(error => {
+      callback(new Error(error.msg))
+    })
+  }
+}
+const validateNewPassword = (rule, value, callback) => {
+  if (!value) {
+    submitPasswordDisabled.value = true
+    callback(new Error('please input new password'))
+  } else {
+    if (value.length < 3) {
+      submitPasswordDisabled.value = true
+      callback(new Error('new password length must be over 3'))
+    } else {
+      if (passwordForm.checkPassword !== '') {
+        if (!passwordFormRef.value) return
+        passwordFormRef.value.validateField('checkPassword')
+      }
+      submitPasswordDisabled.value = false
+      callback()
+    }
+  }
+}
+const validateCheckPassword = (rule, value, callback) => {
+  if (!value) {
+    submitPasswordDisabled.value = true
+    callback(new Error('please input password again'))
+  } else {
+    if (value !== passwordForm.newPassword) {
+      submitPasswordDisabled.value = true
+      callback(new Error('two password inputed are not same'))
+    } else {
+      submitPasswordDisabled.value = false
+      callback()
+    }
+  }
+}
+
+const passwordFormRules = reactive({
+  oldPassword: [{ trigger: ['change', 'blur'], validator: validateOldPassword }],
+  newPassword: [{ trigger: ['change', 'blur'], validator: validateNewPassword }],
+  checkPassword: [{ trigger: ['change', 'blur'], validator: validateCheckPassword }],
+})
+
+const onUpdatePassword = (formEl) => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (!valid) {
+      return ElMessage.error('password form error')
+    }
+    submitPasswordLoading.value = true
+    updatePassword(passwordForm).then(() => {
+      submitPasswordLoading.value = false
+      return ElMessage.success('update password success')
+    }).catch((error) => {
+      submitPasswordLoading.value = false
+      return ElMessage.error(`update password error: ${error}`)
+    })
+  })
 }
 </script>
