@@ -5,6 +5,7 @@ import Layout from '@/layout/index.vue'
 import localStore from '@/utils/localStore'
 import hasPermission from '@/utils/hasPermission'
 import { ElMessage } from 'element-plus'
+import store from '@/store'
 
 // 使用 Glob 动态引入：https://cn.vitejs.dev/guide/features.html#glob-import
 const modules = import.meta.glob('/src/views/**/**.vue')
@@ -56,17 +57,17 @@ export const asyncRouters = [
         meta: { icon: 'user', dropDown: true, },
         children: [{
             path: 'list',
-            name: 'Member manage',
+            name: 'Member Manage',
             component: _import('member/list'),
             meta: { icon: 'user', requiresAuth: true, auth: ['member:list'] }
         }, {
             path: 'detail/:id',
-            name: 'Member detail',
+            name: 'Member Detail',
             component: _import('member/detail'),
             meta: { hidden: true, requiresAuth: true, auth: ['member:detail'] }
         }, {
             path: 'profile',
-            name: 'Profile',
+            name: 'Member Profile',
             component: _import('member/profile'),
             meta: { hidden: true, requiresAuth: true }
         },]
@@ -78,7 +79,7 @@ export const asyncRouters = [
         meta: { icon: 'user-filled', dropDown: true, },
         children: [{
             path: 'list',
-            name: 'Role manage',
+            name: 'Role Manage',
             component: _import('role/list'),
             meta: { icon: 'user-filled', requiresAuth: true, auth: ['role:list'] }
         }]
@@ -115,36 +116,70 @@ const router = createRouter({
     },
 })
 
+// 挂载动态路由表
+let addAsyncRoutersFlag = false
+const addAsyncRouters = async () => {
+    // if (!addAsyncRoutersFlag) {
+    //     const accessedAsyncRouters = await store.dispatch('generateRoutes', localStore().member)
+    //     accessedAsyncRouters.forEach(item => {
+    //         router.addRoute(item)
+    //     })
+    //     addAsyncRoutersFlag = true
+    // }
+    console.debug('store', store)
+    if (!addAsyncRoutersFlag && localStore() && localStore().router.accessedAsyncRouters) {
+        localStore().router.accessedAsyncRouters.forEach(item => {
+            router.addRoute(item)
+        })
+        addAsyncRoutersFlag = true
+    }
+}
+addAsyncRouters()
+
 // 导航守卫：https://router.vuejs.org/zh/guide/advanced/navigation-guards.html
 // 顺序：beforeEach -> beforeResolve -> afterEach
-// 1. 前往的路径无需认证：直接前往
-// 2. 前往的路径需要认证：
-//    有无 token：
-//      有：检查权限
-//      无：跳到登录页
-router.beforeEach((to, from, next) => {
+// 有无 token：
+//   有：
+//     前往的路径无需认证 和 权限：直接前往
+//     前往的路径需要认证 和 权限：
+//                           需要认证，但不需要权限：直接前往
+//                           需要权限：检查权限
+//   无：
+//     前往的路径无需认证 和 权限：直接前往
+//     前往的路径需要认证 和 权限：跳到登录页
+router.beforeEach(async (to, from, next) => {
     NProgress.start()
-    if (!to.meta.requiresAuth) {
-        // 前往的路径无需认证，直接前往
-        next()
-    } else {
-        // 需要认证
-        if (localStore() && localStore().member.token) {
-            // 检查权限
-            if (!to.meta.auth) {
-                next()
+    console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)
+    console.debug('to', to)
+    console.debug('routers', router.getRoutes())
+    if (localStore() && localStore().member.token) {
+        if (!addAsyncRoutersFlag) {
+            const accessedAsyncRouters = await store.dispatch('generateRoutes', localStore().member)
+            accessedAsyncRouters.forEach(item => {
+                router.addRoute(item)
+            })
+            addAsyncRoutersFlag = true
+        }
+        // 无需认证 和 权限
+        if (!to.meta.requiresAuth && !to.meta.auth) {
+            next()
+        } else {
+            // 不要重复访问登录页
+            if (to.path === '/login') {
+                next({ path: '/' })
             } else {
-                // 不要重复访问登录页
-                if (to.path === '/login') {
-                    next({ path: '/' })
+                if (to.meta.requiresAuth && !to.meta.auth) {
+                    next()
+                } else if (to.meta.requiresAuth && to.meta.auth && hasPermission(to.meta.auth)) {
+                    next()
                 } else {
-                    if (hasPermission(to.meta.auth)) {
-                        next()
-                    } else {
-                        ElMessage.error(`no permission to visit ${to.path}`)
-                    }
+                    ElMessage.error(`no permission to visit ${to.path}`)
                 }
             }
+        }
+    } else {
+        if (!to.meta.requiresAuth && !to.meta.auth) {
+            next()
         } else {
             next({ path: '/login' })
         }
@@ -161,6 +196,5 @@ router.afterEach((to, from, failure) => {
     }
     NProgress.done()
 })
-
 
 export default router

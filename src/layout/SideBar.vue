@@ -6,7 +6,7 @@
     mode="vertical"
     router
   >
-    <SideBarItem :routers="routers" />
+    <SideBarItem :routers="accessedRouters" />
   </el-menu>
 </template>
 
@@ -16,7 +16,7 @@ import { useStore } from 'vuex'
 import SideBarItem from './SideBarItem.vue'
 
 const store = useStore()
-const routers = computed(() => store.getters.routers)
+const accessedRouters = computed(() => store.getters.accessedRouters)
 const sidebarOpened = computed(() => store.getters.sidebarOpened)
 </script>
 

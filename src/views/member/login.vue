@@ -116,15 +116,9 @@ const onLogin = (formEl) => {
     store.dispatch('memberLogin', form).then(() => {
       submitLoading.value = false
       // 获取账户信息
-      store.dispatch('memberProfile').then((member) => {
-        // 生成路由表
-        store.dispatch('generateRoutes', member).then(() => {
-          store.getters.addRouters.forEach(_router => {
-            router.addRoute(_router)
-          })
-          router.replace({ path: '/' })
-          return ElMessage.success('login success')
-        })
+      store.dispatch('memberProfile').then(() => {
+        router.replace({ path: '/' })
+        return ElMessage.success('login success')
       })
     }).catch(error => {
       submitLoading.value = false

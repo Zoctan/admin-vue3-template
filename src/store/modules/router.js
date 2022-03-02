@@ -1,4 +1,4 @@
-import { asyncRouters, constRouters } from '../../router'
+import { asyncRouters, constRouters } from '@/router'
 
 /**
  * 通过路由上的 meta.auth 判断是否与当前成员权限匹配
@@ -48,7 +48,7 @@ export default {
     SET_ROUTERS: (state, routers) => {
       state.accessedAsyncRouters = routers
       // 路由合并，成为本成员最终可以访问的路由
-      state.accessedRouters = state.accessedRouters.concat(routers)
+      state.accessedRouters = constRouters.concat(routers)
     },
     RESET_ROUTERS: (state) => {
       Object.assign(state, defaultState())
@@ -59,11 +59,9 @@ export default {
     generateRoutes({ commit }, member) {
       return new Promise(resolve => {
         const permissionList = member.permissionList
-        // 筛选出本角色可用的路由
         const accessedAsyncRouters = filterAsyncRouter(asyncRouters, permissionList)
-        // 执行设置路由的方法
         commit('SET_ROUTERS', accessedAsyncRouters)
-        resolve()
+        resolve(accessedAsyncRouters)
       })
     }
   }

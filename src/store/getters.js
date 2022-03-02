@@ -4,6 +4,6 @@ export default {
 
     member: state => state.member,
 
-    routers: state => state.router.accessedRouters,
-    addRouters: state => state.router.accessedAsyncRouters
+    accessedRouters: state => state.router.accessedRouters,
+    accessedAsyncRouters: state => state.router.accessedAsyncRouters
 }
