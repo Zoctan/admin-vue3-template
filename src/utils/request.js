@@ -34,12 +34,7 @@ instance.interceptors.response.use(
         if (response.data.errno === 0) {
             return Promise.resolve(response.data)
         } else {
-            ElNotification({
-                title: '错误',
-                message: response.data.msg,
-                type: 'error',
-            })
-            return Promise.reject('响应数据不正确')
+            return Promise.reject(response.data)
         }
     },
     (error) => {

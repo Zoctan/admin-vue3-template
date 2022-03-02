@@ -2,7 +2,7 @@
   <el-button
     type="primary"
     @click="toggleSideBar"
-    :icon="sidebar.opened ? 'expand' : 'fold'"
+    :icon="sidebarOpened ? 'expand' : 'fold'"
     circle
   ></el-button>
 </template>
@@ -13,7 +13,7 @@ import { useStore } from 'vuex'
 
 const store = useStore()
 
-const sidebar = computed(() => store.getters.sidebar)
+const sidebarOpened = computed(() => store.getters.sidebarOpened)
 const toggleSideBar = () => store.dispatch('toggleSideBar')
 </script>
 

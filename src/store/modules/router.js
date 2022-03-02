@@ -1,7 +1,7 @@
 import { asyncRouters, constRouters } from '../../router'
 
 /**
- * 通过路由上的 meta.auth 判断是否与当前用户权限匹配
+ * 通过路由上的 meta.auth 判断是否与当前成员权限匹配
  * @param permissionList
  * @param route
  */
@@ -13,7 +13,7 @@ function hasPermission(permissionList, route) {
 }
 
 /**
- * 递归路由表，返回符合用户角色权限的路由表
+ * 递归路由表，返回符合成员角色权限的路由表
  * @param asyncRouters
  * @param permissionList
  */
@@ -25,8 +25,8 @@ function filterAsyncRouter(asyncRouters, permissionList) {
       if (route.children && route.children.length > 0) {
         // 如果这个路由下面还有下一级的话，递归调用
         route.children = filterAsyncRouter(route.children, permissionList)
-        // 如果过滤一圈后,没有子元素了，这个父级菜单就也不显示了
-        // return (route.children && route.children.length)
+        // 如果过滤一圈后，没有子元素，这个父级菜单也不显示了
+        return (route.children && route.children.length)
       }
       return true
     }
@@ -47,7 +47,7 @@ export default {
   mutations: {
     SET_ROUTERS: (state, routers) => {
       state.accessedAsyncRouters = routers
-      // 路由合并，成为本用户最终可以访问的路由
+      // 路由合并，成为本成员最终可以访问的路由
       state.accessedRouters = state.accessedRouters.concat(routers)
     },
     RESET_ROUTERS: (state) => {

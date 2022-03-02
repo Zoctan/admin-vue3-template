@@ -1,5 +1,13 @@
 import request from '@/utils/request'
 
+export function checkExist(data) {
+  return request({
+    url: '/member/checkExist',
+    method: 'POST',
+    data: data
+  })
+}
+
 export function register(data) {
   return request({
     url: '/member/register',

@@ -1,14 +1,11 @@
 export default {
   state: {
-    sidebar: {
-      opened: true
-    }
+    sidebarOpened: true
   },
 
   mutations: {
     TOGGLE_SIDEBAR: (state) => {
-      state.sidebar.opened = !state.sidebar.opened
-      console.debug('state.sidebar',state.sidebar)
+      state.sidebarOpened = !state.sidebarOpened
     }
   },
   

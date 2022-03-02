@@ -3,7 +3,7 @@
     <img :src="background" />
   </div>
   <div class="login">
-    <div class="title">ADMIN SEED 后台登录</div>
+    <div class="title">{{ siteName }} 后台登录</div>
     <el-card class="box-card">
       <el-form
         autocomplete="on"
@@ -14,13 +14,13 @@
         label-position="left"
         label-width="80px"
       >
-        <el-form-item label="用户名" prop="username" required>
+        <el-form-item label="账户名" prop="username" required>
           <el-input
             type="text"
             autocomplete="on"
             prefix-icon="user"
             v-model="form.username"
-            placeholder="请输入用户名"
+            placeholder="请输入账户名"
           />
         </el-form-item>
         <el-form-item label="密码" prop="password" required>
@@ -34,7 +34,12 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="submitLoading" @click="handleLogin(formRef)">登录</el-button>
+          <el-button
+            type="primary"
+            :loading="submitLoading"
+            :disabled="submitDisabled"
+            @click="handleLogin(formRef)"
+          >登录</el-button>
           <el-button type="info" @click="toRegister">注册</el-button>
           <el-button @click="resetForm(formRef)">重置</el-button>
         </el-form-item>
@@ -44,15 +49,18 @@
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { ref, reactive } from 'vue'
 import background from '@/assets/image/maldives.jpg'
 
 const store = useStore()
 const router = useRouter()
 
+const siteName = import.meta.env.VITE_SITE_NAME
+
 let submitLoading = ref(false)
+let submitDisabled = ref(false)
 
 const formRef = ref(null)
 
@@ -63,27 +71,31 @@ const form = reactive({
 
 const validateUsername = (rule, value, callback) => {
   if (!value) {
-    return callback(new Error('请输入用户名'))
-  }
-  setTimeout(() => {
+    submitDisabled.value = true
+    return callback(new Error('请输入账户名'))
+  } else {
     if (value.length < 3) {
+      submitDisabled.value = true
       callback(new Error('账户名长度必须超过3位以上'))
     } else {
+      submitDisabled.value = false
       callback()
     }
-  }, 600)
+  }
 }
 const validatePassword = (rule, value, callback) => {
   if (!value) {
-    return callback(new Error('请输入密码'))
-  }
-  setTimeout(() => {
-    if (value.length < 5) {
-      callback(new Error('密码长度必须超过5位以上'))
+    submitDisabled.value = true
+    callback(new Error('请输入密码'))
+  } else {
+    if (value.length < 3) {
+      submitDisabled.value = true
+      callback(new Error('密码长度必须超过3位以上'))
     } else {
+      submitDisabled.value = false
       callback()
     }
-  }, 600)
+  }
 }
 
 const rules = reactive({
@@ -104,18 +116,12 @@ const handleLogin = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      ElNotification({
-        title: '错误',
-        message: '用户名或密码验证失败',
-        type: 'error',
-      })
-      console.log('error submit!')
-      return false
+      new Error('账户名或密码验证失败')
     } else {
-      submitLoading = true
+      submitLoading.value = true
       store.dispatch('memberLogin', form).then(() => {
-        submitLoading = false
-        // 获取用户信息
+        submitLoading.value = false
+        // 获取账户信息
         store.dispatch('memberProfile').then((member) => {
           // 生成路由表
           store.dispatch('generateRoutes', member).then(() => {

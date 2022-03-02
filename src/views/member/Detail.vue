@@ -196,7 +196,7 @@ export default {
   methods: {
     unix2CurrentTime,
     /**
-     * 设置用户资料
+     * 设置成员资料
      */
     setDetail() {
       this.tmpAccount.name = this.account.name
@@ -233,7 +233,7 @@ export default {
       this.account.token = token
     },
     /**
-     * 重新获取用户信息
+     * 重新获取成员信息
      */
     regainAccountDetail() {
       this.loading = true
@@ -244,8 +244,8 @@ export default {
       })
     },
     /**
-     * 更新用户
-     * @param account 用户
+     * 更新成员
+     * @param account 成员
      */
     updateAccount(account) {
       this.btnLoading = true
@@ -259,7 +259,7 @@ export default {
       })
     },
     /**
-     * 更新用户资料
+     * 更新成员资料
      */
     updateDetail() {
       this.$refs.tmpAccount.validate(valid => {

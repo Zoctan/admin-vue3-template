@@ -206,7 +206,7 @@ export default {
       }
     }
     return {
-      accountList: [], // 用户列表
+      accountList: [], // 成员列表
       roleList: [], // 全部角色
       filterRoleNameList: [], // 用于过滤表格角色的列表 http://element-cn.eleme.io/#/zh-CN/component/table#shai-xuan
       listLoading: false, // 数据加载等待动画
@@ -228,7 +228,7 @@ export default {
         email: '',
         name: '',
         password: '',
-        roleId: 2 // 对应后端数据库普通用户角色Id
+        roleId: 2 // 对应后端数据库普通成员角色Id
       },
       search: {
         page: null,
@@ -261,7 +261,7 @@ export default {
       })
     },
     /**
-     * 获取用户列表
+     * 获取成员列表
      */
     getAccountList() {
       this.listLoading = true
@@ -321,7 +321,7 @@ export default {
       return (this.listQuery.page - 1) * this.listQuery.size + index + 1
     },
     /**
-     * 显示添加用户对话框
+     * 显示添加成员对话框
      */
     showAddAccountDialog() {
       // 显示新增对话框
@@ -332,7 +332,7 @@ export default {
       this.tmpAccount.password = ''
     },
     /**
-     * 添加用户
+     * 添加成员
      */
     addAccount() {
       this.$refs.tmpAccount.validate(valid => {
@@ -351,8 +351,8 @@ export default {
       })
     },
     /**
-     * 显示修改用户对话框
-     * @param index 用户下标
+     * 显示修改成员对话框
+     * @param index 成员下标
      */
     showUpdateAccountDialog(index) {
       this.dialogFormVisible = true
@@ -364,7 +364,7 @@ export default {
       this.tmpAccount.roleId = this.accountList[index].roleId
     },
     /**
-     * 更新用户
+     * 更新成员
      */
     updateAccount() {
       updateAccount(this.tmpAccount).then(() => {
@@ -376,8 +376,8 @@ export default {
       })
     },
     /**
-     * 显示修改用户角色对话框
-     * @param index 用户下标
+     * 显示修改成员角色对话框
+     * @param index 成员下标
      */
     showUpdateAccountRoleDialog(index) {
       this.dialogFormVisible = true
@@ -389,7 +389,7 @@ export default {
       this.tmpAccount.roleId = this.accountList[index].roleId
     },
     /**
-     * 更新用户角色
+     * 更新成员角色
      */
     updateAccountRole() {
       updateAccountRole(this.tmpAccount).then(() => {
@@ -401,8 +401,8 @@ export default {
       })
     },
     /**
-     * 用户资料是否唯一
-     * @param account 用户
+     * 成员信息是否唯一
+     * @param account 成员
      */
     isUniqueDetail(account) {
       for (let i = 0; i < this.accountList.length; i++) {
@@ -418,8 +418,8 @@ export default {
       return true
     },
     /**
-     * 删除用户
-     * @param index 用户下标
+     * 删除成员
+     * @param index 成员下标
      */
     removeAccount(index) {
       this.$confirm('删除该账户？', '警告', {

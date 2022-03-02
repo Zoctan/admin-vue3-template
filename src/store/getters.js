@@ -1,6 +1,6 @@
 // https://vuex.vuejs.org/zh/guide/getters.html
 export default {
-    sidebar: state => state.app.sidebar,
+    sidebarOpened: state => state.app.sidebarOpened,
 
     member: state => state.member,
 
