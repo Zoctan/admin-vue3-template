@@ -1,4 +1,38 @@
-import { asyncRouters, constRouters } from '@/router'
+import { constRouters, asyncRouters, resetRouter } from '@/router'
+
+const defaultState = () => {
+  return {
+    accessedRouters: constRouters,
+    accessedAsyncRouters: []
+  }
+}
+
+export default {
+  state: defaultState(),
+
+  mutations: {
+    SET_ROUTERS: (state, routers) => {
+      state.accessedAsyncRouters = routers
+      // 路由合并，成为本成员最终可以访问的路由
+      state.accessedRouters = constRouters.concat(routers)
+    },
+    RESET_ROUTERS: (state) => {
+      Object.assign(state, defaultState())
+      resetRouter()
+    }
+  },
+
+  actions: {
+    generateRoutes({ commit }, member) {
+      return new Promise(resolve => {
+        const permissionList = member.permissionList
+        const accessedAsyncRouters = filterAsyncRouter(asyncRouters, permissionList)
+        commit('SET_ROUTERS', accessedAsyncRouters)
+        resolve(accessedAsyncRouters)
+      })
+    }
+  }
+}
 
 /**
  * 通过路由上的 meta.auth 判断是否与当前成员权限匹配
@@ -32,37 +66,4 @@ function filterAsyncRouter(asyncRouters, permissionList) {
     }
     return false
   })
-}
-
-const defaultState = () => {
-  return {
-    accessedRouters: constRouters,
-    accessedAsyncRouters: []
-  }
-}
-
-export default {
-  state: defaultState(),
-
-  mutations: {
-    SET_ROUTERS: (state, routers) => {
-      state.accessedAsyncRouters = routers
-      // 路由合并，成为本成员最终可以访问的路由
-      state.accessedRouters = constRouters.concat(routers)
-    },
-    RESET_ROUTERS: (state) => {
-      Object.assign(state, defaultState())
-    }
-  },
-
-  actions: {
-    generateRoutes({ commit }, member) {
-      return new Promise(resolve => {
-        const permissionList = member.permissionList
-        const accessedAsyncRouters = filterAsyncRouter(asyncRouters, permissionList)
-        commit('SET_ROUTERS', accessedAsyncRouters)
-        resolve(accessedAsyncRouters)
-      })
-    }
-  }
 }
