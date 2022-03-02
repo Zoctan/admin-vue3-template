@@ -19,6 +19,8 @@ import { ElMessage } from 'element-plus'
 //     前往的路径无需认证 和 权限：直接前往
 //     前往的路径需要认证 和 权限：跳到登录页
 // 是否已经挂载动态路由表
+// fixme
+// 注销后再进入，该值仍然为true
 let addAsyncRoutersFlag = false
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
