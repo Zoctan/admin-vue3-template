@@ -27,16 +27,13 @@
               <el-dropdown-item icon="avatar">
                 <router-link to="/member/profile">Profile</router-link>
               </el-dropdown-item>
-              <el-dropdown-item icon="back" @click="logout">Logout</el-dropdown-item>
+              <el-dropdown-item icon="back" @click="toLogout">Logout</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </template>
       <template v-else>
-        <el-button type="text">Text Button</el-button>
-        <el-link icon="arrow-right">
-          <a href="https://github.com/Zoctan/admin-seed/issues" target="_blank">Issues</a>
-        </el-link>
+        <el-button type="text" @click="toLogin">Login</el-button>
       </template>
     </div>
   </div>
@@ -45,20 +42,19 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SideBarCollapse from './SideBarCollapse.vue'
 import avatar from '@/assets/image/avatar.png'
 import logo from '@/assets/image/logo.png'
 
 const store = useStore()
+const route = useRoute()
 const router = useRouter()
 
 const memberData = computed(() => store.getters.member.memberData)
 
-const logout = () => store.dispatch('memberLogout').then(() => {
-  // location.reload()
-  router.push(`/login?redirect=${router.fullPath}`)
-})
+const toLogout = () => store.dispatch('memberLogout').then(() => location.reload())
+const toLogin = () => router.push(`/login?redirect=${route.fullPath}`)
 </script>
 
 <style lang="scss" scoped>
