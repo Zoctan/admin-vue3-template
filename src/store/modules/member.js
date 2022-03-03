@@ -59,12 +59,16 @@ export default {
       })
     },
     memberLogout({ commit }) {
+      const resetInfo = () => {
+        commit('RESET_MEMBER')
+        commit('RESET_ROUTERS')
+      }
       return new Promise((resolve, reject) => {
         logout().then(() => {
-          commit('RESET_MEMBER')
-          commit('RESET_ROUTERS')
+          resetInfo()
           resolve()
         }).catch(error => {
+          resetInfo()
           reject(error)
         })
       })

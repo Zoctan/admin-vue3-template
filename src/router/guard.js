@@ -58,6 +58,7 @@ router.beforeEach(async (to, from, next) => {
     if (!to.meta.requiresAuth && !to.meta.auth) {
       next()
     } else {
+      addAsyncRoutersFlag = false
       next({ path: '/login' })
     }
   }

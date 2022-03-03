@@ -1,4 +1,4 @@
-import { constRouters, asyncRouters, resetRouter } from '@/router'
+import { constRouters, asyncRouters } from '@/router'
 
 const defaultState = () => {
   return {
@@ -18,7 +18,6 @@ export default {
     },
     RESET_ROUTERS: (state) => {
       Object.assign(state, defaultState())
-      resetRouter()
     }
   },
 

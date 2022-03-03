@@ -66,6 +66,13 @@ import { resetForm } from '@/utils/form'
 import { checkExist } from '@/api/member'
 import background from '@/assets/image/maldives.jpg'
 
+const props = defineProps({
+  redirect: {
+    type: String,
+    required: false,
+  },
+})
+
 const store = useStore()
 const router = useRouter()
 
@@ -152,14 +159,9 @@ const onRegister = (formEl) => {
     submitLoading.value = true
     store.dispatch('memberRegister', form).then(() => {
       submitLoading.value = false
-      store.dispatch('memberProfile').then((member) => {
-        store.dispatch('generateRoutes', member).then(() => {
-          store.getters.addRouters.forEach(_router => {
-            router.addRoute(_router)
-          })
-          router.push({ path: '/member/profile' })
-          return ElMessage.success('register success')
-        })
+      store.dispatch('memberProfile').then(() => {
+        router.replace({ path: props.redirect || '/member/profile' })
+        return ElMessage.success('register success')
       })
     }).catch((error) => {
       submitLoading.value = false

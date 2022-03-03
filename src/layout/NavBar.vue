@@ -13,23 +13,31 @@
       <el-link icon="question-filled">
         <a href="https://github.com/Zoctan/admin-seed/issues" target="_blank">Issues</a>
       </el-link>
-      <el-dropdown class>
-        <span class="el-dropdown-link">
-          <el-image class="avatar" :src="memberData && (memberData.avatar || avatar)"></el-image>
-          {{ memberData && (memberData.nickname || 'Test') }}
-          <el-icon class="el-icon--right">
-            <arrow-down />
-          </el-icon>
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item icon="avatar">
-              <router-link to="/member/profile">Profile</router-link>
-            </el-dropdown-item>
-            <el-dropdown-item icon="back" @click="logout">Logout</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <template v-if="memberData">
+        <el-dropdown class>
+          <span class="el-dropdown-link">
+            <el-image class="avatar" :src="memberData.avatar || avatar"></el-image>
+            {{ memberData.nickname || 'None' }}
+            <el-icon class="el-icon--right">
+              <arrow-down />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item icon="avatar">
+                <router-link to="/member/profile">Profile</router-link>
+              </el-dropdown-item>
+              <el-dropdown-item icon="back" @click="logout">Logout</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
+      <template v-else>
+        <el-button type="text">Text Button</el-button>
+        <el-link icon="arrow-right">
+          <a href="https://github.com/Zoctan/admin-seed/issues" target="_blank">Issues</a>
+        </el-link>
+      </template>
     </div>
   </div>
 </template>
@@ -47,7 +55,10 @@ const router = useRouter()
 
 const memberData = computed(() => store.getters.member.memberData)
 
-const logout = () => store.dispatch('memberLogout').then(() => router.push({ path: '/login' }))
+const logout = () => store.dispatch('memberLogout').then(() => {
+  // location.reload()
+  router.push(`/login?redirect=${router.fullPath}`)
+})
 </script>
 
 <style lang="scss" scoped>

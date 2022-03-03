@@ -4,7 +4,7 @@
       <NavBar />
     </el-header>
     <el-container>
-      <el-aside style="--el-aside-width:{{ !sidebar.opened ? '200px' : '64px' }}">
+      <el-aside style="--el-aside-width:{{ !sidebarOpened ? '200px' : '64px' }}">
         <SideBar />
       </el-aside>
       <el-main>
@@ -22,7 +22,7 @@ import SideBar from './SideBar.vue'
 import AppMain from './AppMain.vue'
 
 const store = useStore()
-const sidebar = computed(() => store.getters.sidebar)
+const sidebarOpened = computed(() => store.getters.sidebarOpened)
 </script>
 
 <style lang="scss" scoped>

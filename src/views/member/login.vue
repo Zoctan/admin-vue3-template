@@ -55,6 +55,13 @@ import { useRouter } from 'vue-router'
 import { resetForm } from '@/utils/form'
 import background from '@/assets/image/maldives.jpg'
 
+const props = defineProps({
+  redirect: {
+    type: String,
+    required: false,
+  },
+})
+
 const store = useStore()
 const router = useRouter()
 
@@ -117,7 +124,7 @@ const onLogin = (formEl) => {
       submitLoading.value = false
       // 获取账户信息
       store.dispatch('memberProfile').then(() => {
-        router.replace({ path: '/' })
+        router.replace({ path: props.redirect || '/' })
         return ElMessage.success('login success')
       })
     }).catch(error => {

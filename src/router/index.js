@@ -7,21 +7,23 @@ const _import = (file) => modules[`/src/views/${file}.vue`]
 // console.debug('modules', modules)
 
 export const constRouters = [
-    // { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
+    { path: '/', redirect: '/dashboard', meta: { hidden: true } },
+    { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
     { path: '/404', component: _import('error/404'), meta: { hidden: true } },
     { path: '/401', component: _import('error/401'), meta: { hidden: true } },
-    { path: '/login', name: 'Login', component: _import('member/login'), meta: { hidden: true } },
-    { path: '/register', name: 'Register', component: _import('member/register'), meta: { hidden: true } },
-    { path: '/', redirect: '/dashboard', meta: { hidden: true } },
     {
-        path: '/dashboard',
-        component: Layout,
-        name: 'Dashboard',
-        meta: { icon: 'house', requiresAuth: true, },
-        children: [{
-            path: '',
-            component: _import('dashboard')
-        }],
+        path: '/login',
+        name: 'Login',
+        component: _import('member/login'),
+        meta: { hidden: true },
+        props: route => ({ redirect: route.query.redirect })
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: _import('member/register'),
+        meta: { hidden: true },
+        props: route => ({ redirect: route.query.redirect })
     },
     {
         path: '/test',
@@ -45,6 +47,16 @@ export const constRouters = [
 
 export const asyncRouters = [
     {
+        path: '/dashboard',
+        component: Layout,
+        name: 'Dashboard',
+        meta: { icon: 'house', requiresAuth: true, },
+        children: [{
+            path: '',
+            component: _import('dashboard')
+        }],
+    },
+    {
         path: '/member',
         component: Layout,
         name: 'Member',
@@ -58,6 +70,7 @@ export const asyncRouters = [
             path: 'detail/:id',
             name: 'Member Detail',
             component: _import('member/detail'),
+            props: true,
             meta: { hidden: true, requiresAuth: true, auth: ['member:detail'] }
         }, {
             path: 'profile',
@@ -111,12 +124,5 @@ const defaultRouter = () => createRouter({
 })
 
 const router = defaultRouter()
-
-export const resetRouter = () => {
-    console.debug('before resetRouter', router.getRoutes())
-    const newRouter = defaultRouter()
-    router.matcher = newRouter.matcher
-    console.debug('after resetRouter', router.getRoutes())
-}
 
 export default router
