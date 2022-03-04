@@ -1,19 +1,34 @@
-import store from '@/store'
+import hasPermission from '@/utils/hasPermission'
 
 export default {
   // 当被绑定的元素挂载到 DOM 中时
   mounted(el, binding) {
     const { value } = binding
-    const permissionList = store.getters && store.getters.member.permissionList
+    const successCallback = () => el.parentNode && el.parentNode.removeChild(el)
+    const errorCallback = () => {
+      throw new Error(`
+      usage:
+      if need all permissions in array, use 'and': v-permission="['article:add','article:delete']" or v-permission="{joint:'and', list:['article:add','article:delete']}".
+      if just need one of permission in array, use 'or': v-permission="{joint:'or', list:['article:add','article:delete']}".
+    `)
+    }
     if (value && value instanceof Array && value.length > 0) {
-      const need = value
-      const hasPermission = permissionList.some(permission => need.includes(permission))
-
-      if (!hasPermission) {
-        el.parentNode && el.parentNode.removeChild(el);
+      if (!hasPermission(value)) {
+        successCallback()
       }
     } else {
-      throw new Error(`need permission! Like v-permission="['article:add','article:delete']"`);
+      if (value && value instanceof Object) {
+        const { joint, list } = value
+        if (list.length > 0) {
+          if (!hasPermission(list, joint)) {
+            successCallback()
+          }
+        } else {
+          errorCallback()
+        }
+      } else {
+        errorCallback()
+      }
     }
   }
 }

@@ -7,10 +7,20 @@ const _import = (file) => modules[`/src/views/${file}.vue`]
 // console.debug('modules', modules)
 
 export const constRouters = [
-    { path: '/', redirect: '/dashboard', meta: { hidden: true } },
     { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
     { path: '/404', component: _import('error/404'), meta: { hidden: true } },
     { path: '/401', component: _import('error/401'), meta: { hidden: true } },
+    { path: '/', redirect: '/dashboard', meta: { hidden: true } },
+    {
+        path: '/dashboard',
+        component: Layout,
+        name: 'Dashboard',
+        meta: { icon: 'house', requiresAuth: true, },
+        children: [{
+            path: '',
+            component: _import('dashboard')
+        }],
+    },
     {
         path: '/login',
         name: 'Login',
@@ -46,16 +56,6 @@ export const constRouters = [
 ]
 
 export const asyncRouters = [
-    {
-        path: '/dashboard',
-        component: Layout,
-        name: 'Dashboard',
-        meta: { icon: 'house', requiresAuth: true, },
-        children: [{
-            path: '',
-            component: _import('dashboard')
-        }],
-    },
     {
         path: '/member',
         component: Layout,
