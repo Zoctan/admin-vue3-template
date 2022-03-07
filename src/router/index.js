@@ -7,9 +7,8 @@ const _import = (file) => modules[`/src/views/${file}.vue`]
 // console.debug('modules', modules)
 
 export const constRouters = [
-    { path: '/:allMatch(.*)*', redirect: '/404', meta: { hidden: true } },
-    { path: '/404', component: _import('error/404'), meta: { hidden: true } },
-    { path: '/401', component: _import('error/401'), meta: { hidden: true } },
+    { path: '/404', component: _import('error/404'), name: 'NotFound', meta: { hidden: true } },
+    { path: '/401', component: _import('error/401'), name: 'NotAuth', meta: { hidden: true } },
     { path: '/', redirect: '/dashboard', meta: { hidden: true } },
     {
         path: '/dashboard',
@@ -18,6 +17,7 @@ export const constRouters = [
         meta: { icon: 'house', requiresAuth: true, },
         children: [{
             path: '',
+            name: 'Dashboard',
             component: _import('dashboard')
         }],
     },
@@ -36,22 +36,50 @@ export const constRouters = [
         props: route => ({ redirect: route.query.redirect })
     },
     {
-        path: '/test',
+        path: '/nestedMenu',
         component: Layout,
-        name: 'Test',
-        meta: { icon: 'sunny', dropDown: true, },
+        name: 'NestedMenu',
+        meta: { icon: 'menu', dropDown: true, },
         children: [{
-            path: 'sub1',
-            name: 'Test Sub 1',
-            icon: 'soccer',
-            component: _import('testSub1'),
-            meta: { icon: 'soccer' }
+            path: '11',
+            name: '11',
+            component: _import('nestedMenu/11'),
+            meta: { icon: 'menu' }
         }, {
-            path: 'sub2',
-            name: 'Test Sub 2',
-            component: _import('testSub2'),
-            meta: { icon: 'star' }
-        }],
+            path: '12',
+            name: '12',
+            // use empty.vue to be a children placeholder
+            component: _import('empty'),
+            meta: { icon: 'menu', dropDown: true, },
+            children: [{
+                path: '12-21',
+                name: '12-21',
+                component: _import('nestedMenu/12-21'),
+                meta: { icon: 'menu' }
+            },{
+                path: '12-22',
+                name: '12-22',
+                component: _import('nestedMenu/12-22'),
+                meta: { icon: 'menu' }
+            },{
+                path: '12-23',
+                name: '12-23',
+                component: _import('empty'),
+                meta: { icon: 'menu', dropDown: true, },
+                children: [{
+                    path: '12-23-31',
+                    name: '12-23-31',
+                    component: _import('nestedMenu/12-23-31'),
+                    meta: { icon: 'menu' }
+                },
+                {
+                    path: '12-23-32',
+                    name: '12-23-32',
+                    component: _import('nestedMenu/12-23-32'),
+                    meta: { icon: 'menu' }
+                }]
+            },]
+        },],
     },
 ]
 
@@ -90,7 +118,7 @@ export const asyncRouters = [
             component: _import('role/list'),
             meta: { icon: 'user-filled', requiresAuth: true, auth: ['role:list'] }
         }]
-    }
+    },
 ]
 
 const defaultRouter = () => createRouter({

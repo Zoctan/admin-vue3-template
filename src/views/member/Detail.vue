@@ -101,9 +101,6 @@
 <script>
 import store from '@/store'
 import { update as updateAccount, validatePassword } from '@/api/account'
-import { unix2CurrentTime } from '@/utils'
-import { isValidateEmail } from '@/utils/validate'
-import { setToken } from '@/utils/token'
 import { mapState } from 'vuex'
 
 export default {

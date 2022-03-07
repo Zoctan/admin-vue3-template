@@ -1,9 +1,8 @@
 <template>
-  <h1>TestSub2</h1>
+  <h1>12-23-32</h1>
 </template>
 
 <script setup>
-
 </script>
 
 <style lang="scss" scoped>

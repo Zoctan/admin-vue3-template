@@ -16,7 +16,7 @@
       <template v-if="memberData">
         <el-dropdown class>
           <span class="el-dropdown-link">
-            <el-image class="avatar" :src="memberData.avatar || avatar"></el-image>
+            <el-avatar class="avatar" :size="30" :src="memberData.avatar || avatar"></el-avatar>
             {{ memberData.nickname || 'None' }}
             <el-icon class="el-icon--right">
               <arrow-down />
@@ -84,11 +84,6 @@ const toLogin = () => router.push(`/login?redirect=${route.fullPath}`)
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    .avatar {
-      width: 30px;
-      height: 30px;
-      margin-right: 5px;
-    }
   }
 }
 </style>

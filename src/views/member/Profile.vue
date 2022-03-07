@@ -2,19 +2,75 @@
   <el-card class="box-card">
     <template #header>
       <div class="card-header">
-        <span>About me</span>
-        <el-button
-          class="button"
-          type="text"
-          @click="dialogProfileFormVisible = true"
-        >update profile</el-button>
-        <el-button
-          class="button"
-          type="text"
-          @click="dialogPasswordFormVisible = true"
-        >update password</el-button>
+        <el-avatar :size="60" :src="memberData.avatar"></el-avatar>
       </div>
     </template>
+    <el-descriptions :column="3" size="large" border>
+      <template #extra>
+        <el-button class="button" @click="dialogProfileFormVisible = true">update profile</el-button>
+        <el-button class="button" @click="dialogPasswordFormVisible = true">update password</el-button>
+      </template>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <avatar />
+            </el-icon>Username
+          </div>
+        </template>
+        {{ member.username }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <user />
+            </el-icon>Nickname
+          </div>
+        </template>
+        {{ memberData.nickname }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <component :is="memberGenderMap[memberData.gender]"></component>
+            </el-icon>Gender
+          </div>
+        </template>
+        {{ memberGenderMap[memberData.gender] }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <flag />
+            </el-icon>Status
+          </div>
+        </template>
+        <el-tag size="small">{{ memberStatusMap[member.status] }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <clock />
+            </el-icon>Register At
+          </div>
+        </template>
+        {{ member.created_at }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <clock />
+            </el-icon>Logined At
+          </div>
+        </template>
+        {{ member.logined_at }}
+      </el-descriptions-item>
+    </el-descriptions>
   </el-card>
 
   <el-dialog v-model="dialogProfileFormVisible" title="Update Profile">
@@ -117,11 +173,13 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
+import { memberGenderMap, memberStatusMap } from '@/utils'
 import { resetForm } from '@/utils/form'
 import { updateProfile, checkOldPassword, updatePassword } from '@/api/member'
 
 const store = useStore()
 
+const member = computed(() => store.getters.member.member)
 const memberData = computed(() => store.getters.member.memberData)
 
 // ------- profile -------
@@ -254,3 +312,9 @@ const onUpdatePassword = (formEl) => {
   })
 }
 </script>
+
+<style lang="scss" scoped>
+.card-header{
+  text-align: center;
+}
+</style>

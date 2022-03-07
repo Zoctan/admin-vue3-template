@@ -59,7 +59,7 @@
         label="Operations"
         v-permission="{ joint: 'or', list: ['member:update', 'member:delete'] }"
       >
-        <template v-if="scope.row.id !== memberData.member_id" #default>
+        <template v-if="scope.row.id !== member.id" #default>
           <el-button
             type="warning"
             size="small"
@@ -138,7 +138,7 @@ import { list as listMember, updateDetail } from '@/api/member'
 
 const store = useStore()
 
-const memberData = computed(() => store.getters.member.memberData)
+const member = computed(() => store.getters.member.member)
 
 const memberList = ref([])
 const roleList = ref([])
@@ -216,7 +216,7 @@ const memberForm = reactive({
 
 // ------- member -------
 
-searchBy() {
+const searchBy = ()=> {
   this.btnLoading = true
   this.listLoading = true
   this.search.page = this.listQuery.page
@@ -233,7 +233,7 @@ searchBy() {
 /**
  * 显示添加成员对话框
  */
-showAddMemberDialog() {
+const showAddMemberDialog = ()=> {
   // 显示新增对话框
   this.dialogFormVisible = true
   this.dialogStatus = 'add'
@@ -244,7 +244,7 @@ showAddMemberDialog() {
 /**
  * 添加成员
  */
-addMember() {
+const addMember = ()=> {
   this.$refs.tmpMember.validate(valid => {
     if (valid && this.isUniqueDetail(this.tmpMember)) {
       this.btnLoading = true
@@ -264,7 +264,7 @@ addMember() {
  * 显示修改成员对话框
  * @param index 成员下标
  */
-showUpdateMemberDialog(index) {
+const showUpdateMemberDialog  = (index)=> {
   this.dialogFormVisible = true
   this.dialogStatus = 'update'
   this.tmpMember.memberId = this.memberList[index].id
@@ -276,7 +276,7 @@ showUpdateMemberDialog(index) {
 /**
  * 更新成员
  */
-updateMember() {
+const updateMember = ()=> {
   updateMember(this.tmpMember).then(() => {
     this.$message.success('更新成功')
     this.getMemberList()
@@ -289,7 +289,7 @@ updateMember() {
  * 显示修改成员角色对话框
  * @param index 成员下标
  */
-showUpdateMemberRoleDialog(index) {
+const showUpdateMemberRoleDialog = (index)=> {
   this.dialogFormVisible = true
   this.dialogStatus = 'updateRole'
   this.tmpMember.memberId = this.memberList[index].id
@@ -301,7 +301,7 @@ showUpdateMemberRoleDialog(index) {
 /**
  * 更新成员角色
  */
-updateMemberRole() {
+const updateMemberRole = ()=> {
   updateMemberRole(this.tmpMember).then(() => {
     this.$message.success('更新成功')
     this.getMemberList()
@@ -314,7 +314,7 @@ updateMemberRole() {
  * 成员信息是否唯一
  * @param member 成员
  */
-isUniqueDetail(member) {
+const isUniqueDetail = (member)=> {
   for (let i = 0; i < this.memberList.length; i++) {
     if (this.memberList[i].name === member.name) {
       this.$message.error('账户名已存在')
@@ -331,7 +331,7 @@ isUniqueDetail(member) {
  * 删除成员
  * @param index 成员下标
  */
-removeMember(index) {
+const removeMember = (index)=> {
   this.$confirm('删除该账户？', '警告', {
     confirmButtonText: '是',
     cancelButtonText: '否',

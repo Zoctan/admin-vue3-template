@@ -7,18 +7,18 @@ import localStore from '@/utils/localStore'
 import hasPermission from '@/utils/hasPermission'
 import { ElMessage } from 'element-plus'
 
-// 导航守卫：https://router.vuejs.org/zh/guide/advanced/navigation-guards.html
-// 顺序：beforeEach -> beforeResolve -> afterEach
-// 有无 token：
-//   有：
-//     前往的路径无需认证 和 权限：直接前往
-//     前往的路径需要认证 和 权限：
-//                           需要认证，但不需要权限：直接前往
-//                           需要权限：检查权限
-//   无：
-//     前往的路径无需认证 和 权限：直接前往
-//     前往的路径需要认证 和 权限：跳到登录页
-// 是否已经挂载动态路由表
+// Navigation Guards: https://router.vuejs.org/zh/guide/advanced/navigation-guards.html
+// oreder: beforeEach -> beforeResolve -> afterEach
+// has token?
+//   yes:
+//     route hasn't "requiresAuth" and "auth" meta tag: go directly
+//     route has "requiresAuth" and "auth" meta tag:
+//                                                   "requiresAuth" and no "auth": go directly
+//                                                   "auth": check permission
+//   no:
+//     route hasn't "requiresAuth" and "auth" meta tag: go directly
+//     route has "requiresAuth" and "auth" meta tag: redirect to login page
+// flag: already added dynamic routers
 let addAsyncRoutersFlag = false
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
@@ -31,17 +31,25 @@ router.beforeEach(async (to, from, next) => {
       accessedAsyncRouters.forEach(item => {
         router.addRoute(item)
       })
-      next({ ...to })
       addAsyncRoutersFlag = true
+      next({ ...to })
     } else {
-      // 无需认证 和 权限
+      // router exists?
+      // don't put {path:'/:pathMatch(.*)*', redirect:'/404'} into constRouters
+      // if routers are dynamic created, refresh action will redirect to 404 page directly
+      // because refreshed action completed first, and dynamic routers are not created yet
+      if (!router.hasRoute(to.name)) {
+        next({ path: '/404' })
+      }
+      // no requiresAuth and no auth
       if (!to.meta.requiresAuth && !to.meta.auth) {
         next()
       } else {
-        // 不要重复访问登录页
+        // don't visit login again
         if (to.path === '/login') {
           next({ path: '/' })
         } else {
+          // requiresAuth and no auth
           if (to.meta.requiresAuth && !to.meta.auth) {
             next()
           } else if (to.meta.requiresAuth && to.meta.auth && hasPermission(to.meta.auth)) {
@@ -53,10 +61,13 @@ router.beforeEach(async (to, from, next) => {
       }
     }
   } else {
+    // router exists?
+    if (!router.hasRoute(to.name)) {
+      next({ path: '/404' })
+    }
     if (!to.meta.requiresAuth && !to.meta.auth) {
       next()
     } else {
-      addAsyncRoutersFlag = false
       next({ path: '/login' })
     }
   }

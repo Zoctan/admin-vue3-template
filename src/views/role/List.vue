@@ -146,7 +146,6 @@ import {
   update as updateRole,
   remove
 } from '@/api/role'
-import { unix2CurrentTime } from '@/utils'
 import { mapGetters } from 'vuex'
 
 export default {
