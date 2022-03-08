@@ -42,19 +42,18 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import SideBarCollapse from './SideBarCollapse.vue'
 import avatar from '@/assets/image/avatar.png'
 import logo from '@/assets/image/logo.png'
 
 const store = useStore()
-const route = useRoute()
 const router = useRouter()
 
 const memberData = computed(() => store.getters.member.memberData)
 
 const toLogout = () => store.dispatch('memberLogout').then(() => location.reload())
-const toLogin = () => router.push(`/login?redirect=${route.fullPath}`)
+const toLogin = () => router.push(`/login`)
 </script>
 
 <style lang="scss" scoped>

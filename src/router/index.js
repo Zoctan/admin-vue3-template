@@ -17,7 +17,9 @@ export const constRouters = [
         meta: { icon: 'house', requiresAuth: true, },
         children: [{
             path: '',
-            name: 'Dashboard',
+            // dont't use repeat name
+            // who use repeat name first, it will render the first one, and doesn't render the other component
+            name: 'DashboardX',
             component: _import('dashboard')
         }],
     },
@@ -56,12 +58,12 @@ export const constRouters = [
                 name: '12-21',
                 component: _import('nestedMenu/12-21'),
                 meta: { icon: 'menu' }
-            },{
+            }, {
                 path: '12-22',
                 name: '12-22',
                 component: _import('nestedMenu/12-22'),
                 meta: { icon: 'menu' }
-            },{
+            }, {
                 path: '12-23',
                 name: '12-23',
                 component: _import('empty'),
@@ -90,6 +92,11 @@ export const asyncRouters = [
         name: 'Member',
         meta: { icon: 'user', dropDown: true, },
         children: [{
+            path: 'profile',
+            name: 'Member Profile',
+            component: _import('member/profile'),
+            meta: { hidden: true, requiresAuth: true }
+        }, {
             path: 'list',
             name: 'Member Manage',
             component: _import('member/list'),
@@ -100,11 +107,6 @@ export const asyncRouters = [
             component: _import('member/detail'),
             props: true,
             meta: { hidden: true, requiresAuth: true, auth: ['member:detail'] }
-        }, {
-            path: 'profile',
-            name: 'Member Profile',
-            component: _import('member/profile'),
-            meta: { hidden: true, requiresAuth: true }
         },]
     },
     {

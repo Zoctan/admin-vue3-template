@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-
+console.debug('dashboard')
 </script>
 
 <style lang="scss" scoped>
