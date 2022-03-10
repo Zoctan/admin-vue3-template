@@ -17,7 +17,7 @@ instance.defaults.headers.post = {
     'Content-type': 'application/json;charset=UTF-8'
 }
 
-// 请求拦截器
+// request interceptor
 instance.interceptors.request.use(
     (config) => {
         config.headers['Authorization'] = localStore() && localStore().member.token || ''
@@ -29,14 +29,15 @@ instance.interceptors.request.use(
     }
 )
 
-// 响应拦截器
+// response interceptor
 instance.interceptors.response.use(
     (response) => {
         if (response.data.errno === 0) {
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
             ElMessage.error('auth error, please login')
-            router.push({ path: '/login' })
+            localStorage.clear()
+            return router.push({ path: '/login' })
         } else {
             return Promise.reject(response.data)
         }

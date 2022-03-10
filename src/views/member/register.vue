@@ -161,11 +161,11 @@ const onRegister = (formEl) => {
       submitLoading.value = false
       store.dispatch('memberProfile').then(() => {
         router.replace({ path: props.redirect || '/member/profile' })
-        return ElMessage.success('register success')
+        ElMessage.success('register success')
       })
     }).catch((error) => {
       submitLoading.value = false
-      return ElMessage.error(`register error: ${error.msg}`)
+      ElMessage.error(`register error: ${error.msg}`)
     })
   })
 }

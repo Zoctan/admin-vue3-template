@@ -8,15 +8,8 @@
         v-permission="['member:list']"
         @click="getMemberList"
       ></el-button>
-      <el-button
-        type="success"
-        icon="plus"
-        circle
-        v-permission="['member:add']"
-        @click="showAddMemberDialog"
-      ></el-button>
-      <el-form :inline="true" :model="formInline">
-        <template v-permission="['member:search']">
+      <template v-permission="['member:list']">
+        <el-form :inline="true">
           <el-form-item label="Username">
             <el-input v-model="searchForm.member.username" placeholder="username"></el-input>
           </el-form-item>
@@ -25,14 +18,14 @@
           </el-form-item>
           <el-form-item label="Gender">
             <el-select v-model="searchForm.memberData.gender" placeholder="gender">
-              <template v-for="gender in genderList" :key="name">
+              <template v-for="gender in genderList" :key="gender.name">
                 <el-option :label="gender.name" :value="gender.value" />
               </template>
             </el-select>
           </el-form-item>
           <el-form-item label="RoleName">
             <el-select v-model="searchForm.role.name" placeholder="role name">
-              <template v-for="role in roleList" :key="name">
+              <template v-for="role in roleList" :key="role.name">
                 <el-option :label="role.name" :value="role.id" />
               </template>
             </el-select>
@@ -47,8 +40,8 @@
               @click="getMemberList"
             ></el-button>
           </el-form-item>
-        </template>
-      </el-form>
+        </el-form>
+      </template>
     </div>
 
     <el-table :data="memberList" border highlight-current-row style="width: 100%">
@@ -66,19 +59,27 @@
         label="Operations"
         v-permission="{ joint: 'or', list: ['member:update', 'member:delete'] }"
       >
-        <template v-if="scope.row.id !== member.id" #default>
-          <el-button
-            type="warning"
-            size="small"
-            v-permission="['member:update']"
-            @click="onShowUpdateDialog(scope.row.id)"
-          >Update</el-button>
-          <el-button
-            type="danger"
-            size="small"
-            v-permission="['member:delete']"
-            @click="onDelete(scope.row.id)"
-          >Delete</el-button>
+        <template #default="scope">
+          <template v-if="scope.row.id !== member.id">
+            <el-button
+              type="warning"
+              size="small"
+              v-permission="['member:update']"
+              @click="showUpdateRoleDialog(scope.row.id)"
+            >Update</el-button>
+            <el-button
+              type="warning"
+              size="small"
+              v-permission="['member:update']"
+              @click="showUpdateMemberDialog(scope.row.id)"
+            >Update</el-button>
+            <el-button
+              type="danger"
+              size="small"
+              v-permission="['member:delete']"
+              @click="onDelete(scope.row.id)"
+            >Delete</el-button>
+          </template>
         </template>
       </el-table-column>
     </el-table>
@@ -94,7 +95,7 @@
       @current-change="handleCurrentChange"
     ></el-pagination>
 
-    <el-dialog v-model="dialogMemberFormVisible" title="Update Member">
+    <el-dialog v-model="dialogUpdateMemberFormVisible" title="Update Member">
       <el-form
         autocomplete="off"
         ref="memberFormRef"
@@ -138,16 +139,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from '@/utils/form'
-import { list as listMember, updateDetail } from '@/api/member'
-import { list as listRole, updateMemberRole } from '@/api/role'
+import { list as listMember, updateDetail, remove } from '@/api/member'
+import { listRole, updateMemberRole } from '@/api/role'
 
 const store = useStore()
 
 const member = computed(() => store.getters.member.member)
-const memberData = computed(() => store.getters.member.memberData)
 
 const memberList = ref([])
 const roleList = ref([])
@@ -196,16 +196,17 @@ const handleCurrentChange = (currentPage) => {
 }
 
 const getIndex = (index) => {
-  return (page.currentPage - 1) * page.pageSize.size + index + 1
+  return (page.currentPage - 1) * page.pageSize + index + 1
 }
 
 const getRoleList = () => {
   listRole().then(response => {
     roleList.value = response.data.list
   }).catch((error) => {
-    return ElMessage.error(`getRoleList error: ${error.msg}`)
+    ElMessage.error(`getRoleList error: ${error.msg}`)
   })
 }
+
 const getMemberList = () => {
   searchLoading.value = true
   searchDisabled.value = true
@@ -222,7 +223,7 @@ const getMemberList = () => {
   }).catch((error) => {
     searchLoading.value = false
     searchDisabled.value = false
-    return ElMessage.error(`getMemberList error: ${error.msg}`)
+    ElMessage.error(`getMemberList error: ${error.msg}`)
   })
 }
 
@@ -234,153 +235,50 @@ onMounted(() => {
 // ------- update member -------
 const submitMemberLoading = ref(false)
 const submitMemberDisabled = ref(false)
-const dialogMemberFormVisible = ref(false)
+const dialogUpdateMemberFormVisible = ref(false)
 
 const memberFormRef = ref(null)
 
 const memberForm = reactive({
-  nickname: memberData.value.nickname,
-  gender: memberData.value.gender,
+  nickname: '',
+  gender: '',
 })
 
-// ------- member -------
+const showUpdateMemberDialog = (memberId) => {
+  dialogUpdateMemberFormVisible.value = true
 
-/**
- * 显示添加成员对话框
- */
-const showAddMemberDialog = () => {
-  // 显示新增对话框
-  this.dialogFormVisible = true
-  this.dialogStatus = 'add'
-  this.tmpMember.email = ''
-  this.tmpMember.name = ''
-  this.tmpMember.password = ''
 }
-/**
- * 添加成员
- */
-const addMember = () => {
-  this.$refs.tmpMember.validate(valid => {
-    if (valid && this.isUniqueDetail(this.tmpMember)) {
-      this.btnLoading = true
-      register(this.tmpMember).then(() => {
-        this.$message.success('添加成功')
-        this.getMemberList()
-        this.dialogFormVisible = false
-        this.btnLoading = false
-      }).catch(res => {
-        this.$message.error('添加账户失败')
-        this.btnLoading = false
-      })
-    }
+
+const onUpdateMember = () => {
+  updateDetail(memberForm).then(() => {
+    ElMessage.success('update success')
+  }).catch((error) => {
+    ElMessage.error(`updateMemberDetail error: ${error.msg}`)
   })
 }
-/**
- * 显示修改成员对话框
- * @param index 成员下标
- */
-const showUpdateMemberDialog = (index) => {
-  this.dialogFormVisible = true
-  this.dialogStatus = 'update'
-  this.tmpMember.memberId = this.memberList[index].id
-  this.tmpMember.email = this.memberList[index].email
-  this.tmpMember.name = this.memberList[index].name
-  this.tmpMember.password = ''
-  this.tmpMember.roleId = this.memberList[index].roleId
+
+// ------- update member role -------
+const dialogUpdateRoleFormVisible = ref(false)
+
+const showUpdateRoleDialog = () => {
+  dialogUpdateRoleFormVisible.value = true
+
 }
-/**
- * 更新成员
- */
-const updateMember = () => {
-  updateMember(this.tmpMember).then(() => {
-    this.$message.success('更新成功')
-    this.getMemberList()
-    this.dialogFormVisible = false
-  }).catch(res => {
-    this.$message.error('更新失败')
-  })
-}
-/**
- * 显示修改成员角色对话框
- * @param index 成员下标
- */
-const showUpdateMemberRoleDialog = (index) => {
-  this.dialogFormVisible = true
-  this.dialogStatus = 'updateRole'
-  this.tmpMember.memberId = this.memberList[index].id
-  this.tmpMember.email = this.memberList[index].email
-  this.tmpMember.name = this.memberList[index].name
-  this.tmpMember.password = ''
-  this.tmpMember.roleId = this.memberList[index].roleId
-}
-/**
- * 更新成员角色
- */
-const updateMemberRole = () => {
-  updateMemberRole(this.tmpMember).then(() => {
-    this.$message.success('更新成功')
-    this.getMemberList()
-    this.dialogFormVisible = false
-  }).catch(res => {
-    this.$message.error('更新失败')
-  })
-}
-/**
- * 成员信息是否唯一
- * @param member 成员
- */
-const isUniqueDetail = (member) => {
-  for (let i = 0; i < this.memberList.length; i++) {
-    if (this.memberList[i].name === member.name) {
-      this.$message.error('账户名已存在')
-      return false
-    }
-    if (this.memberList[i].email === member.email) {
-      this.$message.error('邮箱已存在')
-      return false
-    }
-  }
-  return true
-}
-/**
- * 删除成员
- * @param index 成员下标
- */
-const removeMember = (index) => {
+
+// ------- delete member -------
+const onDelete = (index) => {
   this.$confirm('删除该账户？', '警告', {
     confirmButtonText: '是',
     cancelButtonText: '否',
     type: 'warning'
   }).then(() => {
-    const id = this.memberList[index].id
+    const id = memberList[index].id
     remove(id).then(() => {
-      this.$message.success('删除成功')
-      this.getMemberList()
+      ElMessage.success('delete success')
+      getMemberList()
     })
   }).catch(() => {
-    this.$message.info('已取消删除')
+    ElMessage.info('cancel delete')
   })
-}
-
-const validateEmail = (rule, value, callback) => {
-  if (!isValidateEmail(value)) {
-    callback(new Error('邮箱格式错误'))
-  } else {
-    callback()
-  }
-}
-const validateName = (rule, value, callback) => {
-  if (value.length < 3) {
-    callback(new Error('账户名长度必须 ≥ 3'))
-  } else {
-    callback()
-  }
-}
-const validatePassword = (rule, value, callback) => {
-  if (value.length < 6) {
-    callback(new Error('密码长度必须 ≥ 6'))
-  } else {
-    callback()
-  }
 }
 </script>

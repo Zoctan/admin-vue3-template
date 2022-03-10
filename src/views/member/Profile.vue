@@ -217,15 +217,15 @@ const onUpdateProfile = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      return ElMessage.error('profile form error')
+      ElMessage.error('profile form error')
     }
     submitProfileLoading.value = true
     updateProfile(profileForm).then(() => {
       submitProfileLoading.value = false
-      return ElMessage.success('update profile success')
+      ElMessage.success('update profile success')
     }).catch((error) => {
       submitProfileLoading.value = false
-      return ElMessage.error(`update profile error: ${error.msg}`)
+      ElMessage.error(`update profile error: ${error.msg}`)
     })
   })
 }
@@ -304,17 +304,17 @@ const onUpdatePassword = (formEl) => {
     submitPasswordLoading.value = true
     updatePassword(passwordForm).then(() => {
       submitPasswordLoading.value = false
-      return ElMessage.success('update password success')
+      ElMessage.success('update password success')
     }).catch((error) => {
       submitPasswordLoading.value = false
-      return ElMessage.error(`update password error: ${error}`)
+      ElMessage.error(`update password error: ${error}`)
     })
   })
 }
 </script>
 
 <style lang="scss" scoped>
-.card-header{
+.card-header {
   text-align: center;
 }
 </style>
