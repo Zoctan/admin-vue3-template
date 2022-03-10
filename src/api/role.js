@@ -1,56 +1,73 @@
 import request from '@/utils/request'
 
-export function listRoleWithPermission(params) {
+export function addRole(data) {
   return request({
-    url: '/role/permission',
-    method: 'get',
-    params
+    url: '/role/add',
+    method: 'POST',
+    data: data
   })
 }
 
-export function list(params) {
+export function addRule(data) {
   return request({
-    url: '/role',
-    method: 'get',
-    params
+    url: '/rule/add',
+    method: 'POST',
+    data: data
   })
 }
 
-export function listResourcePermission(params) {
+export function listRole(data) {
   return request({
-    url: '/permission',
-    method: 'get',
-    params
+    url: '/role/list',
+    method: 'POST',
+    data: data
   })
 }
 
-export function add(params) {
+export function listRule(data) {
   return request({
-    url: '/role',
-    method: 'post',
-    params
+    url: '/rule/list',
+    method: 'POST',
+    data: data
   })
 }
 
-export function update(params) {
+export function detail(data) {
   return request({
-    url: '/role',
-    method: 'put',
-    params
+    url: '/rule/detail',
+    method: 'POST',
+    data: data
   })
 }
 
-export function remove(roleId) {
+export function updateRole(data) {
   return request({
-    url: '/role/' + roleId,
-    method: 'delete'
+    url: '/role/update',
+    method: 'PUT',
+    data: data
   })
 }
 
-export function updateAccountRole(params) {
+export function updateRule(data) {
   return request({
-    url: '/account/role',
-    method: 'put',
-    params
+    url: '/rule/update',
+    method: 'PUT',
+    data: data
+  })
+}
+
+export function updateMemberRole(data) {
+  return request({
+    url: '/memberRole/update',
+    method: 'PUT',
+    data: data
+  })
+}
+
+export function remove(data) {
+  return request({
+    url: '/role/delete',
+    method: 'DELETE',
+    data: data
   })
 }

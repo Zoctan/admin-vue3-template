@@ -6,7 +6,7 @@
         icon="refresh"
         circle
         v-permission="['member:list']"
-        @click="refreshMemberList"
+        @click="getMemberList"
       ></el-button>
       <el-button
         type="success"
@@ -18,27 +18,34 @@
       <el-form :inline="true" :model="formInline">
         <template v-permission="['member:search']">
           <el-form-item label="Username">
-            <el-input v-model="search.member.username" placeholder="username"></el-input>
+            <el-input v-model="searchForm.member.username" placeholder="username"></el-input>
           </el-form-item>
           <el-form-item label="Nickname">
-            <el-input v-model="search.memberData.nickname" placeholder="nickname"></el-input>
+            <el-input v-model="searchForm.memberData.nickname" placeholder="nickname"></el-input>
           </el-form-item>
           <el-form-item label="Gender">
-            <el-select v-model="search.memberData.gender" placeholder="gender">
+            <el-select v-model="searchForm.memberData.gender" placeholder="gender">
               <template v-for="gender in genderList" :key="name">
-                <el-option :label="gender.name" :value="gender.name" />
+                <el-option :label="gender.name" :value="gender.value" />
               </template>
             </el-select>
           </el-form-item>
           <el-form-item label="RoleName">
-            <el-select v-model="search.role.name" placeholder="role name">
+            <el-select v-model="searchForm.role.name" placeholder="role name">
               <template v-for="role in roleList" :key="name">
-                <el-option :label="role.name" :value="role.name" />
+                <el-option :label="role.name" :value="role.id" />
               </template>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="info" icon="search" circle @click="onSearch"></el-button>
+            <el-button
+              type="info"
+              icon="search"
+              circle
+              :loading="searchLoading"
+              :disabled="searchDisabled"
+              @click="getMemberList"
+            ></el-button>
           </el-form-item>
         </template>
       </el-form>
@@ -135,13 +142,37 @@ import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from '@/utils/form'
 import { list as listMember, updateDetail } from '@/api/member'
+import { list as listRole, updateMemberRole } from '@/api/role'
 
 const store = useStore()
 
 const member = computed(() => store.getters.member.member)
+const memberData = computed(() => store.getters.member.memberData)
 
 const memberList = ref([])
 const roleList = ref([])
+const genderList = reactive([
+  { name: 'None', value: 0 },
+  { name: 'Male', value: 1 },
+  { name: 'Female', value: 2 },
+])
+
+const searchLoading = ref(false)
+const searchDisabled = ref(false)
+
+const searchForm = reactive({
+  member: {
+    username: '',
+    status: false,
+  },
+  memberData: {
+    nickname: '',
+    gender: '',
+  },
+  role: {
+    name: ''
+  }
+})
 
 const page = reactive({
   currentPage: 1,
@@ -156,50 +187,48 @@ const page = reactive({
 const handleSizeChange = (pageSize) => {
   page.pageSize = pageSize
   page.currentPage = 1
-  getMemberList()
+  getMemberList(true)
 }
 
 const handleCurrentChange = (currentPage) => {
   page.currentPage = currentPage
-  getMemberList()
+  getMemberList(true)
 }
 
 const getIndex = (index) => {
   return (page.currentPage - 1) * page.pageSize.size + index + 1
 }
 
-/**
-     * 获取所有角色
-     */
 const getRoleList = () => {
-  getRoleList().then(response => {
+  listRole().then(response => {
     roleList.value = response.data.list
   }).catch((error) => {
     return ElMessage.error(`getRoleList error: ${error.msg}`)
   })
 }
-
 const getMemberList = () => {
-  listMember(page).then(response => {
+  searchLoading.value = true
+  searchDisabled.value = true
+  searchForm.currentPage = page.currentPage
+  searchForm.pageSize = page.pageSize
+  listMember(searchForm).then(response => {
     memberList.value = response.data.list
-    page.total = response.data.total
+    page.totalData = response.data.total
+    page.currentPage = response.data.currentPage
+    page.pageSize = response.data.pageSize
+    page.totalPage = response.data.totalPage
+    searchLoading.value = false
+    searchDisabled.value = false
   }).catch((error) => {
+    searchLoading.value = false
+    searchDisabled.value = false
     return ElMessage.error(`getMemberList error: ${error.msg}`)
   })
 }
 
-const searchForm = reactive({
-  member: {
-    username: '',
-    status: false,
-  },
-  memberData: {
-    nickname: '',
-    gender: '',
-  },
-  role: {
-    name: ''
-  }
+onMounted(() => {
+  getMemberList()
+  getRoleList()
 })
 
 // ------- update member -------
@@ -216,24 +245,10 @@ const memberForm = reactive({
 
 // ------- member -------
 
-const searchBy = ()=> {
-  this.btnLoading = true
-  this.listLoading = true
-  this.search.page = this.listQuery.page
-  this.search.size = this.listQuery.size
-  search(this.search).then(response => {
-    this.memberList = response.data.list
-    this.total = response.data.total
-    this.listLoading = false
-    this.btnLoading = false
-  }).catch(res => {
-    this.$message.error('搜索失败')
-  })
-}
 /**
  * 显示添加成员对话框
  */
-const showAddMemberDialog = ()=> {
+const showAddMemberDialog = () => {
   // 显示新增对话框
   this.dialogFormVisible = true
   this.dialogStatus = 'add'
@@ -244,7 +259,7 @@ const showAddMemberDialog = ()=> {
 /**
  * 添加成员
  */
-const addMember = ()=> {
+const addMember = () => {
   this.$refs.tmpMember.validate(valid => {
     if (valid && this.isUniqueDetail(this.tmpMember)) {
       this.btnLoading = true
@@ -264,7 +279,7 @@ const addMember = ()=> {
  * 显示修改成员对话框
  * @param index 成员下标
  */
-const showUpdateMemberDialog  = (index)=> {
+const showUpdateMemberDialog = (index) => {
   this.dialogFormVisible = true
   this.dialogStatus = 'update'
   this.tmpMember.memberId = this.memberList[index].id
@@ -276,7 +291,7 @@ const showUpdateMemberDialog  = (index)=> {
 /**
  * 更新成员
  */
-const updateMember = ()=> {
+const updateMember = () => {
   updateMember(this.tmpMember).then(() => {
     this.$message.success('更新成功')
     this.getMemberList()
@@ -289,7 +304,7 @@ const updateMember = ()=> {
  * 显示修改成员角色对话框
  * @param index 成员下标
  */
-const showUpdateMemberRoleDialog = (index)=> {
+const showUpdateMemberRoleDialog = (index) => {
   this.dialogFormVisible = true
   this.dialogStatus = 'updateRole'
   this.tmpMember.memberId = this.memberList[index].id
@@ -301,7 +316,7 @@ const showUpdateMemberRoleDialog = (index)=> {
 /**
  * 更新成员角色
  */
-const updateMemberRole = ()=> {
+const updateMemberRole = () => {
   updateMemberRole(this.tmpMember).then(() => {
     this.$message.success('更新成功')
     this.getMemberList()
@@ -314,7 +329,7 @@ const updateMemberRole = ()=> {
  * 成员信息是否唯一
  * @param member 成员
  */
-const isUniqueDetail = (member)=> {
+const isUniqueDetail = (member) => {
   for (let i = 0; i < this.memberList.length; i++) {
     if (this.memberList[i].name === member.name) {
       this.$message.error('账户名已存在')
@@ -331,7 +346,7 @@ const isUniqueDetail = (member)=> {
  * 删除成员
  * @param index 成员下标
  */
-const removeMember = (index)=> {
+const removeMember = (index) => {
   this.$confirm('删除该账户？', '警告', {
     confirmButtonText: '是',
     cancelButtonText: '否',
