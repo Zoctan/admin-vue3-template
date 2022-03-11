@@ -42,18 +42,19 @@ router.beforeEach(async (to, from, next) => {
         // because refreshed action completed first, and dynamic routers are not created yet
         if (!router.hasRoute(to.name)) {
           next({ path: '/404' })
-        }
-        if (!to.meta.requiresAuth) {
-          next()
         } else {
-          if (!to.meta.auth) {
+          if (!to.meta.requiresAuth) {
             next()
           } else {
-            if (hasPermission(to.meta.auth)) {
+            if (!to.meta.auth) {
               next()
             } else {
-              next({ path: '/401' })
-              ElMessage.error(`no permission to visit ${to.path}`)
+              if (hasPermission(to.meta.auth)) {
+                next()
+              } else {
+                next({ path: '/401' })
+                ElMessage.error(`no permission to visit ${to.path}`)
+              }
             }
           }
         }
@@ -63,11 +64,12 @@ router.beforeEach(async (to, from, next) => {
     // router exists?
     if (!router.hasRoute(to.name)) {
       next({ path: '/404' })
-    }
-    if (!to.meta.requiresAuth && !to.meta.auth) {
-      next()
     } else {
-      next({ path: '/login', query: { redirect: from.fullPath } })
+      if (!to.meta.requiresAuth && !to.meta.auth) {
+        next()
+      } else {
+        next({ path: '/login', query: { redirect: from.fullPath } })
+      }
     }
   }
 })

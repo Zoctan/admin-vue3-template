@@ -1,59 +1,72 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-button
-        type="primary"
-        icon="refresh"
-        circle
-        v-permission="['member:list']"
-        @click="getMemberList"
-      ></el-button>
-      <template v-permission="['member:list']">
-        <el-form :inline="true">
-          <el-form-item label="Username">
-            <el-input v-model="searchForm.member.username" placeholder="username"></el-input>
-          </el-form-item>
-          <el-form-item label="Nickname">
-            <el-input v-model="searchForm.memberData.nickname" placeholder="nickname"></el-input>
-          </el-form-item>
-          <el-form-item label="Gender">
-            <el-select v-model="searchForm.memberData.gender" placeholder="gender">
-              <template v-for="gender in genderList" :key="gender.name">
-                <el-option :label="gender.name" :value="gender.value" />
-              </template>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="RoleName">
-            <el-select v-model="searchForm.role.name" placeholder="role name">
-              <template v-for="role in roleList" :key="role.name">
-                <el-option :label="role.name" :value="role.id" />
-              </template>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              type="info"
-              icon="search"
-              circle
-              :loading="searchLoading"
-              :disabled="searchDisabled"
-              @click="getMemberList"
-            ></el-button>
-          </el-form-item>
-        </el-form>
-      </template>
+    <div class="filter-container" v-permission="['member:list']">
+      <el-button type="primary" icon="refresh" circle @click="getMemberList"></el-button>
+      <el-form :inline="true">
+        <el-form-item label="Username">
+          <el-input v-model="searchForm.member.username" placeholder="username"></el-input>
+        </el-form-item>
+        <el-form-item label="Status">
+          <el-radio-group v-model="searchForm.member.status">
+            <el-radio-button :label="0">Abnormal</el-radio-button>
+            <el-radio-button :label="1">Normal</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="Nickname">
+          <el-input v-model="searchForm.memberData.nickname" placeholder="nickname"></el-input>
+        </el-form-item>
+        <el-form-item label="Gender">
+          <el-select v-model="searchForm.memberData.gender" placeholder="gender">
+            <template v-for="gender in genderList" :key="gender.name">
+              <el-option :label="gender.name" :value="gender.value" />
+            </template>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="RoleName">
+          <el-select v-model="searchForm.role.name" placeholder="role name">
+            <template v-for="role in roleList" :key="role.name">
+              <el-option :label="role.name" :value="role.id" />
+            </template>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="info"
+            icon="search"
+            circle
+            :loading="searchLoading"
+            :disabled="searchDisabled"
+            @click="getMemberList"
+          ></el-button>
+        </el-form-item>
+      </el-form>
     </div>
 
     <el-table :data="memberList" border highlight-current-row style="width: 100%">
       <el-table-column type="index" :index="getIndex" />
-      <el-table-column label="Username" prop="username" width="180" />
-      <el-table-column label="Avatar" prop="avatar" width="180" />
-      <el-table-column label="Nickname" prop="nickname" width="180" />
-      <el-table-column label="Gender" prop="gender" width="180" />
-      <el-table-column label="Status" prop="status" width="180" />
-      <el-table-column label="Register at" prop="created_at" width="160" />
-      <el-table-column label="Login at" prop="logined_at" width="160" />
-      <el-table-column label="Role name" prop="role.name" width="120" />
+      <el-table-column label="Avatar" prop="memberData.avatar" width="85">
+        <template #default="scope">
+          <el-avatar :size="50" :src="scope.row.memberData.avatar"></el-avatar>
+        </template>
+      </el-table-column>
+      <el-table-column label="Username" prop="member.username" width="150" />
+      <el-table-column label="Nickname" prop="memberData.nickname" width="150" />
+      <el-table-column label="Gender" prop="memberData.gender" width="100">
+        <template #default="scope">
+          <el-tag size="small">{{ memberGenderMap[scope.row.memberData.gender] }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="Status" prop="member.status" width="100">
+        <template #default="scope">
+          <el-tag
+            size="small"
+            :type="scope.row.member.status === 1 ? 'success' : 'danger'"
+          >{{ memberStatusMap[scope.row.member.status] }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="Register at" prop="member.created_at" width="180" />
+      <el-table-column label="Login at" prop="member.logined_at" width="180" />
+      <el-table-column label="Role name" prop="role.name" width="100" />
       <el-table-column
         fixed="right"
         label="Operations"
@@ -62,23 +75,25 @@
         <template #default="scope">
           <template v-if="scope.row.id !== member.id">
             <el-button
-              type="warning"
-              size="small"
               v-permission="['member:update']"
               @click="showUpdateRoleDialog(scope.row.id)"
-            >Update</el-button>
+            >Update Role</el-button>
             <el-button
-              type="warning"
-              size="small"
               v-permission="['member:update']"
               @click="showUpdateMemberDialog(scope.row.id)"
-            >Update</el-button>
-            <el-button
-              type="danger"
-              size="small"
+            >Update Member</el-button>
+            <el-popconfirm
               v-permission="['member:delete']"
+              confirm-button-text="Yes"
+              cancel-button-text="No"
+              icon-color="red"
+              title="Are you sure to delete this member?"
               @click="onDelete(scope.row.id)"
-            >Delete</el-button>
+            >
+              <template #reference>
+                <el-button>Delete</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </template>
       </el-table-column>
@@ -142,6 +157,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from '@/utils/form'
+import { memberGenderMap, memberStatusMap } from '@/utils'
 import { list as listMember, updateDetail, remove } from '@/api/member'
 import { listRole, updateMemberRole } from '@/api/role'
 
@@ -162,15 +178,15 @@ const searchDisabled = ref(false)
 
 const searchForm = reactive({
   member: {
-    username: '',
-    status: false,
+    username: null,
+    status: null,
   },
   memberData: {
-    nickname: '',
-    gender: '',
+    nickname: null,
+    gender: null,
   },
   role: {
-    name: ''
+    name: null
   }
 })
 
@@ -266,19 +282,18 @@ const showUpdateRoleDialog = () => {
 }
 
 // ------- delete member -------
-const onDelete = (index) => {
-  this.$confirm('删除该账户？', '警告', {
-    confirmButtonText: '是',
-    cancelButtonText: '否',
-    type: 'warning'
-  }).then(() => {
-    const id = memberList[index].id
-    remove(id).then(() => {
-      ElMessage.success('delete success')
-      getMemberList()
-    })
-  }).catch(() => {
-    ElMessage.info('cancel delete')
+const onDelete = (id) => {
+  remove(id).then(() => {
+    ElMessage.success('delete success')
+    getMemberList()
+  }).catch((error) => {
+    ElMessage.error(`delete error: ${error.msg}`)
   })
 }
 </script>
+
+<style lang="scss" scoped>
+.filter-container {
+  margin-bottom: 20px;
+}
+</style>

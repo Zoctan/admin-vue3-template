@@ -48,7 +48,10 @@
             </el-icon>Status
           </div>
         </template>
-        <el-tag size="small">{{ memberStatusMap[member.status] }}</el-tag>
+        <el-tag
+          size="small"
+          :type="member.status === 1 ? 'success' : 'danger'"
+        >{{ memberStatusMap[member.status] }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>

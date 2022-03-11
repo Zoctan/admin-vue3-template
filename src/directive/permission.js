@@ -14,20 +14,20 @@ export default {
     }
     if (value && value instanceof Array && value.length > 0) {
       if (!hasPermission(value)) {
-        successCallback()
+        return successCallback()
       }
     } else {
       if (value && value instanceof Object) {
         const { joint, list } = value
         if (list.length > 0) {
           if (!hasPermission(list, joint)) {
-            successCallback()
+            return successCallback()
           }
         } else {
-          errorCallback()
+          return errorCallback()
         }
       } else {
-        errorCallback()
+        return errorCallback()
       }
     }
   }
