@@ -2,7 +2,7 @@
   <el-card class="box-card">
     <template #header>
       <div class="card-header">
-        <el-avatar :size="60" :src="memberData.avatar"></el-avatar>
+        <el-avatar :size="60" :src="member.memberData.avatar"></el-avatar>
       </div>
     </template>
     <el-descriptions :column="3" size="large" border>
@@ -18,7 +18,7 @@
             </el-icon>Username
           </div>
         </template>
-        {{ member.username }}
+        {{ member.member.username }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
@@ -28,17 +28,17 @@
             </el-icon>Nickname
           </div>
         </template>
-        {{ memberData.nickname }}
+        {{ member.memberData.nickname }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <div class="cell-item">
             <el-icon>
-              <component :is="memberGenderMap[memberData.gender]"></component>
+              <component :is="memberGenderMap[member.memberData.gender]"></component>
             </el-icon>Gender
           </div>
         </template>
-        {{ memberGenderMap[memberData.gender] }}
+        {{ memberGenderMap[member.memberData.gender] }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
@@ -50,28 +50,51 @@
         </template>
         <el-tag
           size="small"
-          :type="member.status === 1 ? 'success' : 'danger'"
-        >{{ memberStatusMap[member.status] }}</el-tag>
+          :type="member.member.status === 1 ? 'success' : 'danger'"
+        >{{ memberStatusMap[member.member.status] }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <div class="cell-item">
             <el-icon>
               <clock />
-            </el-icon>Register At
+            </el-icon>RegisterAt
           </div>
         </template>
-        {{ member.created_at }}
+        {{ member.member.created_at }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <div class="cell-item">
             <el-icon>
               <clock />
-            </el-icon>Logined At
+            </el-icon>LoginedAt
           </div>
         </template>
-        {{ member.logined_at }}
+        {{ member.member.logined_at }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <key />
+            </el-icon>RoleName
+          </div>
+        </template>
+        {{ member.role.name }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <lock />
+            </el-icon>Lock
+          </div>
+        </template>
+        <el-tag
+          size="small"
+          :type="member.member.lock === 1 ? 'danger' : 'success'"
+        >{{ memberLockMap[member.member.lock] }}</el-tag>
       </el-descriptions-item>
     </el-descriptions>
   </el-card>
@@ -96,11 +119,11 @@
         />
       </el-form-item>
       <el-form-item label="Gender" prop="gender" required>
-        <el-radio-group v-model="profileForm.gender">
-          <el-radio-button label="0">None</el-radio-button>
-          <el-radio-button label="1">Man</el-radio-button>
-          <el-radio-button label="2">Female</el-radio-button>
-        </el-radio-group>
+        <el-select v-model="profileForm.gender">
+          <template v-for="(item, key, index) in memberGenderMap" :key="key">
+            <el-option :label="item" :value="key" />
+          </template>
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -176,14 +199,13 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
-import { memberGenderMap, memberStatusMap } from '@/utils'
+import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
 import { resetForm } from '@/utils/form'
 import { updateProfile, checkOldPassword, updatePassword } from '@/api/member'
 
 const store = useStore()
 
-const member = computed(() => store.getters.member.member)
-const memberData = computed(() => store.getters.member.memberData)
+const member = computed(() => store.getters.member)
 
 // ------- profile -------
 const submitProfileLoading = ref(false)
@@ -193,8 +215,8 @@ const dialogProfileFormVisible = ref(false)
 const profileFormRef = ref(null)
 
 const profileForm = reactive({
-  nickname: memberData.value.nickname,
-  gender: memberData.value.gender,
+  nickname: member.value.memberData.nickname,
+  gender: member.value.memberData.gender,
 })
 
 const validateNickname = (rule, value, callback) => {

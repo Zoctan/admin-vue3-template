@@ -77,23 +77,27 @@
       >
         <template #default="scope">
           <template v-if="scope.row.member.member_id !== member.id">
-            <span v-permission="['member:update']">
-              <el-button @click="showUpdateRoleDialog(scope.row.member.member_id)">Update Role</el-button>
-              <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
-            </span>
-            <span v-permission="['member:delete']">
-              <el-popconfirm
-                confirm-button-text="Yes"
-                cancel-button-text="No"
-                icon-color="red"
-                :title="`Are you sure to delete this member: ${scope.row.member.username}?`"
-                @confirm="onDelete(scope.row.member.member_id)"
-              >
-                <template #reference>
-                  <el-button>Delete</el-button>
-                </template>
-              </el-popconfirm>
-            </span>
+            <el-space wrap>
+              <span v-permission="['member:update']">
+                <el-button
+                  @click="showUpdateMemberRoleDialog(scope.row.member.member_id)"
+                >Update Role</el-button>
+                <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
+              </span>
+              <span v-permission="['member:delete']" v-if="scope.row.member.lock === 0">
+                <el-popconfirm
+                  confirm-button-text="Yes"
+                  cancel-button-text="No"
+                  icon-color="red"
+                  :title="`Are you sure to delete this member: ${scope.row.member.username}?`"
+                  @confirm="onDelete(scope.row.member.member_id)"
+                >
+                  <template #reference>
+                    <el-button>Delete</el-button>
+                  </template>
+                </el-popconfirm>
+              </span>
+            </el-space>
           </template>
         </template>
       </el-table-column>
@@ -110,7 +114,7 @@
       @current-change="handleCurrentChange"
     ></el-pagination>
 
-    <el-dialog v-model="dialogUpdateMemberFormVisible" title="Update Member">
+    <el-dialog v-model="dialogUpdateMemberVisible" title="Update Member">
       <el-form
         autocomplete="off"
         ref="memberFormRef"
@@ -120,32 +124,94 @@
         label-position="left"
         label-width="100px"
       >
-        <el-form-item label="Nickname" prop="nickname" required>
+        <el-form-item label="Username" prop="member.username">
           <el-input
             type="text"
             autocomplete="off"
             prefix-icon="user"
-            v-model="memberForm.nickname"
-            placeholder="please input nickname"
+            v-model="memberForm.member.username"
           />
         </el-form-item>
-        <el-form-item label="Gender" prop="gender" required>
-          <el-radio-group v-model="memberForm.gender">
-            <el-radio-button label="0">None</el-radio-button>
-            <el-radio-button label="1">Man</el-radio-button>
-            <el-radio-button label="2">Female</el-radio-button>
-          </el-radio-group>
+        <el-form-item label="Password" prop="member.password">
+          <el-input
+            type="text"
+            autocomplete="off"
+            prefix-icon="lock"
+            v-model="memberForm.member.password"
+          />
+        </el-form-item>
+        <el-form-item label="Status" prop="member.status">
+          <el-select v-model="memberForm.member.status">
+            <template v-for="(item, key, index) in memberStatusMap" :key="key">
+              <el-option :label="item" :value="key" />
+            </template>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Lock" prop="member.lock">
+          <el-select v-model="memberForm.member.lock">
+            <template v-for="(item, key, index) in memberLockMap" :key="key">
+              <el-option :label="item" :value="key" />
+            </template>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Nickname" prop="memberData.nickname">
+          <el-input
+            type="text"
+            autocomplete="off"
+            prefix-icon="user"
+            v-model="memberForm.memberData.nickname"
+          />
+        </el-form-item>
+        <el-form-item label="Gender" prop="memberData.gender">
+          <el-select v-model="memberForm.memberData.gender">
+            <template v-for="(item, key, index) in memberGenderMap" :key="key">
+              <el-option :label="item" :value="key" />
+            </template>
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogMemberFormVisible = false">Cancel</el-button>
+          <el-button @click="dialogUpdateMemberVisible = false">Cancel</el-button>
           <el-button type="danger" @click="resetForm(memberFormRef)">Reset</el-button>
           <el-button
             type="primary"
             :loading="submitMemberLoading"
             :disabled="submitMemberDisabled"
             @click="onUpdateMember(memberFormRef)"
+          >Confirm</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="dialogUpdateMemberRoleVisible" title="Update Member Role">
+      <el-form
+        autocomplete="off"
+        ref="memberRoleFormRef"
+        :model="memberRoleForm"
+        label-position="left"
+        label-width="100px"
+      >
+        <el-form-item label="Old Role" prop="role.name">
+          <el-input v-model="memberRoleForm.role.name" disabled />
+        </el-form-item>
+        <el-form-item label="New Role">
+          <el-select v-model="memberRoleForm.role.id">
+            <template v-for="role in roleList" :key="role.id">
+              <el-option :label="role.name" :value="role.id" />
+            </template>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogUpdateMemberRoleVisible = false">Cancel</el-button>
+          <el-button type="danger" @click="resetForm(memberRoleFormRef)">Reset</el-button>
+          <el-button
+            type="primary"
+            :loading="submitMemberRoleLoading"
+            :disabled="submitMemberRoleDisabled"
+            @click="onUpdateMemberRole(memberRoleFormRef)"
           >Confirm</el-button>
         </span>
       </template>
@@ -157,7 +223,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from '@/utils/form'
-import { memberGenderMap, memberStatusMap } from '@/utils'
+import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
 import { list as listMember, updateDetail, remove as removeMember } from '@/api/member'
 import { listRole, updateMemberRole } from '@/api/role'
 
@@ -246,34 +312,137 @@ onMounted(() => {
 // ------- update member -------
 const submitMemberLoading = ref(false)
 const submitMemberDisabled = ref(false)
-const dialogUpdateMemberFormVisible = ref(false)
+const dialogUpdateMemberVisible = ref(false)
 
 const memberFormRef = ref(null)
 
 const memberForm = reactive({
-  nickname: '',
-  gender: '',
+  member: {
+    id: null,
+    username: null,
+    password: null,
+    status: null,
+  },
+  memberData: {
+    avatar: null,
+    nickname: null,
+    gender: null,
+  }
+})
+
+const validateUsername = (rule, value, callback) => {
+  if (!value) {
+    submitMemberDisabled.value = true
+    callback(new Error('please input username'))
+  } else {
+    if (value.length < 3) {
+      submitMemberDisabled.value = true
+      callback(new Error('username length must be over 3'))
+    } else {
+      submitMemberDisabled.value = false
+      callback()
+    }
+  }
+}
+const validatePassword = (rule, value, callback) => {
+  if (value) {
+    if (value.length < 3) {
+      submitMemberDisabled.value = true
+      callback(new Error('password length must be over 3'))
+    } else {
+      submitMemberDisabled.value = false
+      callback()
+    }
+  }
+}
+const validateNickname = (rule, value, callback) => {
+  if (!value) {
+    submitMemberDisabled.value = true
+    callback(new Error('please input nickname'))
+  } else {
+    if (value.length < 3) {
+      submitMemberDisabled.value = true
+      callback(new Error('nickname length must be over 3'))
+    } else {
+      submitMemberDisabled.value = false
+      callback()
+    }
+  }
+}
+
+const memberFormRules = reactive({
+  member: {
+    username: [{ trigger: ['change', 'blur'], validator: validateUsername }],
+    password: [{ trigger: ['change', 'blur'], validator: validatePassword }],
+  },
+  memberData: {
+    nickname: [{ trigger: ['change', 'blur'], validator: validateNickname }],
+  }
 })
 
 const showUpdateMemberDialog = (memberId) => {
-  dialogUpdateMemberFormVisible.value = true
-
+  dialogUpdateMemberVisible.value = true
+  const member = memberList.value.filter(item => item.member.member_id === memberId)
+  memberForm.member.id = member[0].member.member_id
+  memberForm.member.username = member[0].member.username
+  memberForm.member.status = memberStatusMap[member[0].member.status]
+  memberForm.memberData.avatar = member[0].memberData.avatar
+  memberForm.memberData.nickname = member[0].memberData.nickname
+  memberForm.memberData.gender = memberGenderMap[member[0].memberData.gender]
 }
 
 const onUpdateMember = () => {
+  submitMemberLoading.value = true
+  submitMemberDisabled.value = true
   updateDetail(memberForm).then(() => {
-    ElMessage.success('update success')
+    ElMessage.success('update member detail success')
+    getMemberList()
+    submitMemberLoading.value = false
+    submitMemberDisabled.value = false
+    dialogUpdateMemberVisible.value = false
   }).catch((error) => {
-    ElMessage.error(`updateMemberDetail error: ${error.msg}`)
+    ElMessage.error(`update member detail error: ${error.msg}`)
+    submitMemberLoading.value = false
+    submitMemberDisabled.value = false
   })
 }
 
 // ------- update member role -------
-const dialogUpdateRoleFormVisible = ref(false)
+const submitMemberRoleLoading = ref(false)
+const submitMemberRoleDisabled = ref(false)
+const dialogUpdateMemberRoleVisible = ref(false)
 
-const showUpdateRoleDialog = () => {
-  dialogUpdateRoleFormVisible.value = true
+const memberRoleFormRef = ref(null)
 
+const memberRoleForm = reactive({
+  memberId: null,
+  role: {
+    id: null,
+    name: '',
+  },
+})
+
+const showUpdateMemberRoleDialog = (memberId) => {
+  dialogUpdateMemberRoleVisible.value = true
+  const member = memberList.value.filter(item => item.member.member_id === memberId)
+  memberRoleForm.memberId = member[0].member.member_id
+  memberRoleForm.role = member[0].role
+}
+
+const onUpdateMemberRole = () => {
+  submitMemberRoleLoading.value = true
+  submitMemberRoleDisabled.value = true
+  updateMemberRole(memberRoleForm).then(() => {
+    ElMessage.success('update member role success')
+    getMemberList()
+    submitMemberRoleLoading.value = false
+    submitMemberRoleDisabled.value = false
+    dialogUpdateMemberRoleVisible.value = false
+  }).catch((error) => {
+    ElMessage.error(`update member role error: ${error.msg}`)
+    submitMemberRoleLoading.value = false
+    submitMemberRoleDisabled.value = false
+  })
 }
 
 // ------- delete member -------
