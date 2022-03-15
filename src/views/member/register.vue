@@ -33,7 +33,7 @@
             show-password
           />
         </el-form-item>
-        <el-form-item label="Password Again" prop="checkPassword" required>
+        <el-form-item label="Password2" prop="checkPassword" required>
           <el-input
             type="password"
             autocomplete="off"

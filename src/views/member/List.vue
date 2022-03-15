@@ -1,30 +1,33 @@
 <template>
   <div class="app-container">
     <div class="filter-container" v-permission="['member:list']">
-      <el-button type="primary" icon="refresh" circle @click="getMemberList"></el-button>
       <el-form :inline="true">
+        <el-form-item>
+          <el-button type="primary" icon="refresh" circle @click="getMemberList"></el-button>
+        </el-form-item>
         <el-form-item label="Username">
-          <el-input v-model="searchForm.member.username" placeholder="username"></el-input>
+          <el-input v-model="searchForm.member.username"></el-input>
         </el-form-item>
         <el-form-item label="Status">
-          <el-radio-group v-model="searchForm.member.status">
-            <el-radio-button :label="0">Abnormal</el-radio-button>
-            <el-radio-button :label="1">Normal</el-radio-button>
-          </el-radio-group>
+          <el-select v-model="searchForm.member.status">
+            <template v-for="(item, key, index) in memberStatusMap" :key="key">
+              <el-option :label="item" :value="key" />
+            </template>
+          </el-select>
         </el-form-item>
         <el-form-item label="Nickname">
-          <el-input v-model="searchForm.memberData.nickname" placeholder="nickname"></el-input>
+          <el-input v-model="searchForm.memberData.nickname"></el-input>
         </el-form-item>
         <el-form-item label="Gender">
-          <el-select v-model="searchForm.memberData.gender" placeholder="gender">
-            <template v-for="gender in genderList" :key="gender.name">
-              <el-option :label="gender.name" :value="gender.value" />
+          <el-select v-model="searchForm.memberData.gender">
+            <template v-for="(item, key, index) in memberGenderMap" :key="key">
+              <el-option :label="item" :value="key" />
             </template>
           </el-select>
         </el-form-item>
         <el-form-item label="RoleName">
-          <el-select v-model="searchForm.role.name" placeholder="role name">
-            <template v-for="role in roleList" :key="role.name">
+          <el-select v-model="searchForm.role.id">
+            <template v-for="role in roleList" :key="role.id">
               <el-option :label="role.name" :value="role.id" />
             </template>
           </el-select>
@@ -64,36 +67,33 @@
           >{{ memberStatusMap[scope.row.member.status] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Register at" prop="member.created_at" width="180" />
-      <el-table-column label="Login at" prop="member.logined_at" width="180" />
-      <el-table-column label="Role name" prop="role.name" width="100" />
+      <el-table-column label="RegisterAt" prop="member.created_at" width="180" />
+      <el-table-column label="LoginAt" prop="member.logined_at" width="180" />
+      <el-table-column label="RoleName" prop="role.name" width="130" />
       <el-table-column
         fixed="right"
         label="Operations"
         v-permission="{ joint: 'or', list: ['member:update', 'member:delete'] }"
       >
         <template #default="scope">
-          <template v-if="scope.row.id !== member.id">
-            <el-button
-              v-permission="['member:update']"
-              @click="showUpdateRoleDialog(scope.row.id)"
-            >Update Role</el-button>
-            <el-button
-              v-permission="['member:update']"
-              @click="showUpdateMemberDialog(scope.row.id)"
-            >Update Member</el-button>
-            <el-popconfirm
-              v-permission="['member:delete']"
-              confirm-button-text="Yes"
-              cancel-button-text="No"
-              icon-color="red"
-              title="Are you sure to delete this member?"
-              @click="onDelete(scope.row.id)"
-            >
-              <template #reference>
-                <el-button>Delete</el-button>
-              </template>
-            </el-popconfirm>
+          <template v-if="scope.row.member.member_id !== member.id">
+            <span v-permission="['member:update']">
+              <el-button @click="showUpdateRoleDialog(scope.row.member.member_id)">Update Role</el-button>
+              <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
+            </span>
+            <span v-permission="['member:delete']">
+              <el-popconfirm
+                confirm-button-text="Yes"
+                cancel-button-text="No"
+                icon-color="red"
+                :title="`Are you sure to delete this member: ${scope.row.member.username}?`"
+                @confirm="onDelete(scope.row.member.member_id)"
+              >
+                <template #reference>
+                  <el-button>Delete</el-button>
+                </template>
+              </el-popconfirm>
+            </span>
           </template>
         </template>
       </el-table-column>
@@ -158,7 +158,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from '@/utils/form'
 import { memberGenderMap, memberStatusMap } from '@/utils'
-import { list as listMember, updateDetail, remove } from '@/api/member'
+import { list as listMember, updateDetail, remove as removeMember } from '@/api/member'
 import { listRole, updateMemberRole } from '@/api/role'
 
 const store = useStore()
@@ -167,11 +167,6 @@ const member = computed(() => store.getters.member.member)
 
 const memberList = ref([])
 const roleList = ref([])
-const genderList = reactive([
-  { name: 'None', value: 0 },
-  { name: 'Male', value: 1 },
-  { name: 'Female', value: 2 },
-])
 
 const searchLoading = ref(false)
 const searchDisabled = ref(false)
@@ -186,7 +181,7 @@ const searchForm = reactive({
     gender: null,
   },
   role: {
-    name: null
+    id: null
   }
 })
 
@@ -282,8 +277,8 @@ const showUpdateRoleDialog = () => {
 }
 
 // ------- delete member -------
-const onDelete = (id) => {
-  remove(id).then(() => {
+const onDelete = (memberId) => {
+  removeMember({ memberId: memberId }).then(() => {
     ElMessage.success('delete success')
     getMemberList()
   }).catch((error) => {
