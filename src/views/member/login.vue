@@ -122,14 +122,14 @@ const onLogin = (formEl) => {
     submitLoading.value = true
     store.dispatch('memberLogin', form).then(() => {
       submitLoading.value = false
-      // 获取账户信息
+      // get member profile
       store.dispatch('memberProfile').then(() => {
         router.replace({ path: props.redirect || '/' })
         ElMessage.success('login success')
       })
     }).catch(error => {
       submitLoading.value = false
-      ElMessage.error(`login error: ${error.msg}`)
+      ElMessage.error(`login error: ${error}`)
     })
   })
 }

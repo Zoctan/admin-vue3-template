@@ -1,51 +1,77 @@
 <template>
   <div class="app-container">
     <div class="filter-container" v-permission="['member:list']">
-      <el-form :inline="true">
+      <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
-          <el-button type="primary" icon="refresh" circle @click="getMemberList"></el-button>
+          <el-button type="success" icon="refresh" circle @click="getMemberList()"></el-button>
         </el-form-item>
-        <el-form-item label="Username">
+        <el-form-item label="Username" prop="member.username">
           <el-input v-model="searchForm.member.username"></el-input>
         </el-form-item>
-        <el-form-item label="Status">
+        <el-form-item label="Status" prop="member.status">
           <el-select v-model="searchForm.member.status">
-            <template v-for="(item, key, index) in memberStatusMap" :key="key">
-              <el-option :label="item" :value="key" />
-            </template>
+            <el-option
+              v-for="item in memberStatusMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === searchForm.member.status"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="Nickname">
+        <el-form-item label="Nickname" prop="memberData.nickname">
           <el-input v-model="searchForm.memberData.nickname"></el-input>
         </el-form-item>
-        <el-form-item label="Gender">
+        <el-form-item label="Gender" prop="memberData.gender">
           <el-select v-model="searchForm.memberData.gender">
-            <template v-for="(item, key, index) in memberGenderMap" :key="key">
-              <el-option :label="item" :value="key" />
-            </template>
+            <el-option
+              v-for="item in memberGenderMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === searchForm.memberData.gender"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="RoleName">
+        <el-form-item label="RoleName" prop="role.id">
           <el-select v-model="searchForm.role.id">
-            <template v-for="role in roleList" :key="role.id">
-              <el-option :label="role.name" :value="role.id" />
-            </template>
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+              :disabled="item.id === searchForm.role.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-button
-            type="info"
+            type="primary"
             icon="search"
             circle
-            :loading="searchLoading"
-            :disabled="searchDisabled"
-            @click="getMemberList"
+            :loading="onSearchLoading"
+            :disabled="onSearchDisabled"
+            @click="onSearch"
+          ></el-button>
+          <el-button
+            type="danger"
+            icon="refresh-left"
+            circle
+            :loading="restSearchLoading"
+            :disabled="restSearchDisabled"
+            @click="restSearch(searchFormRef)"
           ></el-button>
         </el-form-item>
       </el-form>
     </div>
 
-    <el-table :data="memberList" border highlight-current-row style="width: 100%">
+    <el-table
+      v-loading="memberListLoading"
+      :data="memberList"
+      border
+      highlight-current-row
+      style="width: 100%"
+    >
       <el-table-column type="index" :index="getIndex" />
       <el-table-column label="Avatar" prop="memberData.avatar" width="85">
         <template #default="scope">
@@ -56,20 +82,35 @@
       <el-table-column label="Nickname" prop="memberData.nickname" width="150" />
       <el-table-column label="Gender" prop="memberData.gender" width="100">
         <template #default="scope">
-          <el-tag size="small">{{ memberGenderMap[scope.row.memberData.gender] }}</el-tag>
+          <el-tag
+            size="small"
+            :type="memberGenderMap[scope.row.memberData.gender].color"
+          >{{ memberGenderMap[scope.row.memberData.gender].label }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="Status" prop="member.status" width="100">
         <template #default="scope">
           <el-tag
             size="small"
-            :type="scope.row.member.status === 1 ? 'success' : 'danger'"
-          >{{ memberStatusMap[scope.row.member.status] }}</el-tag>
+            :type="memberStatusMap[scope.row.member.status].color"
+          >{{ memberStatusMap[scope.row.member.status].label }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="RegisterAt" prop="member.created_at" width="180" />
-      <el-table-column label="LoginAt" prop="member.logined_at" width="180" />
+      <el-table-column label="Lock" prop="member.lock" width="100">
+        <template #default="scope">
+          <el-tag
+            size="small"
+            :type="memberLockMap[scope.row.member.lock].color"
+          >{{ memberLockMap[scope.row.member.lock].label }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="RoleName" prop="role.name" width="130" />
+      <el-table-column label="LoginAt / RegisterAt" width="180">
+        <template #default="scope">
+          <div>{{ scope.row.member.logined_at }}</div>
+          <div>{{ scope.row.member.created_at }}</div>
+        </template>
+      </el-table-column>
       <el-table-column
         fixed="right"
         label="Operations"
@@ -114,7 +155,7 @@
       @current-change="handleCurrentChange"
     ></el-pagination>
 
-    <el-dialog v-model="dialogUpdateMemberVisible" title="Update Member">
+    <el-dialog v-model="dialogUpdateMemberVisible" title="Update Member" destroy-on-close>
       <el-form
         autocomplete="off"
         ref="memberFormRef"
@@ -142,16 +183,24 @@
         </el-form-item>
         <el-form-item label="Status" prop="member.status">
           <el-select v-model="memberForm.member.status">
-            <template v-for="(item, key, index) in memberStatusMap" :key="key">
-              <el-option :label="item" :value="key" />
-            </template>
+            <el-option
+              v-for="item in memberStatusMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === memberForm.member.status"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="member.lock">
           <el-select v-model="memberForm.member.lock">
-            <template v-for="(item, key, index) in memberLockMap" :key="key">
-              <el-option :label="item" :value="key" />
-            </template>
+            <el-option
+              v-for="item in memberLockMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === memberForm.member.lock"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="Nickname" prop="memberData.nickname">
@@ -164,9 +213,13 @@
         </el-form-item>
         <el-form-item label="Gender" prop="memberData.gender">
           <el-select v-model="memberForm.memberData.gender">
-            <template v-for="(item, key, index) in memberGenderMap" :key="key">
-              <el-option :label="item" :value="key" />
-            </template>
+            <el-option
+              v-for="item in memberGenderMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === memberForm.memberData.gender"
+            />
           </el-select>
         </el-form-item>
       </el-form>
@@ -184,7 +237,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="dialogUpdateMemberRoleVisible" title="Update Member Role">
+    <el-dialog v-model="dialogUpdateMemberRoleVisible" title="Update Member Role" destroy-on-close>
       <el-form
         autocomplete="off"
         ref="memberRoleFormRef"
@@ -197,9 +250,13 @@
         </el-form-item>
         <el-form-item label="New Role">
           <el-select v-model="memberRoleForm.role.id">
-            <template v-for="role in roleList" :key="role.id">
-              <el-option :label="role.name" :value="role.id" />
-            </template>
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+              :disabled="item.id === memberRoleForm.role.id"
+            />
           </el-select>
         </el-form-item>
       </el-form>
@@ -231,11 +288,15 @@ const store = useStore()
 
 const member = computed(() => store.getters.member.member)
 
+const memberListLoading = ref(false)
+
 const memberList = ref([])
 const roleList = ref([])
 
 const searchLoading = ref(false)
 const searchDisabled = ref(false)
+
+const searchFormRef = ref(null)
 
 const searchForm = reactive({
   member: {
@@ -251,6 +312,33 @@ const searchForm = reactive({
   }
 })
 
+const onSearchLoading = ref(false)
+const onSearchDisabled = ref(false)
+
+const onSearch = () => {
+  onSearchLoading.value = true
+  onSearchDisabled.value = true
+  const callback = () => {
+    onSearchLoading.value = false
+    onSearchDisabled.value = false
+  }
+  getMemberList(callback, callback)
+}
+
+const restSearchLoading = ref(false)
+const restSearchDisabled = ref(false)
+
+const restSearch = (formEl) => {
+  restSearchLoading.value = true
+  restSearchDisabled.value = true
+  const callback = () => {
+    restSearchLoading.value = false
+    restSearchDisabled.value = false
+  }
+  resetForm(formEl)
+  getMemberList(callback, callback)
+}
+
 const page = reactive({
   currentPage: 1,
   pageSize: 10,
@@ -264,12 +352,12 @@ const page = reactive({
 const handleSizeChange = (pageSize) => {
   page.pageSize = pageSize
   page.currentPage = 1
-  getMemberList(true)
+  getMemberList()
 }
 
 const handleCurrentChange = (currentPage) => {
   page.currentPage = currentPage
-  getMemberList(true)
+  getMemberList()
 }
 
 const getIndex = (index) => {
@@ -277,14 +365,18 @@ const getIndex = (index) => {
 }
 
 const getRoleList = () => {
-  listRole().then(response => {
+  listRole({
+    currentPage: 0,
+    pageSize: 500,
+  }).then(response => {
     roleList.value = response.data.list
   }).catch((error) => {
-    ElMessage.error(`getRoleList error: ${error.msg}`)
+    ElMessage.error(`getRoleList error: ${error}`)
   })
 }
 
-const getMemberList = () => {
+const getMemberList = (successCallback = null, errorCallback = null) => {
+  memberListLoading.value = true
   searchLoading.value = true
   searchDisabled.value = true
   searchForm.currentPage = page.currentPage
@@ -295,18 +387,22 @@ const getMemberList = () => {
     page.currentPage = response.data.currentPage
     page.pageSize = response.data.pageSize
     page.totalPage = response.data.totalPage
+    memberListLoading.value = false
     searchLoading.value = false
     searchDisabled.value = false
+    successCallback && successCallback()
   }).catch((error) => {
+    memberListLoading.value = false
     searchLoading.value = false
     searchDisabled.value = false
-    ElMessage.error(`getMemberList error: ${error.msg}`)
+    errorCallback && errorCallback()
+    ElMessage.error(`getMemberList error: ${error}`)
   })
 }
 
 onMounted(() => {
-  getMemberList()
   getRoleList()
+  getMemberList()
 })
 
 // ------- update member -------
@@ -322,6 +418,7 @@ const memberForm = reactive({
     username: null,
     password: null,
     status: null,
+    lock: null,
   },
   memberData: {
     avatar: null,
@@ -385,10 +482,11 @@ const showUpdateMemberDialog = (memberId) => {
   const member = memberList.value.filter(item => item.member.member_id === memberId)
   memberForm.member.id = member[0].member.member_id
   memberForm.member.username = member[0].member.username
-  memberForm.member.status = memberStatusMap[member[0].member.status]
+  memberForm.member.status = member[0].member.status
+  memberForm.member.lock = member[0].member.lock
   memberForm.memberData.avatar = member[0].memberData.avatar
   memberForm.memberData.nickname = member[0].memberData.nickname
-  memberForm.memberData.gender = memberGenderMap[member[0].memberData.gender]
+  memberForm.memberData.gender = member[0].memberData.gender
 }
 
 const onUpdateMember = () => {
@@ -401,7 +499,7 @@ const onUpdateMember = () => {
     submitMemberDisabled.value = false
     dialogUpdateMemberVisible.value = false
   }).catch((error) => {
-    ElMessage.error(`update member detail error: ${error.msg}`)
+    ElMessage.error(`update member detail error: ${error}`)
     submitMemberLoading.value = false
     submitMemberDisabled.value = false
   })
@@ -439,7 +537,7 @@ const onUpdateMemberRole = () => {
     submitMemberRoleDisabled.value = false
     dialogUpdateMemberRoleVisible.value = false
   }).catch((error) => {
-    ElMessage.error(`update member role error: ${error.msg}`)
+    ElMessage.error(`update member role error: ${error}`)
     submitMemberRoleLoading.value = false
     submitMemberRoleDisabled.value = false
   })
@@ -451,7 +549,7 @@ const onDelete = (memberId) => {
     ElMessage.success('delete success')
     getMemberList()
   }).catch((error) => {
-    ElMessage.error(`delete error: ${error.msg}`)
+    ElMessage.error(`delete error: ${error}`)
   })
 }
 </script>

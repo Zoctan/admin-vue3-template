@@ -1,141 +1,422 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-button
-        type="primary"
-        icon="refresh"
-        circle
-        v-permission="['role:list']"
-        @click="getMemberList"
-      ></el-button>
-      <el-button
-        type="primary"
-        icon="plus"
-        circle
-        v-permission="['role:add']"
-        @click="showAddRoleDialog"
-      ></el-button>
+    <div class="filter-container" v-permission="['role:list']">
+      <el-form :inline="true" ref="searchFormRef" :model="searchForm">
+        <el-form-item>
+          <el-button type="success" icon="refresh" circle @click="getRoleList()"></el-button>
+        </el-form-item>
+        <el-form-item label="RoleName" prop="role.name">
+          <el-input v-model="searchForm.role.name"></el-input>
+        </el-form-item>
+        <el-form-item label="Has All Rule" prop="role.has_all_rule">
+          <el-select v-model="searchForm.role.has_all_rule">
+            <el-option
+              v-for="item in roleHasAllRuleMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === searchForm.role.has_all_rule"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Lock" prop="role.lock">
+          <el-select v-model="searchForm.role.lock">
+            <el-option
+              v-for="item in roleLockMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === searchForm.role.lock"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="search"
+            circle
+            :loading="onSearchLoading"
+            :disabled="onSearchDisabled"
+            @click="onSearch"
+          ></el-button>
+          <el-button
+            type="danger"
+            icon="refresh-left"
+            circle
+            :loading="restSearchLoading"
+            :disabled="restSearchDisabled"
+            @click="restSearch(searchFormRef)"
+          ></el-button>
+        </el-form-item>
+      </el-form>
     </div>
 
     <el-table
+      v-loading="roleListLoading"
       :data="roleList"
-      v-loading.body="listLoading"
-      element-loading-text="loading"
       border
-      fit
       highlight-current-row
+      style="width: 100%"
     >
-      <el-table-column label="#" align="center" width="80">
-        <template slot-scope="scope">
-          <span v-text="getTableIndex(scope.$index)"></span>
+      <el-table-column type="index" :index="getIndex" />
+      <el-table-column label="Name" prop="name" width="150" />
+      <el-table-column label="HasAllRule" prop="has_all_rule" width="110">
+        <template #default="scope">
+          <el-tag
+            size="small"
+            :type="roleHasAllRuleMap[scope.row.has_all_rule].color"
+          >{{ roleHasAllRuleMap[scope.row.has_all_rule].label }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="角色名" align="center" prop="name" />
-      <el-table-column label="创建时间" align="center" prop="createTime">
-        <template slot-scope="scope">{{ unix2CurrentTime(scope.row.createTime) }}</template>
+      <el-table-column label="Lock" prop="lock" width="100">
+        <template #default="scope">
+          <el-tag
+            size="small"
+            :type="roleLockMap[scope.row.lock].color"
+          >{{ roleLockMap[scope.row.lock].label }}</el-tag>
+        </template>
       </el-table-column>
-      <el-table-column label="修改时间" align="center" prop="updateTime">
-        <template slot-scope="scope">{{ unix2CurrentTime(scope.row.updateTime) }}</template>
-      </el-table-column>
+      <el-table-column label="CreatedAt" prop="created_at" width="180" />
       <el-table-column
-        label="管理"
-        align="center"
-        v-if="hasPermission('role:detail') || hasPermission('role:update') || hasPermission('role:delete')"
+        fixed="right"
+        label="Operations"
+        v-permission="{ joint: 'or', list: ['role:detail', 'role:update', 'role:delete'] }"
       >
-        <template slot-scope="scope">
-          <el-button
-            type="info"
-            size="mini"
-            v-if="hasPermission('role:detail')"
-            @click.native.prevent="showRoleDialog(scope.$index)"
-          >查看</el-button>
-          <el-button
-            type="warning"
-            size="mini"
-            v-if="hasPermission('role:update') && scope.row.name !== '超级管理员'"
-            @click="showUpdateRoleDialog(scope.$index)"
-          >修改</el-button>
-          <el-button
-            type="danger"
-            size="mini"
-            v-if="hasPermission('role:delete') && scope.row.name !== '超级管理员'"
-            @click="removeRole(scope.$index)"
-          >删除</el-button>
+        <template #default="scope">
+          <el-space wrap>
+            <span v-loading.fullscreen.lock="fullscreenLoading" v-permission="['role:update']">
+              <el-button @click="showUpdateRoleDialog(scope.row.id)">Update</el-button>
+            </span>
+            <span v-permission="['role:delete']">
+              <el-popconfirm
+                confirm-button-text="Yes"
+                cancel-button-text="No"
+                icon-color="red"
+                :title="`Are you sure to delete this role: ${scope.row.name}?`"
+                @confirm="onDelete(scope.row.id)"
+                :diabled="scope.row.lock === 0"
+              >
+                <template #reference>
+                  <el-button>Delete</el-button>
+                </template>
+              </el-popconfirm>
+            </span>
+          </el-space>
         </template>
       </el-table-column>
     </el-table>
+
     <el-pagination
+      background
+      layout="total, sizes, prev, pager, next, jumper"
+      v-model:currentPage="page.currentPage"
+      v-model:page-size="page.pageSize"
+      :page-sizes="page.pageSizes"
+      :total="page.totalData"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="listQuery.page"
-      :page-size="listQuery.size"
-      :total="total"
-      :page-sizes="[9, 18, 36, 72]"
-      layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog v-model="dialogUpdateRoleVisible" title="Update Role" destroy-on-close>
       <el-form
+        autocomplete="off"
+        ref="roleFormRef"
+        :model="roleForm"
         status-icon
-        class="small-space"
         label-position="left"
         label-width="100px"
-        style="width: 500px; margin-left:50px;"
-        :model="tempRole"
-        :rules="createRules"
-        ref="tempRole"
       >
-        <el-form-item label="角色名" prop="name" required>
-          <el-input
-            :disabled="dialogStatus === 'show'"
-            type="text"
-            prefix-icon="el-icon-edit"
-            auto-complete="off"
-            v-model="tempRole.name"
-          ></el-input>
+        <el-form-item label="RoleName" prop="role.name">
+          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="roleForm.role.name" />
         </el-form-item>
-        <el-form-item label="权限" required>
-          <div v-for="(permission, index) in permissionList" :key="index">
-            <el-button
-              :disabled="dialogStatus === 'show'"
-              size="mini"
-              :type="isMenuNone(index) ? '' : (isMenuAll(index) ? 'success' : 'primary')"
-              @click="checkAll(index)"
-            >{{ permission.resource }}</el-button>
-            <!-- https://element.eleme.cn/#/zh-CN/component/checkbox#indeterminate-zhuang-tai -->
-            <el-checkbox-group v-model="tempRole.permissionIdList">
-              <el-checkbox
-                :disabled="dialogStatus === 'show'"
-                v-for="item in permission.handleList"
-                :key="item.id"
-                :label="item.id"
-                @change="handleChecked(item, _index)"
-              >
-                <span>{{ item.handle }}</span>
-              </el-checkbox>
-            </el-checkbox-group>
-          </div>
+        <el-form-item label="Has All Rule" prop="role.has_all_rule">
+          <el-select v-model="roleForm.role.has_all_rule">
+            <el-option
+              v-for="item in roleHasAllRuleMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === roleForm.role.has_all_rule"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Lock" prop="role.lock">
+          <el-select v-model="roleForm.role.lock">
+            <el-option
+              v-for="item in roleLockMap"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+              :disabled="item.id === roleForm.role.lock"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Rule">
+          <el-tree
+            ref="ruleTreeRef"
+            :data="ruleTree"
+            show-checkbox
+            node-key="id"
+            :default-checked-keys="roleForm.ruleList"
+            :props="defaultRuleProps"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button
-          v-if="dialogStatus === 'add'"
-          type="success"
-          :loading="btnLoading"
-          @click="addRole"
-        >添加</el-button>
-        <el-button
-          v-if="dialogStatus === 'update'"
-          type="primary"
-          :loading="btnLoading"
-          @click="updateRole"
-        >更新</el-button>
-      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogUpdateRoleVisible = false">Cancel</el-button>
+          <el-button type="danger" @click="resetForm(roleFormRef)">Reset</el-button>
+          <el-button
+            type="primary"
+            :loading="submitRoleLoading"
+            :disabled="submitRoleDisabled"
+            @click="onUpdateRole(roleFormRef)"
+          >Confirm</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { resetForm } from '@/utils/form'
+import { roleHasAllRuleMap, roleLockMap } from '@/utils'
+import { addRole, addRule, listRole, listRule, detail as getRoleDetail, updateRole, updateRule, remove as removeRole } from '@/api/role'
 
+const fullscreenLoading = ref(false)
+const roleListLoading = ref(false)
+
+const roleList = ref([])
+const ruleList = ref([])
+
+const searchLoading = ref(false)
+const searchDisabled = ref(false)
+
+const searchFormRef = ref(null)
+
+const searchForm = reactive({
+  role: {
+    id: null,
+    name: null,
+    has_all_rule: null,
+    lock: null,
+  }
+})
+
+const onSearchLoading = ref(false)
+const onSearchDisabled = ref(false)
+
+const onSearch = () => {
+  onSearchLoading.value = true
+  onSearchDisabled.value = true
+  const callback = () => {
+    onSearchLoading.value = false
+    onSearchDisabled.value = false
+  }
+  getRoleList(callback, callback)
+}
+
+const restSearchLoading = ref(false)
+const restSearchDisabled = ref(false)
+
+const restSearch = (formEl) => {
+  restSearchLoading.value = true
+  restSearchDisabled.value = true
+  const callback = () => {
+    restSearchLoading.value = false
+    restSearchDisabled.value = false
+  }
+  resetForm(formEl)
+  getRoleList(callback, callback)
+}
+
+const page = reactive({
+  currentPage: 1,
+  pageSize: 10,
+  pageSizes: [10, 20, 50, 100, 200],
+  totalPage: 1,
+  prePage: 1,
+  nextPage: 1,
+  totalData: 0,
+})
+
+const handleSizeChange = (pageSize) => {
+  page.pageSize = pageSize
+  page.currentPage = 1
+  getRoleList()
+}
+
+const handleCurrentChange = (currentPage) => {
+  page.currentPage = currentPage
+  getRoleList()
+}
+
+const getIndex = (index) => {
+  return (page.currentPage - 1) * page.pageSize + index + 1
+}
+
+const ruleTreeRef = ref(null)
+const ruleTree = ref([])
+const defaultRuleProps = {
+  children: 'children',
+  label: 'label',
+}
+
+// [
+//   { id: 1, description: '成员：添加', permission: 'member:add' },
+//   { id: 2, description: '成员：删除', permission: 'member:delete' },
+// ]
+// =>
+// [
+//   {
+//     id: 0,
+//     label: 'member',
+//     children: [
+//       { id: 1, label: 'add' },
+//       { id: 2, label: 'delete' },
+//     ],
+//   }
+// ]
+const ruleList2Tree = (_ruleList) => {
+  let ruleList = []
+  Object.assign(ruleList, _ruleList)
+  let ruleTree = []
+  let ruleLength = ruleList.length
+  while (0 < ruleLength) {
+    ruleLength--
+    let firstRule = ruleList.shift()
+    let ruleNode = {
+      id: 0,
+      label: firstRule.description.split(':')[0],
+      children: [{
+        id: firstRule.id,
+        label: firstRule.description.split(':')[1],
+      }],
+    }
+    // add children
+    let i = 0
+    while (i < ruleLength) {
+      // add to ruleTree while delete from ruleList
+      if (ruleList[i].description.split(':')[0] === ruleNode.label) {
+        ruleLength--
+        i = -1
+        const rule = ruleList.shift()
+        ruleNode.children.push({
+          id: rule.id,
+          label: rule.description.split(':')[1],
+        })
+      }
+      i++
+    }
+    ruleTree.push(ruleNode)
+  }
+  return ruleTree
+}
+
+const getRuleList = () => {
+  listRule().then(response => {
+    ruleList.value = response.data
+    ruleTree.value = ruleList2Tree(response.data)
+  }).catch((error) => {
+    ElMessage.error(`get ruleList error: ${error}`)
+  })
+}
+
+const getRoleList = (successCallback = null, errorCallback = null) => {
+  roleListLoading.value = true
+  searchLoading.value = true
+  searchDisabled.value = true
+  searchForm.currentPage = page.currentPage
+  searchForm.pageSize = page.pageSize
+  listRole(searchForm).then(response => {
+    roleList.value = response.data.list
+    page.totalData = response.data.total
+    page.currentPage = response.data.currentPage
+    page.pageSize = response.data.pageSize
+    page.totalPage = response.data.totalPage
+    roleListLoading.value = false
+    searchLoading.value = false
+    searchDisabled.value = false
+    successCallback && successCallback()
+  }).catch((error) => {
+    roleListLoading.value = false
+    searchLoading.value = false
+    searchDisabled.value = false
+    errorCallback && errorCallback()
+    ElMessage.error(`get roleList error: ${error}`)
+  })
+}
+
+onMounted(() => {
+  getRuleList()
+  getRoleList()
+})
+
+// ------- update role -------
+const submitRoleLoading = ref(false)
+const submitRoleDisabled = ref(false)
+const dialogUpdateRoleVisible = ref(false)
+
+const roleFormRef = ref(null)
+
+const roleForm = reactive({
+  role: {
+    id: null,
+    name: null,
+    has_all_rule: null,
+    lock: null,
+  },
+  ruleList: []
+})
+
+const showUpdateRoleDialog = (roleId) => {
+  fullscreenLoading.value = true
+  getRoleDetail({ roleId: roleId }).then(response => {
+    roleForm.role.id = response.data.role.id
+    roleForm.role.name = response.data.role.name
+    roleForm.role.has_all_rule = response.data.role.has_all_rule
+    roleForm.role.lock = response.data.role.lock
+    roleForm.ruleList = roleForm.role.has_all_rule === 0 ? response.data.ruleList.map(rule => rule.id) : ruleList.value.map(rule => rule.id)
+    fullscreenLoading.value = false
+    dialogUpdateRoleVisible.value = true
+  }).catch((error) => {
+    fullscreenLoading.value = false
+    ElMessage.error(`get role detail error: ${error}`)
+  })
+}
+
+const onUpdateRole = () => {
+  submitRoleLoading.value = true
+  submitRoleDisabled.value = true
+  // no parent id
+  roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(key => key !== 0)
+  updateRole(roleForm).then(() => {
+    ElMessage.success('update role success')
+    getRoleList()
+    submitRoleLoading.value = false
+    submitRoleDisabled.value = false
+    dialogUpdateRoleVisible.value = false
+  }).catch((error) => {
+    ElMessage.error(`update role error: ${error}`)
+    submitRoleLoading.value = false
+    submitRoleDisabled.value = false
+  })
+}
+
+// ------- delete role -------
+const onDelete = (roleId) => {
+  removeRole({ roleId: roleId }).then(() => {
+    ElMessage.success('delete success')
+    getRoleList()
+  }).catch((error) => {
+    ElMessage.error(`delete error: ${error}`)
+  })
+}
 </script>
+
+<style lang="scss" scoped>
+.filter-container {
+  margin-bottom: 20px;
+}
+</style>

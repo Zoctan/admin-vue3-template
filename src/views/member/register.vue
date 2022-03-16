@@ -102,7 +102,7 @@ const validateUsername = (rule, value, callback) => {
         submitDisabled.value = false
         callback()
       }).catch(error => {
-        callback(new Error(error.msg))
+        callback(new Error(error))
       })
     }
   }
@@ -165,7 +165,7 @@ const onRegister = (formEl) => {
       })
     }).catch((error) => {
       submitLoading.value = false
-      ElMessage.error(`register error: ${error.msg}`)
+      ElMessage.error(`register error: ${error}`)
     })
   })
 }

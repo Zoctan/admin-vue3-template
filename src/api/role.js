@@ -34,7 +34,7 @@ export function listRule(data) {
 
 export function detail(data) {
   return request({
-    url: '/rule/detail',
+    url: '/role/detail',
     method: 'POST',
     data: data
   })

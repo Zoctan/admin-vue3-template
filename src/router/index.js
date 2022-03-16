@@ -101,12 +101,6 @@ export const asyncRouters = [
             name: 'Member Manage',
             component: _import('member/list'),
             meta: { icon: 'user', requiresAuth: true, auth: ['member:list'] }
-        }, {
-            path: 'detail/:id',
-            name: 'Member Detail',
-            component: _import('member/detail'),
-            props: true,
-            meta: { hidden: true, requiresAuth: true, auth: ['member:detail'] }
         },]
     },
     {

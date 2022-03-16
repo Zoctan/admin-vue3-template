@@ -34,11 +34,11 @@
         <template #label>
           <div class="cell-item">
             <el-icon>
-              <component :is="memberGenderMap[member.memberData.gender]"></component>
+              <component :is="memberGenderMap[member.memberData.gender].label"></component>
             </el-icon>Gender
           </div>
         </template>
-        {{ memberGenderMap[member.memberData.gender] }}
+        {{ memberGenderMap[member.memberData.gender].label }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
@@ -50,28 +50,8 @@
         </template>
         <el-tag
           size="small"
-          :type="member.member.status === 1 ? 'success' : 'danger'"
-        >{{ memberStatusMap[member.member.status] }}</el-tag>
-      </el-descriptions-item>
-      <el-descriptions-item>
-        <template #label>
-          <div class="cell-item">
-            <el-icon>
-              <clock />
-            </el-icon>RegisterAt
-          </div>
-        </template>
-        {{ member.member.created_at }}
-      </el-descriptions-item>
-      <el-descriptions-item>
-        <template #label>
-          <div class="cell-item">
-            <el-icon>
-              <clock />
-            </el-icon>LoginedAt
-          </div>
-        </template>
-        {{ member.member.logined_at }}
+          :type="memberStatusMap[member.member.status].color"
+        >{{ memberStatusMap[member.member.status].label }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
@@ -93,13 +73,33 @@
         </template>
         <el-tag
           size="small"
-          :type="member.member.lock === 1 ? 'danger' : 'success'"
-        >{{ memberLockMap[member.member.lock] }}</el-tag>
+          :type="memberLockMap[member.member.lock].color"
+        >{{ memberLockMap[member.member.lock].label }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <clock />
+            </el-icon>RegisterAt
+          </div>
+        </template>
+        {{ member.member.created_at }}
+      </el-descriptions-item>
+      <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            <el-icon>
+              <clock />
+            </el-icon>LoginedAt
+          </div>
+        </template>
+        {{ member.member.logined_at }}
       </el-descriptions-item>
     </el-descriptions>
   </el-card>
 
-  <el-dialog v-model="dialogProfileFormVisible" title="Update Profile">
+  <el-dialog v-model="dialogProfileFormVisible" title="Update Profile" destroy-on-close>
     <el-form
       autocomplete="off"
       ref="profileFormRef"
@@ -120,9 +120,13 @@
       </el-form-item>
       <el-form-item label="Gender" prop="gender" required>
         <el-select v-model="profileForm.gender">
-          <template v-for="(item, key, index) in memberGenderMap" :key="key">
-            <el-option :label="item" :value="key" />
-          </template>
+          <el-option
+            v-for="item in memberGenderMap"
+            :key="item.id"
+            :label="item.label"
+            :value="item.id"
+            :disabled="item.id === profileForm.gender"
+          />
         </el-select>
       </el-form-item>
     </el-form>
@@ -140,7 +144,7 @@
     </template>
   </el-dialog>
 
-  <el-dialog v-model="dialogPasswordFormVisible" title="Update Password">
+  <el-dialog v-model="dialogPasswordFormVisible" title="Update Password" destroy-on-close>
     <el-form
       autocomplete="off"
       ref="passwordFormRef"
@@ -148,7 +152,7 @@
       :rules="passwordFormRules"
       status-icon
       label-position="left"
-      label-width="100px"
+      label-width="130px"
     >
       <el-form-item label="Old Password" prop="oldPassword" required>
         <el-input
@@ -170,7 +174,7 @@
           show-password
         />
       </el-form-item>
-      <el-form-item label="New Password Again" prop="checkPassword" required>
+      <el-form-item label="New Password2" prop="checkPassword" required>
         <el-input
           type="password"
           autocomplete="off"
@@ -250,7 +254,7 @@ const onUpdateProfile = (formEl) => {
       ElMessage.success('update profile success')
     }).catch((error) => {
       submitProfileLoading.value = false
-      ElMessage.error(`update profile error: ${error.msg}`)
+      ElMessage.error(`update profile error: ${error}`)
     })
   })
 }
@@ -277,7 +281,7 @@ const validateOldPassword = (rule, value, callback) => {
       submitPasswordDisabled.value = false
       callback()
     }).catch(error => {
-      callback(new Error(error.msg))
+      callback(new Error(error))
     })
   }
 }
