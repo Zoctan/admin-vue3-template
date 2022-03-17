@@ -9,28 +9,6 @@
         <el-form-item label="RoleName" prop="role.name">
           <el-input v-model="searchForm.role.name"></el-input>
         </el-form-item>
-        <el-form-item label="Has All Rule" prop="role.has_all_rule">
-          <el-select v-model="searchForm.role.has_all_rule" clearable>
-            <el-option
-              v-for="item in roleHasAllRuleMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === searchForm.role.has_all_rule"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Lock" prop="role.lock">
-          <el-select v-model="searchForm.role.lock" clearable>
-            <el-option
-              v-for="item in roleLockMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === searchForm.role.lock"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item>
           <el-button
             type="primary"
@@ -101,7 +79,7 @@
                 :diabled="scope.row.lock === 0"
               >
                 <template #reference>
-                  <el-button v-loading.fullscreen.lock="fullscreenLoading">Delete</el-button>
+                  <el-button>Delete</el-button>
                 </template>
               </el-popconfirm>
             </span>
@@ -380,6 +358,7 @@ const submitRoleLoading = ref(false)
 const submitRoleDisabled = ref(false)
 
 const roleFormRef = ref(null)
+
 const defaultRoleForm = () => {
   return {
     role: {
@@ -457,13 +436,10 @@ const onUpdateRole = () => {
 
 // ------- delete role -------
 const onDelete = (roleId) => {
-  fullscreenLoading.value = true
   removeRole({ roleId: roleId }).then(() => {
     getRoleList()
-    fullscreenLoading.value = false
     ElMessage.success('delete success')
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`delete error: ${JSON.stringify(error)}`)
   })
 }

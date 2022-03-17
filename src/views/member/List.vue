@@ -4,12 +4,13 @@
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
           <el-button type="success" icon="refresh" circle @click="getMemberList()"></el-button>
+          <el-button type="primary" icon="plus" circle @click="showAddMemberDialog"></el-button>
         </el-form-item>
         <el-form-item label="Username" prop="member.username">
           <el-input v-model="searchForm.member.username"></el-input>
         </el-form-item>
         <el-form-item label="Status" prop="member.status">
-          <el-select v-model="searchForm.member.status">
+          <el-select v-model="searchForm.member.status" clearable>
             <el-option
               v-for="item in memberStatusMap"
               :key="item.id"
@@ -23,7 +24,7 @@
           <el-input v-model="searchForm.memberData.nickname"></el-input>
         </el-form-item>
         <el-form-item label="Gender" prop="memberData.gender">
-          <el-select v-model="searchForm.memberData.gender">
+          <el-select v-model="searchForm.memberData.gender" clearable>
             <el-option
               v-for="item in memberGenderMap"
               :key="item.id"
@@ -34,7 +35,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="RoleName" prop="role.id">
-          <el-select v-model="searchForm.role.id">
+          <el-select v-model="searchForm.role.id" clearable>
             <el-option
               v-for="item in roleList"
               :key="item.id"
@@ -58,7 +59,7 @@
             icon="refresh-left"
             circle
             :loading="restSearchLoading"
-            :disabled="restSearchDisabled"
+            :disabled="restSearchDisabled || !searched || allEmpty(searchForm, ['currentPage', 'pageSize'])"
             @click="restSearch(searchFormRef)"
           ></el-button>
         </el-form-item>
@@ -121,9 +122,13 @@
             <el-space wrap>
               <span v-permission="['member:update']">
                 <el-button
+                  v-loading.fullscreen.lock="fullscreenLoading"
                   @click="showUpdateMemberRoleDialog(scope.row.member.member_id)"
                 >Update Role</el-button>
-                <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
+                <el-button
+                  v-loading.fullscreen.lock="fullscreenLoading"
+                  @click="showUpdateMemberDialog(scope.row.member.member_id)"
+                >Update Member</el-button>
               </span>
               <span v-permission="['member:delete']" v-if="scope.row.member.lock === 0">
                 <el-popconfirm
@@ -134,7 +139,7 @@
                   @confirm="onDelete(scope.row.member.member_id)"
                 >
                   <template #reference>
-                    <el-button>Delete</el-button>
+                    <el-button v-loading.fullscreen.lock="fullscreenLoading">Delete</el-button>
                   </template>
                 </el-popconfirm>
               </span>
@@ -155,7 +160,11 @@
       @current-change="handleCurrentChange"
     ></el-pagination>
 
-    <el-dialog v-model="dialogUpdateMemberVisible" title="Update Member" destroy-on-close>
+    <el-dialog
+      v-model="dialogMemberVisible"
+      :title="dialogMemberStatusMap[dialogMemberStatus].title"
+      destroy-on-close
+    >
       <el-form
         autocomplete="off"
         ref="memberFormRef"
@@ -225,7 +234,7 @@
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogUpdateMemberVisible = false">Cancel</el-button>
+          <el-button @click="dialogMemberVisible = false">Cancel</el-button>
           <el-button type="danger" @click="resetForm(memberFormRef)">Reset</el-button>
           <el-button
             type="primary"
@@ -279,20 +288,22 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { resetForm } from '@/utils/form'
+import { resetForm, allEmpty } from '@/utils/form'
 import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
-import { list as listMember, updateDetail, remove as removeMember } from '@/api/member'
+import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from '@/api/member'
 import { listRole, updateMemberRole } from '@/api/role'
 
 const store = useStore()
 
 const member = computed(() => store.getters.member.member)
 
+const fullscreenLoading = ref(false)
 const memberListLoading = ref(false)
 
 const memberList = ref([])
 const roleList = ref([])
 
+const searched = ref(false)
 const searchLoading = ref(false)
 const searchDisabled = ref(false)
 
@@ -316,6 +327,7 @@ const onSearchLoading = ref(false)
 const onSearchDisabled = ref(false)
 
 const onSearch = () => {
+  searched.value = true
   onSearchLoading.value = true
   onSearchDisabled.value = true
   const callback = () => {
@@ -329,6 +341,7 @@ const restSearchLoading = ref(false)
 const restSearchDisabled = ref(false)
 
 const restSearch = (formEl) => {
+  searched.value = false
   restSearchLoading.value = true
   restSearchDisabled.value = true
   const callback = () => {
@@ -371,7 +384,7 @@ const getRoleList = () => {
   }).then(response => {
     roleList.value = response.data.list
   }).catch((error) => {
-    ElMessage.error(`getRoleList error: ${error}`)
+    ElMessage.error(`getRoleList error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -396,7 +409,7 @@ const getMemberList = (successCallback = null, errorCallback = null) => {
     searchLoading.value = false
     searchDisabled.value = false
     errorCallback && errorCallback()
-    ElMessage.error(`getMemberList error: ${error}`)
+    ElMessage.error(`getMemberList error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -405,28 +418,64 @@ onMounted(() => {
   getMemberList()
 })
 
-// ------- update member -------
+const dialogMemberStatusMap = {
+  add: {
+    title: 'Add Member',
+    submitAction: (formEl) => onAddMember(formEl),
+  },
+  update: {
+    title: 'Update Member',
+    submitAction: (formEl) => onUpdateMember(formEl),
+  }
+}
+const dialogMemberStatus = ref('add')
+const dialogMemberVisible = ref(false)
 const submitMemberLoading = ref(false)
 const submitMemberDisabled = ref(false)
-const dialogUpdateMemberVisible = ref(false)
 
 const memberFormRef = ref(null)
-
-const memberForm = reactive({
-  member: {
-    id: null,
-    username: null,
-    password: null,
-    status: null,
-    lock: null,
-  },
-  memberData: {
-    avatar: null,
-    nickname: null,
-    gender: null,
+const defaultMemberForm = () => {
+  return {
+    member: {
+      id: null,
+      username: null,
+      password: null,
+      status: null,
+      lock: null,
+    },
+    memberData: {
+      avatar: null,
+      nickname: null,
+      gender: null,
+    }
   }
-})
+}
+const memberForm = reactive(defaultMemberForm())
 
+// ------- add member -------
+const showAddMemberDialog = () => {
+  Object.assign(memberForm, defaultMemberForm())
+  dialogMemberStatus.value = 'add'
+  dialogMemberVisible.value = true
+}
+
+const onAddMember = () => {
+  submitMemberLoading.value = true
+  submitMemberDisabled.value = true
+  addMember(memberForm).then(() => {
+    getMemberList()
+    submitMemberLoading.value = false
+    submitMemberDisabled.value = false
+    dialogMemberVisible.value = false
+    ElMessage.success('add member success')
+  }).catch((error) => {
+    submitMemberLoading.value = false
+    submitMemberDisabled.value = false
+    ElMessage.error(`add member error: ${JSON.stringify(error)}`)
+  })
+}
+
+// ------- update member -------
 const validateUsername = (rule, value, callback) => {
   if (!value) {
     submitMemberDisabled.value = true
@@ -478,30 +527,38 @@ const memberFormRules = reactive({
 })
 
 const showUpdateMemberDialog = (memberId) => {
-  dialogUpdateMemberVisible.value = true
-  const member = memberList.value.filter(item => item.member.member_id === memberId)
-  memberForm.member.id = member[0].member.member_id
-  memberForm.member.username = member[0].member.username
-  memberForm.member.status = member[0].member.status
-  memberForm.member.lock = member[0].member.lock
-  memberForm.memberData.avatar = member[0].memberData.avatar
-  memberForm.memberData.nickname = member[0].memberData.nickname
-  memberForm.memberData.gender = member[0].memberData.gender
+  fullscreenLoading.value = true
+  Object.assign(memberForm, defaultMemberForm())
+  getMemberDetail({ memberId: memberId }).then(response => {
+    memberForm.member.id = response.data.member.member_id
+    memberForm.member.username = response.data.member.username
+    memberForm.member.status = response.data.member.status
+    memberForm.member.lock = response.data.member.lock
+    memberForm.memberData.avatar = response.data.memberData.avatar
+    memberForm.memberData.nickname = response.data.memberData.nickname
+    memberForm.memberData.gender = response.data.memberData.gender
+    fullscreenLoading.value = false
+    dialogMemberStatus.value = 'update'
+    dialogMemberVisible.value = true
+  }).catch((error) => {
+    fullscreenLoading.value = false
+    ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
+  })
 }
 
 const onUpdateMember = () => {
   submitMemberLoading.value = true
   submitMemberDisabled.value = true
-  updateDetail(memberForm).then(() => {
-    ElMessage.success('update member detail success')
+  updateMemberDetail(memberForm).then(() => {
     getMemberList()
     submitMemberLoading.value = false
     submitMemberDisabled.value = false
-    dialogUpdateMemberVisible.value = false
+    dialogMemberVisible.value = false
+    ElMessage.success('update member detail success')
   }).catch((error) => {
-    ElMessage.error(`update member detail error: ${error}`)
     submitMemberLoading.value = false
     submitMemberDisabled.value = false
+    ElMessage.error(`update member detail error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -512,44 +569,58 @@ const dialogUpdateMemberRoleVisible = ref(false)
 
 const memberRoleFormRef = ref(null)
 
-const memberRoleForm = reactive({
-  memberId: null,
-  role: {
-    id: null,
-    name: '',
-  },
-})
+const defaultMemberRoleForm = () => {
+  return {
+    memberId: null,
+    role: {
+      id: null,
+      name: '',
+    }
+  }
+}
+const memberRoleForm = reactive(defaultMemberRoleForm())
 
 const showUpdateMemberRoleDialog = (memberId) => {
-  dialogUpdateMemberRoleVisible.value = true
-  const member = memberList.value.filter(item => item.member.member_id === memberId)
-  memberRoleForm.memberId = member[0].member.member_id
-  memberRoleForm.role = member[0].role
+  fullscreenLoading.value = true
+  Object.assign(memberRoleForm, defaultMemberRoleForm())
+  getMemberDetail({ memberId: memberId }).then(response => {
+    memberRoleForm.memberId = response.data.member.member_id
+    memberRoleForm.role.id = response.data.role.id
+    memberRoleForm.role.name = response.data.role.name
+    fullscreenLoading.value = false
+    dialogUpdateMemberRoleVisible.value = true
+  }).catch((error) => {
+    fullscreenLoading.value = false
+    ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
+  })
 }
 
 const onUpdateMemberRole = () => {
   submitMemberRoleLoading.value = true
   submitMemberRoleDisabled.value = true
   updateMemberRole(memberRoleForm).then(() => {
-    ElMessage.success('update member role success')
     getMemberList()
     submitMemberRoleLoading.value = false
     submitMemberRoleDisabled.value = false
     dialogUpdateMemberRoleVisible.value = false
+    ElMessage.success('update member role success')
   }).catch((error) => {
-    ElMessage.error(`update member role error: ${error}`)
     submitMemberRoleLoading.value = false
     submitMemberRoleDisabled.value = false
+    ElMessage.error(`update member role error: ${JSON.stringify(error)}`)
   })
 }
 
 // ------- delete member -------
 const onDelete = (memberId) => {
+  fullscreenLoading.value = true
   removeMember({ memberId: memberId }).then(() => {
-    ElMessage.success('delete success')
     getMemberList()
+    fullscreenLoading.value = false
+    ElMessage.success('delete success')
   }).catch((error) => {
-    ElMessage.error(`delete error: ${error}`)
+    fullscreenLoading.value = false
+    ElMessage.error(`delete error: ${JSON.stringify(error)}`)
   })
 }
 </script>

@@ -46,6 +46,14 @@ export function refreshToken() {
   })
 }
 
+export function detail(data) {
+  return request({
+    url: '/member/detail',
+    method: 'POST',
+    data: data
+  })
+}
+
 export function profile() {
   return request({
     url: '/member/profile',
@@ -81,6 +89,14 @@ export function updateDetail(data) {
   return request({
     url: '/member/updateDetail',
     method: 'PUT',
+    data: data
+  })
+}
+
+export function add(data) {
+  return request({
+    url: '/member/add',
+    method: 'POST',
     data: data
   })
 }

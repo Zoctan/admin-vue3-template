@@ -6,6 +6,7 @@ import actions from './actions'
 import mutations from './mutations'
 import app from './modules/app'
 import member from './modules/member'
+import token from './modules/token'
 import router from './modules/router'
 
 export default createStore({
@@ -16,7 +17,8 @@ export default createStore({
     modules: {
         app,
         member,
-        router
+        token,
+        router,
     },
     // 持久化插件：https://github.com/robinvdvleuten/vuex-persistedstate/tree/3.x.x
     plugins: [createPersistedState({

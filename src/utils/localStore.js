@@ -1,4 +1,4 @@
-export default () => {
-  const storage = localStorage.getItem('vuex')
+export default (name = 'vuex') => {
+  const storage = localStorage.getItem(name)
   return storage ? JSON.parse(storage) : null
 }

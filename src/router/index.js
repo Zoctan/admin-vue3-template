@@ -113,6 +113,11 @@ export const asyncRouters = [
             name: 'Role Manage',
             component: _import('role/list'),
             meta: { icon: 'user-filled', requiresAuth: true, auth: ['role:list'] }
+        }, {
+            path: 'ruleList',
+            name: 'Rule Manage',
+            component: _import('role/ruleList'),
+            meta: { icon: 'stamp', requiresAuth: true, auth: ['role:list'] }
         }]
     },
 ]

@@ -25,7 +25,7 @@ router.beforeEach(async (to, from, next) => {
   console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)
   console.debug('to', to)
   console.debug('routers', router.getRoutes())
-  if (localStore() && localStore().member.token) {
+  if (localStore() && localStore().token.token) {
     // don't visit login again
     if (to.path === '/login') {
       next({ path: '/' })

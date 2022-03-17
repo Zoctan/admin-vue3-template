@@ -217,7 +217,6 @@ const submitProfileDisabled = ref(false)
 const dialogProfileFormVisible = ref(false)
 
 const profileFormRef = ref(null)
-
 const profileForm = reactive({
   nickname: member.value.memberData.nickname,
   gender: member.value.memberData.gender,
@@ -254,7 +253,7 @@ const onUpdateProfile = (formEl) => {
       ElMessage.success('update profile success')
     }).catch((error) => {
       submitProfileLoading.value = false
-      ElMessage.error(`update profile error: ${error}`)
+      ElMessage.error(`update profile error: ${JSON.stringify(error)}`)
     })
   })
 }
@@ -336,7 +335,7 @@ const onUpdatePassword = (formEl) => {
       ElMessage.success('update password success')
     }).catch((error) => {
       submitPasswordLoading.value = false
-      ElMessage.error(`update password error: ${error}`)
+      ElMessage.error(`update password error: ${JSON.stringify(error)}`)
     })
   })
 }

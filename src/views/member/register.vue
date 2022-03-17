@@ -82,7 +82,6 @@ const submitLoading = ref(false)
 const submitDisabled = ref(false)
 
 const formRef = ref()
-
 const form = reactive({
   username: '',
   password: '',
@@ -159,13 +158,14 @@ const onRegister = (formEl) => {
     submitLoading.value = true
     store.dispatch('memberRegister', form).then(() => {
       submitLoading.value = false
+      store.dispatch('startTokenClock')
       store.dispatch('memberProfile').then(() => {
         router.replace({ path: props.redirect || '/member/profile' })
         ElMessage.success('register success')
       })
     }).catch((error) => {
       submitLoading.value = false
-      ElMessage.error(`register error: ${error}`)
+      ElMessage.error(`register error: ${JSON.stringify(error)}`)
     })
   })
 }

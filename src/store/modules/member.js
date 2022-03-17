@@ -2,7 +2,6 @@ import { register, login, logout, profile } from '@/api/member'
 
 const defaultState = () => {
   return {
-    token: null,
     member: null,
     memberData: null,
     role: null,
@@ -14,9 +13,6 @@ export default {
   state: defaultState(),
 
   mutations: {
-    SET_TOKEN: (state, token) => {
-      state.token = token
-    },
     SET_MEMBER: (state, _member) => {
       const { member, memberData, role, permissionList } = _member
       state.member = member
@@ -63,6 +59,7 @@ export default {
     memberLogout({ commit }) {
       const resetInfo = () => {
         commit('RESET_MEMBER')
+        commit('RESET_TOKEN')        
         commit('RESET_ROUTERS')
       }
       return new Promise((resolve, reject) => {

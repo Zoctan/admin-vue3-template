@@ -20,7 +20,9 @@ instance.defaults.headers.post = {
 // request interceptor
 instance.interceptors.request.use(
     (config) => {
-        config.headers['Authorization'] = localStore() && localStore().member.token || ''
+        if (localStore() && localStore().token.token) {
+            config.headers['Authorization'] = localStore().token.token
+        }
         return config
     },
     (error) => {
@@ -35,8 +37,8 @@ instance.interceptors.response.use(
         if (response.data.errno === 0) {
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
-            ElMessage.error('auth error, please login')
             localStorage.clear()
+            ElMessage.error('auth error, please login')
             return router.push({ path: '/login' })
         } else {
             return Promise.reject(response.data)

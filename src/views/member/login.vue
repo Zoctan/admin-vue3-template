@@ -71,7 +71,6 @@ const submitLoading = ref(false)
 const submitDisabled = ref(false)
 
 const formRef = ref(null)
-
 const form = reactive({
   username: 'admin',
   password: 'admin',
@@ -122,6 +121,7 @@ const onLogin = (formEl) => {
     submitLoading.value = true
     store.dispatch('memberLogin', form).then(() => {
       submitLoading.value = false
+      store.dispatch('startTokenClock')
       // get member profile
       store.dispatch('memberProfile').then(() => {
         router.replace({ path: props.redirect || '/' })
@@ -129,7 +129,7 @@ const onLogin = (formEl) => {
       })
     }).catch(error => {
       submitLoading.value = false
-      ElMessage.error(`login error: ${error}`)
+      ElMessage.error(`login error: ${JSON.stringify(error)}`)
     })
   })
 }
