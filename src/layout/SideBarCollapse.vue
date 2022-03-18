@@ -2,7 +2,7 @@
   <el-button
     type="primary"
     @click="toggleSideBar"
-    :icon="sidebarOpened ? 'expand' : 'fold'"
+    :icon="!sidebarOpened ? 'expand' : 'fold'"
     circle
   ></el-button>
 </template>

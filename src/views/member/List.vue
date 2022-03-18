@@ -400,16 +400,14 @@ const getMemberList = (successCallback = null, errorCallback = null) => {
     page.currentPage = response.data.currentPage
     page.pageSize = response.data.pageSize
     page.totalPage = response.data.totalPage
-    memberListLoading.value = false
-    searchLoading.value = false
-    searchDisabled.value = false
     successCallback && successCallback()
   }).catch((error) => {
+    errorCallback && errorCallback()
+    ElMessage.error(`getMemberList error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     memberListLoading.value = false
     searchLoading.value = false
     searchDisabled.value = false
-    errorCallback && errorCallback()
-    ElMessage.error(`getMemberList error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -464,14 +462,13 @@ const onAddMember = () => {
   submitMemberDisabled.value = true
   addMember(memberForm).then(() => {
     getMemberList()
-    submitMemberLoading.value = false
-    submitMemberDisabled.value = false
     dialogMemberVisible.value = false
     ElMessage.success('add member success')
   }).catch((error) => {
+    ElMessage.error(`add member error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     submitMemberLoading.value = false
     submitMemberDisabled.value = false
-    ElMessage.error(`add member error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -537,12 +534,12 @@ const showUpdateMemberDialog = (memberId) => {
     memberForm.memberData.avatar = response.data.memberData.avatar
     memberForm.memberData.nickname = response.data.memberData.nickname
     memberForm.memberData.gender = response.data.memberData.gender
-    fullscreenLoading.value = false
     dialogMemberStatus.value = 'update'
     dialogMemberVisible.value = true
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    fullscreenLoading.value = false
   })
 }
 
@@ -551,14 +548,13 @@ const onUpdateMember = () => {
   submitMemberDisabled.value = true
   updateMemberDetail(memberForm).then(() => {
     getMemberList()
-    submitMemberLoading.value = false
-    submitMemberDisabled.value = false
     dialogMemberVisible.value = false
     ElMessage.success('update member detail success')
   }).catch((error) => {
+    ElMessage.error(`update member detail error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     submitMemberLoading.value = false
     submitMemberDisabled.value = false
-    ElMessage.error(`update member detail error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -587,11 +583,11 @@ const showUpdateMemberRoleDialog = (memberId) => {
     memberRoleForm.memberId = response.data.member.member_id
     memberRoleForm.role.id = response.data.role.id
     memberRoleForm.role.name = response.data.role.name
-    fullscreenLoading.value = false
     dialogUpdateMemberRoleVisible.value = true
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    fullscreenLoading.value = false
   })
 }
 
@@ -600,14 +596,13 @@ const onUpdateMemberRole = () => {
   submitMemberRoleDisabled.value = true
   updateMemberRole(memberRoleForm).then(() => {
     getMemberList()
-    submitMemberRoleLoading.value = false
-    submitMemberRoleDisabled.value = false
     dialogUpdateMemberRoleVisible.value = false
     ElMessage.success('update member role success')
   }).catch((error) => {
+    ElMessage.error(`update member role error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     submitMemberRoleLoading.value = false
     submitMemberRoleDisabled.value = false
-    ElMessage.error(`update member role error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -616,11 +611,11 @@ const onDelete = (memberId) => {
   fullscreenLoading.value = true
   removeMember({ memberId: memberId }).then(() => {
     getMemberList()
-    fullscreenLoading.value = false
     ElMessage.success('delete success')
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`delete error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    fullscreenLoading.value = false
   })
 }
 </script>

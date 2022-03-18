@@ -346,16 +346,14 @@ const getRoleList = (successCallback = null, errorCallback = null) => {
     page.currentPage = response.data.currentPage
     page.pageSize = response.data.pageSize
     page.totalPage = response.data.totalPage
-    roleListLoading.value = false
-    searchLoading.value = false
-    searchDisabled.value = false
     successCallback && successCallback()
   }).catch((error) => {
+    errorCallback && errorCallback()
+    ElMessage.error(`get roleList error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     roleListLoading.value = false
     searchLoading.value = false
     searchDisabled.value = false
-    errorCallback && errorCallback()
-    ElMessage.error(`get roleList error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -407,14 +405,13 @@ const onAddRole = () => {
   roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(key => key !== 0)
   addRole(roleForm).then(() => {
     getRoleList()
-    submitRoleLoading.value = false
-    submitRoleDisabled.value = false
     dialogRoleVisible.value = false
     ElMessage.success('add role success')
   }).catch((error) => {
+    ElMessage.error(`add role error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     submitRoleLoading.value = false
     submitRoleDisabled.value = false
-    ElMessage.error(`add role error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -428,12 +425,12 @@ const showUpdateRoleDialog = (roleId) => {
     roleForm.role.has_all_rule = response.data.role.has_all_rule
     roleForm.role.lock = response.data.role.lock
     roleForm.ruleList = roleForm.role.has_all_rule === 0 ? response.data.ruleList.map(rule => rule.id) : ruleList.value.map(rule => rule.id)
-    fullscreenLoading.value = false
     dialogRoleStatus.value = 'update'
     dialogRoleVisible.value = true
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`get role detail error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    fullscreenLoading.value = false
   })
 }
 
@@ -444,14 +441,13 @@ const onUpdateRole = () => {
   roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(key => key !== 0)
   updateRole(roleForm).then(() => {
     getRoleList()
-    submitRoleLoading.value = false
-    submitRoleDisabled.value = false
     dialogRoleVisible.value = false
     ElMessage.success('update role success')
   }).catch((error) => {
+    ElMessage.error(`update role error: ${JSON.stringify(error)}`)
+  }).finally(() => {
     submitRoleLoading.value = false
     submitRoleDisabled.value = false
-    ElMessage.error(`update role error: ${JSON.stringify(error)}`)
   })
 }
 
@@ -460,11 +456,11 @@ const onDelete = (roleId) => {
   fullscreenLoading.value = true
   removeRole({ roleId: roleId }).then(() => {
     getRoleList()
-    fullscreenLoading.value = false
     ElMessage.success('delete success')
   }).catch((error) => {
-    fullscreenLoading.value = false
     ElMessage.error(`delete error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    fullscreenLoading.value = false
   })
 }
 </script>

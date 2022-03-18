@@ -1,7 +1,6 @@
 import { isNavigationFailure } from 'vue-router'
 import store from '@/store'
 import router from '@/router'
-import localStore from '@/utils/localStore'
 import hasPermission from '@/utils/hasPermission'
 import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
@@ -20,21 +19,31 @@ import 'nprogress/nprogress.css'
 //     route has "requiresAuth" and "auth" meta tag: redirect to login page
 // flag: already added dynamic routers
 let addAsyncRoutersFlag = false
+const addAsyncRouters = async () => {
+  if (!addAsyncRoutersFlag) {
+    try {
+      const accessedAsyncRouters = await store.dispatch('generateRoutes', store.getters.member)
+      accessedAsyncRouters.forEach(item => router.addRoute(item))
+      addAsyncRoutersFlag = true
+    } catch (error) {
+      ElMessage.error(`generate routes error: ${error}`)
+    }
+  }
+}
+await addAsyncRouters()
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
   console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)
   console.debug('to', to)
   console.debug('routers', router.getRoutes())
-  if (localStore() && localStore().token.token) {
+  if (store.getters.token && store.getters.token.accessToken) {
     // don't visit login again
     if (to.path === '/login') {
       next({ path: '/' })
     } else {
       if (!addAsyncRoutersFlag) {
-        const accessedAsyncRouters = await store.dispatch('generateRoutes', localStore().member)
-        accessedAsyncRouters.forEach(item => router.addRoute(item))
-        addAsyncRoutersFlag = true
-        next({ ...to })
+        await addAsyncRouters()
+        next({ ...to, replace: true })
       } else {
         // router exists?
         // don't put {path:'/:pathMatch(.*)*', redirect:'/404'} into constRouters
@@ -61,6 +70,7 @@ router.beforeEach(async (to, from, next) => {
       }
     }
   } else {
+    addAsyncRoutersFlag = false
     // router exists?
     if (!router.hasRoute(to.name)) {
       next({ path: '/404' })

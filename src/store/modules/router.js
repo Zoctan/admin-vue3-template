@@ -12,9 +12,9 @@ export default {
 
   mutations: {
     SET_ROUTERS: (state, routers) => {
-      state.accessedAsyncRouters = routers
       // 路由合并，成为本成员最终可以访问的路由
       state.accessedRouters = constRouters.concat(routers)
+      state.accessedAsyncRouters = routers
     },
     RESET_ROUTERS: (state) => {
       Object.assign(state, defaultState())
@@ -26,6 +26,7 @@ export default {
       return new Promise(resolve => {
         const permissionList = member.permissionList
         const accessedAsyncRouters = filterAsyncRouter(asyncRouters, permissionList)
+        console.debug('generateRoutes accessedAsyncRouters => ', accessedAsyncRouters)
         commit('SET_ROUTERS', accessedAsyncRouters)
         resolve(accessedAsyncRouters)
       })

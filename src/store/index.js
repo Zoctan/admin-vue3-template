@@ -20,9 +20,8 @@ export default createStore({
         token,
         router,
     },
-    // 持久化插件：https://github.com/robinvdvleuten/vuex-persistedstate/tree/3.x.x
     plugins: [createPersistedState({
-        // 默认存储到 window.localStorage
-        storage: window.localStorage
-    })],
+        key: 'vuex',
+        storage: window.localStorage,
+    })]
 })

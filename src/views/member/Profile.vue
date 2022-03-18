@@ -249,11 +249,11 @@ const onUpdateProfile = (formEl) => {
     }
     submitProfileLoading.value = true
     updateProfile(profileForm).then(() => {
-      submitProfileLoading.value = false
       ElMessage.success('update profile success')
     }).catch((error) => {
-      submitProfileLoading.value = false
       ElMessage.error(`update profile error: ${JSON.stringify(error)}`)
+    }).finally(() => {
+      submitProfileLoading.value = false
     })
   })
 }
@@ -331,11 +331,11 @@ const onUpdatePassword = (formEl) => {
     }
     submitPasswordLoading.value = true
     updatePassword(passwordForm).then(() => {
-      submitPasswordLoading.value = false
       ElMessage.success('update password success')
     }).catch((error) => {
-      submitPasswordLoading.value = false
       ElMessage.error(`update password error: ${JSON.stringify(error)}`)
+    }).finally(() => {
+      submitPasswordLoading.value = false
     })
   })
 }
