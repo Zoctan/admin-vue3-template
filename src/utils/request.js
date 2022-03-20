@@ -38,23 +38,32 @@ instance.interceptors.response.use(
         if (response.data.errno === 0) {
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
+            const authErrorCallback = () => {
+                store.dispatch('memberLogout')
+                ElMessage.error('auth error, please login')
+                return router.push({ path: '/login' })
+            }
             const config = response.config
             if (!isRefreshing) {
                 isRefreshing = true
-                return store.dispatch('refreshToken').then((response) => {
-                    const { accessToken } = response.data
-                    config.baseURL = ''
-                    config.headers['Authorization'] = accessToken
-                    // 已经刷新了token，将所有队列中的请求进行重试
-                    requests.forEach(callback => callback(accessToken))
-                    requests = []
-                    return instance(config)
-                }).catch((error) => {
-                    ElMessage.error('auth error, please login')
-                    return router.push({ path: '/login' })
-                }).finally(() => {
-                    isRefreshing = false
-                })
+                const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
+                if (!refreshToken) {
+                    return authErrorCallback()
+                } else {
+                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((response) => {
+                        const { accessToken } = response.data
+                        config.baseURL = ''
+                        config.headers['Authorization'] = accessToken
+                        // 已经刷新了token，将所有队列中的请求进行重试
+                        requests.forEach(callback => callback(accessToken))
+                        requests = []
+                        return instance(config)
+                    }).catch((error) => {
+                        return authErrorCallback()
+                    }).finally(() => {
+                        isRefreshing = false
+                    })
+                }
             } else {
                 // 正在刷新token，将返回一个未执行resolve的promise
                 return new Promise((resolve) => {
@@ -71,7 +80,7 @@ instance.interceptors.response.use(
         }
     },
     (error) => {
-        ElMessage.error(error.response.data.msg)
+        // ElMessage.error(error.response.data.msg)
         return Promise.reject(error)
     }
 )

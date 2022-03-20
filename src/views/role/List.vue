@@ -5,6 +5,7 @@
         <el-form-item>
           <el-button type="success" icon="refresh" circle @click="getRoleList()"></el-button>
           <el-button type="primary" icon="plus" circle @click="showAddRoleDialog"></el-button>
+          <el-button type="info" icon="menu" @click="dialogRuleVisible = true">Rule Manage</el-button>
         </el-form-item>
         <el-form-item label="RoleName" prop="role.name">
           <el-input v-model="searchForm.role.name"></el-input>
@@ -183,14 +184,48 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="dialogRuleVisible" title="Rule Manage" destroy-on-close>
+      <el-input v-model="filterRuleText" placeholder="Filter keyword" />
+      <el-tree
+        ref="ruleTreeRef"
+        :data="ruleTree"
+        node-key="id"
+        :props="defaultRuleProps"
+        :filter-node-method="filterRuleNode"
+      >
+        <template #default="{ node, data }">
+          <span class="custom-tree-node">
+            <span>{{ node.label }}</span>
+            <span>
+              <a @click="onAppendRule(data)" v-if="node.id === 0">Append</a>
+              <a @click="onRemoveRule(node, data)">Delete</a>
+            </span>
+          </span>
+        </template>
+      </el-tree>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogRuleVisible = false">Cancel</el-button>
+          <el-button type="danger" @click="resetTree">Reset</el-button>
+          <el-button
+            type="primary"
+            :loading="submitRuleLoading"
+            :disabled="submitRuleDisabled"
+            @click="onUpdateRuleList()"
+          >Confirm</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, watch, reactive, onMounted } from 'vue'
 import { resetForm, allEmpty } from '@/utils/form'
 import { roleHasAllRuleMap, roleLockMap } from '@/utils'
-import { addRole, listRole, listRule, detail as getRoleDetail, updateRole, remove as removeRole } from '@/api/role'
+import { add as addRole, list as listRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from '@/api/role'
+import { add as addRule, list as listRule, updateList as updateRuleList, update as updateRule, remove as removeRule } from '@/api/rule'
 
 const fullscreenLoading = ref(false)
 const roleListLoading = ref(false)
@@ -267,6 +302,10 @@ const getIndex = (index) => {
   return (page.currentPage - 1) * page.pageSize + index + 1
 }
 
+const dialogRuleVisible = ref(false)
+const submitRuleLoading = ref(false)
+const submitRuleDisabled = ref(false)
+const filterRuleText = ref('')
 const ruleTreeRef = ref(null)
 const ruleTree = ref([])
 const defaultRuleProps = {
@@ -275,8 +314,8 @@ const defaultRuleProps = {
 }
 
 // [
-//   { id: 1, description: '成员：添加', permission: 'member:add' },
-//   { id: 2, description: '成员：删除', permission: 'member:delete' },
+//   { id: 1, description: 'Member:Add', permission: 'member:add' },
+//   { id: 2, description: 'Member:delete', permission: 'member:delete' },
 // ]
 // =>
 // [
@@ -303,6 +342,7 @@ const ruleList2Tree = (_ruleList) => {
       children: [{
         id: firstRule.id,
         label: firstRule.description.split(':')[1],
+        value: firstRule.permission,
       }],
     }
     // add children
@@ -316,6 +356,7 @@ const ruleList2Tree = (_ruleList) => {
         ruleNode.children.push({
           id: rule.id,
           label: rule.description.split(':')[1],
+          value: firstRule.permission,
         })
       }
       i++
@@ -331,6 +372,54 @@ const getRuleList = () => {
     ruleTree.value = ruleList2Tree(response.data)
   }).catch((error) => {
     ElMessage.error(`get ruleList error: ${JSON.stringify(error)}`)
+  })
+}
+
+watch(filterRuleText, (value) => {
+  console.debug('watch', value)
+  if (ruleTreeRef.value) {
+    ruleTreeRef.value.filter(value)
+  }
+})
+
+const filterRuleNode = (value, data) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
+
+const resetTree = () => {
+  getRuleList()
+}
+
+const onAppendRule = (data) => {
+  // const newChild = { id: id++, label: 'testtest', children: [] }
+  // if (!data.children) {
+  //   data.children = []
+  // }
+  // data.children.push(newChild)
+  // dataSource.value = [...dataSource.value]
+}
+
+const onRemoveRule = (node, data) => {
+  // const parent = node.parent
+  // const children = parent.data.children || parent.data
+  // const index = children.findIndex((d) => d.id === data.id)
+  // children.splice(index, 1)
+  // dataSource.value = [...dataSource.value]
+}
+
+const onUpdateRuleList = () => {
+  submitRuleLoading.value = true
+  submitRuleDisabled.value = true
+  updateRuleList(roleForm).then(() => {
+    getRuleList()
+    dialogRoleVisible.value = false
+    ElMessage.success('update rule success')
+  }).catch((error) => {
+    ElMessage.error(`update rule error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    submitRuleLoading.value = false
+    submitRuleDisabled.value = false
   })
 }
 
@@ -402,7 +491,7 @@ const onAddRole = () => {
   submitRoleLoading.value = true
   submitRoleDisabled.value = true
   // no parent id
-  roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(key => key !== 0)
+  roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(id => id !== 0)
   addRole(roleForm).then(() => {
     getRoleList()
     dialogRoleVisible.value = false
@@ -468,5 +557,13 @@ const onDelete = (roleId) => {
 <style lang="scss" scoped>
 .filter-container {
   margin-bottom: 20px;
+}
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
 }
 </style>

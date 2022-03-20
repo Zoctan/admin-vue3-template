@@ -1,4 +1,4 @@
-import { refreshToken as refresh } from '@/api/member'
+import { refreshToken as refreshTokenApi } from '@/api/member'
 
 const defaultState = () => {
   return {
@@ -22,9 +22,9 @@ export default {
   },
 
   actions: {
-    refreshToken({ commit }) {
+    refreshToken({ commit }, data) {
       return new Promise((resolve, reject) => {
-        refresh().then(response => {
+        refreshTokenApi(data).then(response => {
           commit('SET_TOKEN', response.data)
           resolve(response.data)
         }).catch(error => {

@@ -39,10 +39,11 @@ export function logout() {
   })
 }
 
-export function refreshToken() {
+export function refreshToken(data) {
   return request({
     url: '/member/refreshToken',
-    method: 'PUT'
+    method: 'PUT',
+    data: data
   })
 }
 

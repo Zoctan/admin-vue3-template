@@ -291,7 +291,7 @@ import { useStore } from 'vuex'
 import { resetForm, allEmpty } from '@/utils/form'
 import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
 import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from '@/api/member'
-import { listRole, updateMemberRole } from '@/api/role'
+import { list as listRole, updateMemberRole } from '@/api/role'
 
 const store = useStore()
 
