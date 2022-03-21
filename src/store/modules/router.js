@@ -1,5 +1,7 @@
 import { constRouters, asyncRouters } from '@/router'
 
+let permissionList = []
+
 const defaultState = () => {
   return {
     accessedRouters: constRouters,
@@ -24,9 +26,9 @@ export default {
   actions: {
     generateRoutes({ commit }, member) {
       return new Promise(resolve => {
-        const permissionList = member.permissionList
-        const accessedAsyncRouters = filterAsyncRouter(asyncRouters, permissionList)
-        console.debug('generateRoutes accessedAsyncRouters => ', accessedAsyncRouters)
+        permissionList = member.permissionList
+        // console.debug('permissionList', permissionList)
+        const accessedAsyncRouters = filterAsyncRouter(asyncRouters)
         commit('SET_ROUTERS', accessedAsyncRouters)
         resolve(accessedAsyncRouters)
       })
@@ -36,34 +38,62 @@ export default {
 
 /**
  * 通过路由上的 meta.auth 判断是否与当前成员权限匹配
- * @param permissionList
  * @param route
  */
-function hasPermission(permissionList, route) {
-  if (route.meta && route.meta.requiresAuth && route.meta.auth) {
-    return permissionList.some(permission => route.meta.auth.includes(permission))
+function hasPermission(route) {
+  // meta: { requiresAuth: true, auth: ['member:list'] }
+  // meta: { requiresAuth: true, auth: { joint: 'and', list: ['member:list'] } }
+  if (route.meta && route.meta.requiresAuth) {
+    if (route.meta.auth) {
+      if (permissionList.length === 0) {
+        return false
+      } else {
+        if (route.meta.auth instanceof Array && route.meta.auth.length > 0) {
+          return checkPermission(route.meta.auth)
+        } else if (route.meta.auth instanceof Object) {
+          const { joint, list } = route.meta.auth
+          if (list.length > 0) {
+            return checkPermission(list, joint)
+          }
+        } else {
+          return false
+        }
+      }
+    }
   }
   return true
 }
 
+function checkPermission(needList = [], joint = 'and') {
+  const needSet = new Set(needList)
+  const permissionSet = new Set(permissionList)
+  const intersect = new Set([...needSet].filter(x => permissionSet.has(x)))
+  if (joint === 'and') {
+    const setsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value))
+    return setsEqual(needSet, intersect)
+  } else if (joint === 'or') {
+    return intersect.size > 0
+  }
+  return false
+}
+
+
 /**
  * 递归路由表，返回符合成员角色权限的路由表
  * @param asyncRouters
- * @param permissionList
  */
-function filterAsyncRouter(asyncRouters, permissionList) {
+function filterAsyncRouter(asyncRouters) {
   return asyncRouters.filter(route => {
-    // console.debug('permissionList', permissionList)
+    // console.debug('hasPermission(route)', hasPermission(route))
     // console.debug('route', route)
-    if (hasPermission(permissionList, route)) {
-      if (route.children && route.children.length > 0) {
-        // 如果这个路由下面还有下一级的话，递归调用
-        route.children = filterAsyncRouter(route.children, permissionList)
-        // 如果过滤一圈后，没有子元素，这个父级菜单也不显示了
-        return (route.children && route.children.length)
-      }
-      return true
+    if (!hasPermission(route)) {
+      return false
     }
-    return false
+    if (route.children && route.children.length > 0) {
+      // 如果这个路由下面还有下一级的话，递归调用
+      route.children = filterAsyncRouter(route.children)
+      return route.children && route.children.length > 0
+    }
+    return true
   })
 }

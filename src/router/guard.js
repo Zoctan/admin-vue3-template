@@ -20,10 +20,11 @@ import 'nprogress/nprogress.css'
 // flag: already added dynamic routers
 let addAsyncRoutersFlag = false
 const addAsyncRouters = async () => {
-  if (!addAsyncRoutersFlag) {
+  if (!addAsyncRoutersFlag && store.getters.token && store.getters.token.accessToken) {
     try {
       const accessedAsyncRouters = await store.dispatch('generateRoutes', store.getters.member)
       accessedAsyncRouters.forEach(item => router.addRoute(item))
+      console.debug('accessedAsyncRouters', accessedAsyncRouters)
       addAsyncRoutersFlag = true
     } catch (error) {
       ElMessage.error(`generate routes error: ${error}`)

@@ -240,7 +240,7 @@
             type="primary"
             :loading="submitMemberLoading"
             :disabled="submitMemberDisabled"
-            @click="onUpdateMember(memberFormRef)"
+            @click="dialogMemberStatusMap[dialogMemberStatus].submitAction(memberFormRef)"
           >Confirm</el-button>
         </span>
       </template>
@@ -411,9 +411,9 @@ const getMemberList = (successCallback = null, errorCallback = null) => {
   })
 }
 
-onMounted(() => {
-  getRoleList()
-  getMemberList()
+onMounted(async () => {
+  await getRoleList()
+  await getMemberList()
 })
 
 const dialogMemberStatusMap = {

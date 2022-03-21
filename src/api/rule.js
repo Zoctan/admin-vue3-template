@@ -32,6 +32,14 @@ export function update(data) {
   })
 }
 
+export function removeList(data) {
+  return request({
+    url: '/rule/deleteList',
+    method: 'DELETE',
+    data: data
+  })
+}
+
 export function remove(data) {
   return request({
     url: '/rule/delete',
