@@ -3,12 +3,39 @@ import store from '@/store'
 import router from '@/router'
 import { ElMessage } from 'element-plus'
 
-// 创建 axios 实例
+function retryAdapterEnhancer(adapter, options) {
+    const { times = 1, delay = 3000 } = options
+    return async (config) => {
+        const { retryTimes = times, retryDelay = delay } = config
+        let retryCount = 0
+        const request = async () => {
+            try {
+                return await adapter(config)
+            } catch (error) {
+                // Only retry once
+                if (!retryTimes || retryCount >= retryTimes) {
+                    return Promise.reject(error)
+                }
+                retryCount += 1
+                // delay process
+                const delayFunc = new Promise((resolve) => {
+                    setTimeout(() => resolve(), retryDelay)
+                })
+                // send the request again
+                return delayFunc.then(() => request())
+            }
+        }
+        return request()
+    }
+}
+
 const instance = axios.create({
     baseURL: import.meta.env.VITE_API_DOMAIN,
     withCredentials: false,
-    // 请求超时时间
     timeout: 5000,
+    adapter: retryAdapterEnhancer(axios.defaults.adapter, {
+        retryDelay: 1000,
+    }),
 })
 
 instance.defaults.headers.post = {
@@ -17,7 +44,6 @@ instance.defaults.headers.post = {
     'Content-type': 'application/json;charset=UTF-8'
 }
 
-// request interceptor
 instance.interceptors.request.use(
     (config) => {
         config.headers['Authorization'] = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
@@ -32,7 +58,6 @@ instance.interceptors.request.use(
 let isRefreshing = false
 // 重试队列，每一项将是一个待执行的函数形式
 let requests = []
-// response interceptor
 instance.interceptors.response.use(
     (response) => {
         if (response.data.errno === 0) {
@@ -47,7 +72,7 @@ instance.interceptors.response.use(
             if (!isRefreshing) {
                 isRefreshing = true
                 const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
-                if (!refreshToken) {
+                if (refreshToken === null || refreshToken === '') {
                     return authErrorCallback()
                 } else {
                     return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((response) => {
@@ -65,9 +90,7 @@ instance.interceptors.response.use(
                     })
                 }
             } else {
-                // 正在刷新token，将返回一个未执行resolve的promise
                 return new Promise((resolve) => {
-                    // 将resolve放进队列，用一个函数形式来保存，等token刷新后直接执行
                     requests.push((accessToken) => {
                         config.baseURL = ''
                         config.headers['Authorization'] = accessToken

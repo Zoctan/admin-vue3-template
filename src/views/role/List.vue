@@ -425,8 +425,8 @@ const ruleList2Tree = (_ruleList) => {
   let ruleListLength = ruleList.length
   while (0 < ruleListLength) {
     ruleListLength--
-    let firstRule = ruleList.shift()
-    let ruleNode = {
+    const firstRule = ruleList.shift()
+    const ruleNode = {
       id: 0,
       description: firstRule.description.split(':')[0],
       resource: firstRule.permission.split(':')[0],
@@ -437,23 +437,22 @@ const ruleList2Tree = (_ruleList) => {
       }],
     }
     // add children
-    let i = 0
-    while (i < ruleListLength) {
-      // add to ruleTree while delete from ruleList
-      if (ruleList[i].description.split(':')[0] === ruleNode.description) {
-        ruleListLength--
-        i = -1
-        const rule = ruleList.shift()
-        ruleNode.children.push({
-          id: rule.id,
-          description: rule.description.split(':')[1],
-          action: rule.permission.split(':')[1],
-        })
-      }
-      i++
+    const childRuleList = ruleList.filter(rule => rule.description.split(':')[0] === firstRule.description.split(':')[0])
+    console.debug('childRuleList', childRuleList)
+    for (let i = 0; i < childRuleList.length; i++) {
+      const childRule = childRuleList[i]
+      ruleNode.children.push({
+        id: childRule.id,
+        description: childRule.description.split(':')[1],
+        action: childRule.permission.split(':')[1],
+      })
     }
     ruleTree.push(ruleNode)
+    // add to ruleTree while delete from ruleList
+    ruleList = ruleList.filter(rule => rule.description.split(':')[0] !== firstRule.description.split(':')[0])
+    ruleListLength -= childRuleList.length
   }
+  console.debug('ruleTree', ruleTree)
   return ruleTree
 }
 const ruleTree2List = (_ruleTree) => {
@@ -512,7 +511,7 @@ const onAddRule = () => {
   ruleForm.permission = `${ruleForm.resource}:${ruleForm.action}`
   addRule(ruleForm).then(() => {
     getRuleList()
-    dialogRoleVisible.value = false
+    innerDialogRuleVisible.value = false
     ElMessage.success('add rule success')
   }).catch((error) => {
     ElMessage.error(`add rule error: ${JSON.stringify(error)}`)
@@ -525,7 +524,6 @@ const onAddRule = () => {
 let currentRuleTree = []
 const showUpdateRuleDialog = (node) => {
   Object.assign(ruleForm, defaultRuleForm())
-  console.debug('showUpdateRuleDialog', node)
   ruleForm.id = node.data.id
   if (node.data.id === 0) {
     ruleForm.parentDescription = node.data.description
@@ -549,14 +547,13 @@ const onUpdateRule = () => {
   submitRuleDisabled.value = true
   if (ruleForm.action === null) {
     const _ruleList = ruleTree2List([currentRuleTree])
-    console.debug('_ruleList', _ruleList)
     for (let i = 0; i < _ruleList.length; i++) {
       _ruleList[i].description = `${ruleForm.parentDescription}:${_ruleList[i].description.split(':')[1]}`
       _ruleList[i].permission = `${ruleForm.resource}:${_ruleList[i].permission.split(':')[1]}`
     }
     updateRuleList({ ruleList: _ruleList }).then(() => {
       getRuleList()
-      dialogRoleVisible.value = false
+      innerDialogRuleVisible.value = false
       ElMessage.success('update rule success')
     }).catch((error) => {
       ElMessage.error(`update rule error: ${JSON.stringify(error)}`)
@@ -569,7 +566,7 @@ const onUpdateRule = () => {
     ruleForm.permission = `${ruleForm.resource}:${ruleForm.action}`
     updateRule(ruleForm).then(() => {
       getRuleList()
-      dialogRoleVisible.value = false
+      innerDialogRuleVisible.value = false
       ElMessage.success('update rule success')
     }).catch((error) => {
       ElMessage.error(`update rule error: ${JSON.stringify(error)}`)
