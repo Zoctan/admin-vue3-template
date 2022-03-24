@@ -1,8 +1,14 @@
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 
+// refreshing token flag
+let isRefreshing = false
+// retry requests queue
+let requests = []
+// fullscreen loading instance
+let loadingInstance = null
 function retryAdapterEnhancer(adapter, options) {
     const { times = 1, delay = 3000 } = options
     return async (config) => {
@@ -12,7 +18,6 @@ function retryAdapterEnhancer(adapter, options) {
             try {
                 return await adapter(config)
             } catch (error) {
-                // Only retry once
                 if (!retryTimes || retryCount >= retryTimes) {
                     return Promise.reject(error)
                 }
@@ -29,6 +34,12 @@ function retryAdapterEnhancer(adapter, options) {
     }
 }
 
+const getConfig = (config, accessToken) => {
+    config.baseURL = import.meta.env.VITE_API_DOMAIN
+    config.headers['Authorization'] = accessToken
+    return config
+}
+
 const instance = axios.create({
     baseURL: import.meta.env.VITE_API_DOMAIN,
     withCredentials: false,
@@ -39,14 +50,15 @@ const instance = axios.create({
 })
 
 instance.defaults.headers.post = {
-    // 请求以 JSON 形式传送
-    // 会有预检请求，服务端需要正常通过OPTIONS请求
+    // will send preflight request (OPTIONS), needs back-end response correctly
     'Content-type': 'application/json;charset=UTF-8'
 }
 
 instance.interceptors.request.use(
     (config) => {
-        config.headers['Authorization'] = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
+        loadingInstance = ElLoading.service({ fullscreen: true })
+        const accessToken = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
+        config = getConfig(config, accessToken)
         return config
     },
     (error) => {
@@ -54,56 +66,53 @@ instance.interceptors.request.use(
     }
 )
 
-// 是否正在刷新的标记
-let isRefreshing = false
-// 重试队列，每一项将是一个待执行的函数形式
-let requests = []
 instance.interceptors.response.use(
     (response) => {
         if (response.data.errno === 0) {
+            loadingInstance && loadingInstance.close()
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
-            const authErrorCallback = () => {
+            const config = response.config
+            const authErrorCallback = (error) => {
                 store.dispatch('memberLogout')
-                ElMessage.error('auth error, please login')
+                ElMessage.error(`auth error: ${error}, please login`)
                 return router.push({ path: '/login' })
             }
-            const config = response.config
             if (!isRefreshing) {
                 isRefreshing = true
                 const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
                 if (refreshToken === null || refreshToken === '') {
-                    return authErrorCallback()
+                    return authErrorCallback('empty refreshToken')
                 } else {
-                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((response) => {
-                        const { accessToken } = response.data
-                        config.baseURL = ''
-                        config.headers['Authorization'] = accessToken
-                        // 已经刷新了token，将所有队列中的请求进行重试
+                    ElMessage.info('refresh token, please wait...')
+                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
+                        // already refreshed token, retry pending requests
                         requests.forEach(callback => callback(accessToken))
                         requests = []
-                        return instance(config)
+                        return instance(getConfig(config, accessToken))
                     }).catch((error) => {
-                        return authErrorCallback()
+                        return authErrorCallback(error)
                     }).finally(() => {
                         isRefreshing = false
+                        loadingInstance && loadingInstance.close()
                     })
                 }
             } else {
+                // pending requests when refreshing token
                 return new Promise((resolve) => {
                     requests.push((accessToken) => {
-                        config.baseURL = ''
-                        config.headers['Authorization'] = accessToken
-                        resolve(instance(config))
+                        resolve(instance(getConfig(config, accessToken)))
                     })
                 })
             }
         } else {
+            loadingInstance && loadingInstance.close()
             return Promise.reject(response.data)
         }
     },
     (error) => {
-        // ElMessage.error(error.response.data.msg)
+        loadingInstance && loadingInstance.close()
+        // console.error('response error', error.response.data.msg)
         return Promise.reject(error)
     }
 )

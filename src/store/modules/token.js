@@ -11,6 +11,12 @@ export default {
   state: defaultState(),
 
   mutations: {
+    SET_ACCESS_TOKEN: (state, accessToken) => {
+      state.accessToken = accessToken
+    },
+    SET_REFRESH_TOKEN: (state, refreshToken) => {
+      state.refreshToken = refreshToken
+    },
     SET_TOKEN: (state, _token) => {
       const { accessToken, refreshToken } = _token
       state.accessToken = accessToken
@@ -25,7 +31,7 @@ export default {
     refreshToken({ commit }, data) {
       return new Promise((resolve, reject) => {
         refreshTokenApi(data).then(response => {
-          commit('SET_TOKEN', response.data)
+          commit('SET_ACCESS_TOKEN', response.data)
           resolve(response.data)
         }).catch(error => {
           reject(error)

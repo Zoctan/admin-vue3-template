@@ -11,42 +11,65 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 
 # Token 刷新策略
 
-SEED 项目选择在前端请求拦截响应后刷新。
+SEED 项目选择在后端签发：accessToken、refreshToken，在前端请求拦截响应后刷新 accessToken 的策略。
 
-## 前端
+## 分类讨论
 
-1.登录或注册后保存 accessToken、refreshToken、expired；
+1.后端签发：accessToken（可选：expired）；
+前端在 accessToken 过期前，申请刷新；过期后重新登录。
 
-2.刷新策略有两种：
-    1.全局维护刷新倒计时器（需要记录保存的时间 saveTokenDate）
-    2.在请求拦截中刷新（请求前或响应后）
+2.后端签发：accessToken、refreshToken（可选：expired）；
+前端在 accessToken 过期后，可以采取多种策略使用 refreshToken 不断刷新 accessToken，保证用户一直无感在线。
 
-3.全局维护刷新倒计时器：
-    登录或注册后开启倒计时（分钟级）（App.vue也要加入倒计时，防止页面刷新，倒计时被销毁），倒计时到达刷新时间，使用 refreshToken 请求续期 accessToken。
+什么时候需要 expired？
+前后端商量好过期时间就不用，只是后期可能增加商量的时间和修改前端的成本，expired 字段可以节省成本。
+
+为什么需要 refreshToken？
+accessToken 存在网络传输泄露风险，因为 accessToken 需要在请求中频繁用到，所以不能用作刷新。
+refreshToken 本身没多少次传输，只有登录时，刷新时，本身过期需要刷新时才会在网络中出现，其他时间都在本地储存，泄露风险相对较低。
+
+## 单纯前端实现
+
+### accessToken 刷新策略有三种
+
+1.全局维护刷新倒计时器：【后端：accessToken、refreshToken（可选：expired）；前端：保存 token 的时间 saveTokenDate】
+    登录或注册后开启倒计时【分钟级】（App.vue也要加入倒计时，防止页面刷新，倒计时被销毁），倒计时到达刷新时间，使用 refreshToken 请求续期 accessToken。
+    倒计时要结合 saveTokenDate，不然用户退出网页一段时间再回来会导致倒计时错误。
     优点：用户无感，即使无请求动作，只要开着网页即可续期。
-    缺点：后端额外提供 accessToken 的有效时间字段 expired；
-          本地时间在开启网页后中途更改，导致倒计时出错（可能性低）。
+    缺点：本地时间在开启网页后中途乱改，导致倒计时出错（可能性低）。
 
-4.在请求拦截中刷新（请求前或响应后）:
-    请求前：和全局维护倒计时器差不多，也需要记录保存的时间 saveTokenDate，每次请求前检查是否到达刷新时间。
-        优点：无需维护计时器，节省计算资源。
-        缺点：需要额外字段 expired，有本地时间乱改的问题；
-              需要 refreshToken 的有效时间长；
-              需要前端有实时保存动作，长时间没有请求动作时数据丢失，影响用户体验。
+2.在请求拦截中刷新【请求前或响应后】:
+    请求前：【后端：accessToken、refreshToken（可选：expired）；前端：保存 token 的时间 saveTokenDate】
+        和全局维护倒计时器差不多，每次请求前检查是否到达刷新时间。
+        优点：无需维护计时器。
+        缺点：有本地时间乱改的风险；
+              需要用户有请求动作；
+              需要前端有实时保存动作，避免长时间没有请求动作时表单之类的数据丢失，影响用户体验。
 
-    响应后：响应提示 accessToken 过期就使用 refreshToken 刷新，如果 refreshToken 也过期就跳转至登录页。
-        优点：无需额外字段 expired；
-              无需判断时间；
+    响应后：【后端：accessToken、refreshToken】
+        响应提示 accessToken 过期就使用 refreshToken 请求续期。
+        优点：无需判断时间；
               无需维护计时器。
         缺点：需要用户有请求动作；
-              需要 refreshToken 的有效时间长；
               需要前端有实时保存动作。
 
-## 后端
+以上策略在 refreshToken 也过期时都需要跳转至登录页。
 
-1.刷新策略有一种：
+### refreshToken 刷新策略有两种
 
-2.只签发 accessToken：
+1.采用全局维护刷新倒计时器：和上面的策略一致。
+
+2.每次请求都刷新 refreshToken，或者达到什么请求条件（比如超过50次请求，具体的几个时间段仍然在线）就请求刷新：
+    优点：无需额外字段 expired；
+          无需开倒计时器，维护简单。
+
+什么时候刷新 refreshToken？
+看项目需要，如果 refreshToken 有效时间长达半个月、一个月都无所谓，那不刷新也没事。
+refreshToken 本身泄露风险不高，除非 accessToken 时间极短，需要频繁刷新。
+
+## 后端 + 前端
+
+只签发 accessToken：
     每次拦截请求，成功响应后，都检查 accessToken，如果即将过期，在响应字段中签发新的 accessToken，前端拦截每次响应并检查 accessToken 是否有更新。
     优点：无需额外字段 refreshToken、expired；
     缺点：需要用户有请求动作；
