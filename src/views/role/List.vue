@@ -298,10 +298,6 @@ const roleListLoading = ref(false)
 const roleList = ref([])
 const ruleList = ref([])
 
-const searched = ref(false)
-const searchLoading = ref(false)
-const searchDisabled = ref(false)
-
 const searchFormRef = ref(null)
 const searchForm = reactive({
   role: {
@@ -312,6 +308,7 @@ const searchForm = reactive({
   }
 })
 
+const searched = ref(false)
 const onSearchLoading = ref(false)
 const onSearchDisabled = ref(false)
 
@@ -602,8 +599,8 @@ const onRemoveRule = (node) => {
 
 const getRoleList = (successCallback = null, errorCallback = null) => {
   roleListLoading.value = true
-  searchLoading.value = true
-  searchDisabled.value = true
+  onSearchLoading.value = true
+  onSearchDisabled.value = true
   searchForm.currentPage = page.currentPage
   searchForm.pageSize = page.pageSize
   listRole(searchForm).then(response => {
@@ -618,8 +615,8 @@ const getRoleList = (successCallback = null, errorCallback = null) => {
     ElMessage.error(`get roleList error: ${JSON.stringify(error)}`)
   }).finally(() => {
     roleListLoading.value = false
-    searchLoading.value = false
-    searchDisabled.value = false
+    onSearchLoading.value = false
+    onSearchDisabled.value = false
   })
 }
 

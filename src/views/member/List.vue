@@ -303,10 +303,6 @@ const memberListLoading = ref(false)
 const memberList = ref([])
 const roleList = ref([])
 
-const searched = ref(false)
-const searchLoading = ref(false)
-const searchDisabled = ref(false)
-
 const searchFormRef = ref(null)
 
 const searchForm = reactive({
@@ -323,6 +319,7 @@ const searchForm = reactive({
   }
 })
 
+const searched = ref(false)
 const onSearchLoading = ref(false)
 const onSearchDisabled = ref(false)
 
@@ -390,8 +387,8 @@ const getRoleList = () => {
 
 const getMemberList = (successCallback = null, errorCallback = null) => {
   memberListLoading.value = true
-  searchLoading.value = true
-  searchDisabled.value = true
+  onSearchLoading.value = true
+  onSearchDisabled.value = true
   searchForm.currentPage = page.currentPage
   searchForm.pageSize = page.pageSize
   listMember(searchForm).then(response => {
@@ -406,8 +403,8 @@ const getMemberList = (successCallback = null, errorCallback = null) => {
     ElMessage.error(`getMemberList error: ${JSON.stringify(error)}`)
   }).finally(() => {
     memberListLoading.value = false
-    searchLoading.value = false
-    searchDisabled.value = false
+    onSearchLoading.value = false
+    onSearchDisabled.value = false
   })
 }
 
