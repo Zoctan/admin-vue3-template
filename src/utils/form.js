@@ -14,7 +14,7 @@ export const allEmpty = (obj, excludeKey = []) => {
       flag = flag && allEmpty(obj[key], excludeKey)
     } else {
       if (obj[key] !== null && obj[key] !== '') {
-        console.debug(`flag => ${false}, key => ${key}, value => ${obj[key]}`)
+        console.debug('allEmpty', `flag => ${false}, key => ${key}, value => ${obj[key]}`)
         return false
       }
     }

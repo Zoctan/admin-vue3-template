@@ -16,7 +16,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
-import coffee from '@/assets/image/coffee.png'
+import coffee from 'assets/image/coffee.png'
 
 const router = useRouter()
 const route = useRoute()

@@ -87,10 +87,7 @@
         <template #default="scope">
           <el-space wrap>
             <span v-permission="['role:update']">
-              <el-button
-                v-loading.fullscreen.lock="fullscreenLoading"
-                @click="showUpdateRoleDialog(scope.row.id)"
-              >Update</el-button>
+              <el-button @click="showUpdateRoleDialog(scope.row.id)">Update</el-button>
             </span>
             <span v-permission="['role:delete']">
               <el-popconfirm
@@ -102,7 +99,7 @@
                 :diabled="scope.row.lock === 0"
               >
                 <template #reference>
-                  <el-button v-loading.fullscreen.lock="fullscreenLoading">Delete</el-button>
+                  <el-button>Delete</el-button>
                 </template>
               </el-popconfirm>
             </span>
@@ -128,7 +125,6 @@
       destroy-on-close
     >
       <el-form
-        autocomplete="off"
         ref="roleFormRef"
         :model="roleForm"
         status-icon
@@ -232,7 +228,6 @@
           append-to-body
         >
           <el-form
-            autocomplete="off"
             ref="ruleFormRef"
             :model="ruleForm"
             status-icon
@@ -287,12 +282,11 @@
 
 <script setup>
 import { ref, watch, reactive, onMounted } from 'vue'
-import { resetForm, allEmpty } from '@/utils/form'
-import { roleHasAllRuleMap, roleLockMap } from '@/utils'
-import { add as addRole, list as listRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from '@/api/role'
-import { add as addRule, list as listRule, updateList as updateRuleList, update as updateRule, removeList as removeRuleList } from '@/api/rule'
+import { resetForm, allEmpty } from 'utils/form'
+import { roleHasAllRuleMap, roleLockMap } from 'utils'
+import { add as addRole, list as listRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
+import { add as addRule, list as listRule, updateList as updateRuleList, update as updateRule, removeList as removeRuleList } from 'api/rule'
 
-const fullscreenLoading = ref(false)
 const roleListLoading = ref(false)
 
 const roleList = ref([])
@@ -680,7 +674,6 @@ const onAddRole = () => {
 
 // ------- update role -------
 const showUpdateRoleDialog = (roleId) => {
-  fullscreenLoading.value = true
   Object.assign(roleForm, defaultRoleForm())
   getRoleDetail({ roleId: roleId }).then(response => {
     roleForm.role.id = response.data.role.id
@@ -692,8 +685,6 @@ const showUpdateRoleDialog = (roleId) => {
     dialogRoleVisible.value = true
   }).catch((error) => {
     ElMessage.error(`get role detail error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    fullscreenLoading.value = false
   })
 }
 
@@ -716,14 +707,11 @@ const onUpdateRole = () => {
 
 // ------- delete role -------
 const onDelete = (roleId) => {
-  fullscreenLoading.value = true
   removeRole({ roleId: roleId }).then(() => {
     getRoleList()
     ElMessage.success('delete success')
   }).catch((error) => {
     ElMessage.error(`delete error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    fullscreenLoading.value = false
   })
 }
 </script>

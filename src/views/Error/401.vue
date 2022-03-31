@@ -11,7 +11,7 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import coffee from '@/assets/image/coffee.png'
+import coffee from 'assets/image/coffee.png'
 
 const router = useRouter()
 const route = useRoute()

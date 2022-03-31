@@ -44,7 +44,10 @@ export default ({ command, mode }) => {
     resolve: {
       alias: {
         '@': resolve('src'),
+        'api': resolve('src/api'),
+        'assets': resolve('src/assets'),
         'components': resolve('src/components'),
+        'utils': resolve('src/utils'),
       }
     },
     server: {
@@ -59,7 +62,9 @@ export default ({ command, mode }) => {
       https: false,
     },
     base: process.env.VITE_BASE_URL,
-    outDir: process.env.VITE_OUTPUT_DIR,
+    build: {
+      outDir: process.env.VITE_OUTPUT_DIR,
+    },
     define: {
       'process.env': {}
     }

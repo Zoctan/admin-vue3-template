@@ -122,13 +122,9 @@
             <el-space wrap>
               <span v-permission="['member:update']">
                 <el-button
-                  v-loading.fullscreen.lock="fullscreenLoading"
                   @click="showUpdateMemberRoleDialog(scope.row.member.member_id)"
                 >Update Role</el-button>
-                <el-button
-                  v-loading.fullscreen.lock="fullscreenLoading"
-                  @click="showUpdateMemberDialog(scope.row.member.member_id)"
-                >Update Member</el-button>
+                <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
               </span>
               <span v-permission="['member:delete']" v-if="scope.row.member.lock === 0">
                 <el-popconfirm
@@ -139,7 +135,7 @@
                   @confirm="onDelete(scope.row.member.member_id)"
                 >
                   <template #reference>
-                    <el-button v-loading.fullscreen.lock="fullscreenLoading">Delete</el-button>
+                    <el-button>Delete</el-button>
                   </template>
                 </el-popconfirm>
               </span>
@@ -166,7 +162,6 @@
       destroy-on-close
     >
       <el-form
-        autocomplete="off"
         ref="memberFormRef"
         :model="memberForm"
         :rules="memberFormRules"
@@ -248,7 +243,6 @@
 
     <el-dialog v-model="dialogUpdateMemberRoleVisible" title="Update Member Role" destroy-on-close>
       <el-form
-        autocomplete="off"
         ref="memberRoleFormRef"
         :model="memberRoleForm"
         label-position="left"
@@ -288,23 +282,19 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { resetForm, allEmpty } from '@/utils/form'
-import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
-import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from '@/api/member'
-import { list as listRole, updateMemberRole } from '@/api/role'
+import { resetForm, allEmpty } from 'utils/form'
+import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
+import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from 'api/member'
+import { list as listRole, updateMemberRole } from 'api/role'
 
 const store = useStore()
-
 const member = computed(() => store.getters.member.member)
 
-const fullscreenLoading = ref(false)
 const memberListLoading = ref(false)
-
 const memberList = ref([])
 const roleList = ref([])
 
 const searchFormRef = ref(null)
-
 const searchForm = reactive({
   member: {
     username: null,
@@ -521,7 +511,6 @@ const memberFormRules = reactive({
 })
 
 const showUpdateMemberDialog = (memberId) => {
-  fullscreenLoading.value = true
   Object.assign(memberForm, defaultMemberForm())
   getMemberDetail({ memberId: memberId }).then(response => {
     memberForm.member.id = response.data.member.member_id
@@ -535,8 +524,6 @@ const showUpdateMemberDialog = (memberId) => {
     dialogMemberVisible.value = true
   }).catch((error) => {
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    fullscreenLoading.value = false
   })
 }
 
@@ -574,7 +561,6 @@ const defaultMemberRoleForm = () => {
 const memberRoleForm = reactive(defaultMemberRoleForm())
 
 const showUpdateMemberRoleDialog = (memberId) => {
-  fullscreenLoading.value = true
   Object.assign(memberRoleForm, defaultMemberRoleForm())
   getMemberDetail({ memberId: memberId }).then(response => {
     memberRoleForm.memberId = response.data.member.member_id
@@ -583,8 +569,6 @@ const showUpdateMemberRoleDialog = (memberId) => {
     dialogUpdateMemberRoleVisible.value = true
   }).catch((error) => {
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    fullscreenLoading.value = false
   })
 }
 
@@ -605,14 +589,11 @@ const onUpdateMemberRole = () => {
 
 // ------- delete member -------
 const onDelete = (memberId) => {
-  fullscreenLoading.value = true
   removeMember({ memberId: memberId }).then(() => {
     getMemberList()
     ElMessage.success('delete success')
   }).catch((error) => {
     ElMessage.error(`delete error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    fullscreenLoading.value = false
   })
 }
 </script>

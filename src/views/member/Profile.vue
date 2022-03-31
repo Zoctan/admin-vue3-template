@@ -101,7 +101,6 @@
 
   <el-dialog v-model="dialogProfileFormVisible" title="Update Profile" destroy-on-close>
     <el-form
-      autocomplete="off"
       ref="profileFormRef"
       :model="profileForm"
       :rules="profileFormRules"
@@ -146,7 +145,6 @@
 
   <el-dialog v-model="dialogPasswordFormVisible" title="Update Password" destroy-on-close>
     <el-form
-      autocomplete="off"
       ref="passwordFormRef"
       :model="passwordForm"
       :rules="passwordFormRules"
@@ -203,9 +201,9 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
-import { memberStatusMap, memberLockMap, memberGenderMap } from '@/utils'
-import { resetForm } from '@/utils/form'
-import { updateProfile, checkOldPassword, updatePassword } from '@/api/member'
+import { resetForm } from 'utils/form'
+import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
+import { updateProfile, checkOldPassword, updatePassword } from 'api/member'
 
 const store = useStore()
 

@@ -1,7 +1,7 @@
 import { isNavigationFailure } from 'vue-router'
 import store from '@/store'
 import router from '@/router'
-import hasPermission from '@/utils/hasPermission'
+import hasPermission from 'utils/hasPermission'
 import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -31,7 +31,7 @@ const addAsyncRouters = async () => {
     }
   }
 }
-await addAsyncRouters()
+addAsyncRouters()
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
   console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)

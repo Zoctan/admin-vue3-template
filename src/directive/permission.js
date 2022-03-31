@@ -1,4 +1,4 @@
-import hasPermission from '@/utils/hasPermission'
+import hasPermission from 'utils/hasPermission'
 
 export default {
   // 当被绑定的元素挂载到 DOM 中时

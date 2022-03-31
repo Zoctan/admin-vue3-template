@@ -1,4 +1,4 @@
-import { register, login, logout, profile } from '@/api/member'
+import { register, login, logout, profile } from 'api/member'
 
 const defaultState = () => {
   return {

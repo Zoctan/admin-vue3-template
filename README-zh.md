@@ -3,6 +3,55 @@
 ![stars](https://img.shields.io/github/stars/Zoctan/admin-seed.svg?style=flat-square&label=Stars)
 ![license](https://img.shields.io/github/license/Zoctan/admin-seed.svg?style=flat-square)
 
+# 部署
+
+- Node >= 16.13
+- Npm >= 8.5
+
+安装依赖：npm install
+
+修改 .env：
+VITE_BASE_URL = '/XX'
+VITE_ADMIN_DOMAIN = 'http://127.0.0.1/admin'
+
+修改 src/router/index.js：
+history: createWebHashHistory()
+
+打包 npm run build，把 front 文件夹改成喜欢的名字XX，放到 WWW 目录下。
+
+# 开发
+
+修改 .env：
+VITE_BASE_URL = './'
+VITE_FRONT_DOMAIN = 'http://127.0.0.1:9999'
+
+修改 src/router/index.js：
+history: createWebHistory()
+
+# 文件说明
+
+```text
+api：对应后端 API 接口
+assets：静态资源
+directive：
+layout：布局
+router：路由
+store：vuex存储
+utils：工具函数
+views：视图
+
+App.vue：主视图
+main.js：全局入口
+
+.env：环境配置
+.env.development：开发环境配置
+.env.production：生产环境配置
+.eslintrc.js：代码规范
+babel.config.js：代码规范
+index.html：静态入口
+vite.config.js：配置
+```
+
 简体中文 | [English](./README.md)
 
 # Vue 3 + Vite

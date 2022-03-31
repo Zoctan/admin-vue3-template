@@ -44,8 +44,8 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import SideBarCollapse from './SideBarCollapse.vue'
-import avatar from '@/assets/image/avatar.png'
-import logo from '@/assets/image/logo.png'
+import avatar from 'assets/image/avatar.png'
+import logo from 'assets/image/logo.png'
 
 const store = useStore()
 const route = useRoute()

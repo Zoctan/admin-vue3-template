@@ -6,7 +6,6 @@
     <div class="title">{{ siteName }} Register</div>
     <el-card class="box-card">
       <el-form
-        autocomplete="on"
         ref="formRef"
         :model="form"
         :rules="rules"
@@ -62,9 +61,9 @@
 import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { resetForm } from '@/utils/form'
-import { checkExist } from '@/api/member'
-import background from '@/assets/image/maldives.jpg'
+import { resetForm } from 'utils/form'
+import { checkExist } from 'api/member'
+import background from 'assets/image/maldives.jpg'
 
 const props = defineProps({
   redirect: {

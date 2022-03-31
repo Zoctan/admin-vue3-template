@@ -1,4 +1,4 @@
-import { refreshToken as refreshTokenApi } from '@/api/member'
+import { refreshToken as refreshTokenApi } from 'api/member'
 
 const defaultState = () => {
   return {
