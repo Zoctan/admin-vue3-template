@@ -64,6 +64,16 @@ export default ({ command, mode }) => {
     base: process.env.VITE_BASE_URL,
     build: {
       outDir: process.env.VITE_OUTPUT_DIR,
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString();
+            }
+          }
+        }
+      }
     },
     define: {
       'process.env': {}
