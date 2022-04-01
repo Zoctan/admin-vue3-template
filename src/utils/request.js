@@ -41,7 +41,6 @@ const getConfig = (config, accessToken) => {
 }
 
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_DOMAIN,
     withCredentials: false,
     timeout: 5000,
     adapter: retryAdapterEnhancer(axios.defaults.adapter, {
@@ -73,8 +72,8 @@ instance.interceptors.response.use(
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
             const config = response.config
-            const authErrorCallback = (error) => {
-                store.dispatch('memberLogout')
+            const authErrorCallback = async (error) => {
+                await store.dispatch('memberLogout')
                 ElMessage.error(`auth error: ${error}, please login`)
                 return router.push({ path: '/login' })
             }

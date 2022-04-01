@@ -18,6 +18,6 @@ const accessedRouters = computed(() => store.getters.accessedRouters)
 <style lang="scss" scoped>
 .el-menu:not(.el-menu--collapse) {
   width: 200px;
-  height: 100vh;
+  height: 96vh;
 }
 </style>

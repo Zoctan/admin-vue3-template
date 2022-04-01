@@ -6,24 +6,16 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { resolve } from 'path'
 import dotenv from 'dotenv'
 import fs from 'fs'
+import process from 'process'
 
 export default ({ command, mode }) => {
   let NODE_ENV = process.env.NODE_ENV || 'development';
-  let envFiles = [];
-  //根据不同的环境使用不同的环境变量
-  if (command == 'serve') {
-    envFiles = [
-      /** default file */
-      `.env`
-    ]
-  } else {
-    envFiles = [
-      /** default file */
-      `.env`,
-      /** mode file */
-      `.env.${NODE_ENV}`
-    ]
-  }
+  let envFiles = [
+    /** default file */
+    `.env`,
+    /** mode file */
+    `.env.${NODE_ENV}`
+  ];
   for (const file of envFiles) {
     const envConfig = dotenv.parse(fs.readFileSync(file))
     for (const k in envConfig) {

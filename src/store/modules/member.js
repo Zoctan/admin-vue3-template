@@ -57,19 +57,12 @@ export default {
       })
     },
     memberLogout({ commit }) {
-      const resetInfo = () => {
-        window.localStorage.clear()
-        commit('RESET_MEMBER')
-        commit('RESET_TOKEN')
-        commit('RESET_ROUTERS')
-      }
-      return new Promise((resolve, reject) => {
-        logout().then(() => {
-          resetInfo()
+      return new Promise((resolve) => {
+        logout().finally(() => {
+          commit('RESET_MEMBER')
+          commit('RESET_TOKEN')
+          commit('RESET_ROUTERS')
           resolve()
-        }).catch(error => {
-          resetInfo()
-          reject(error)
         })
       })
     },

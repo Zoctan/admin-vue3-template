@@ -17,7 +17,7 @@ import background from 'assets/image/library.jpg'
   justify-content: center;
 
   .el-image {
-    height: 80vh;
+    height: 70vh;
   }
 }
 </style>
