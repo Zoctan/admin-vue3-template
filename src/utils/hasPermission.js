@@ -9,7 +9,6 @@ export default (needList = [], joint = 'and') => {
     // console.debug('intersect', intersect)
     // console.debug('setsEqual', setsEqual(needSet, intersect))
     if (joint === 'and') {
-      const setsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value))
       return setsEqual(needSet, intersect)
     } else if (joint === 'or') {
       return intersect.size > 0
@@ -17,3 +16,5 @@ export default (needList = [], joint = 'and') => {
   }
   return false
 }
+
+const setsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value))

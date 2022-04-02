@@ -31,7 +31,7 @@ const addAsyncRouters = async () => {
     }
   }
 }
-async () => await addAsyncRouters()
+(async () => await addAsyncRouters())()
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
   console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)

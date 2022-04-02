@@ -18,27 +18,28 @@
 //           id: 3,
 //           parent_id: 2,
 //           label: 'Acostic',
-//           children: []
 //          },
 //         ],
 //       },
-//       { id: 4, parent_id: 1,, label: 'XX', children: [] },
+//       { id: 4, parent_id: 1,, label: 'XX' },
 //     ],
 //   }
 // ]
-export const list2Tree = (_list, parentIdKey = 'parent_id') => {
+export const list2Tree = (_list, parentIdKey = 'parent_id', idKey = 'id', childrenKey = 'children') => {
   const list = []
   Object.assign(list, _list)
   const map = {}, tree = []
   for (let i = 0; i < list.length; i++) {
-    map[list[i].id] = i
-    list[i].children = []
+    map[list[i][idKey]] = i
   }
   for (let i = 0; i < list.length; i++) {
     const node = list[i]
     if (node[parentIdKey] !== 0) {
+      if (!(childrenKey in list[map[node[parentIdKey]]])) {
+        list[map[node[parentIdKey]]][childrenKey] = []
+      }
       // if you have dangling branches check that map[node.parentId] exists
-      list[map[node[parentIdKey]]].children.push(node)
+      list[map[node[parentIdKey]]][childrenKey].push(node)
     } else {
       tree.push(node)
     }
@@ -62,11 +63,10 @@ export const list2Tree = (_list, parentIdKey = 'parent_id') => {
 //           id: 3,
 //           parent_id: 2,
 //           label: 'Acostic',
-//           children: []
 //          },
 //         ],
 //       },
-//       { id: 4, parent_id: 1,, label: 'XX', children: [] },
+//       { id: 4, parent_id: 1,, label: 'XX' },
 //     ],
 //   }
 // ]
@@ -76,12 +76,15 @@ export const list2Tree = (_list, parentIdKey = 'parent_id') => {
 //   { id: 1, parent_id: 0, label: 'Benci' },
 //   { id: 2, parent_id: 1, permission: 'A1' },
 // ]
-export const tree2List = (node, keyValue = () => { }, path = [], result = []) => {
-  if (!node.children.length) {
-    result.push(path.concat(keyValue(node)))
+export const tree2List = (node, keyValueMap = () => { }, path = [], result = [], childrenKey = 'children') => {
+  if (!(childrenKey in node)) {
+    return
   }
-  for (const child of node.children) {
-    tree2List(child, keyValue, path.concat(keyValue(node)), result)
+  if (!node[childrenKey].length) {
+    result.push(path.concat(keyValueMap(node)))
+  }
+  for (const child of node[childrenKey]) {
+    tree2List(child, keyValueMap, path.concat(keyValueMap(node)), result, childrenKey)
   }
   return result
 }
