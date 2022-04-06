@@ -252,15 +252,12 @@
           <el-input v-model="memberRoleForm.role.name" disabled />
         </el-form-item>
         <el-form-item label="New Role">
-          <el-select v-model="memberRoleForm.role.id">
-            <el-option
-              v-for="item in roleList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-              :disabled="item.id === memberRoleForm.role.id"
-            />
-          </el-select>
+          <el-cascader
+            :options="roleTree"
+            :props="roleProps"
+            @change="handleRoleChange"
+            filterable
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -283,6 +280,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm, allEmpty } from 'utils/form'
+import { list2Tree } from 'utils/tree'
 import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
 import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from 'api/member'
 import { list as listRole, updateMemberRole } from 'api/role'
@@ -293,6 +291,12 @@ const member = computed(() => store.getters.member.member)
 const memberListLoading = ref(false)
 const memberList = ref([])
 const roleList = ref([])
+const roleTree = ref([])
+const roleProps = {
+  value: 'id',
+  label: 'name',
+  checkStrictly: true,
+}
 
 const searchFormRef = ref(null)
 const searchForm = reactive({
@@ -365,11 +369,10 @@ const getIndex = (index) => {
 }
 
 const getRoleList = () => {
-  listRole({
-    currentPage: 0,
-    pageSize: 500,
-  }).then(response => {
+  listRole().then(response => {
     roleList.value = response.data.list
+    roleTree.value = list2Tree(response.data.list)
+    console.debug('roleTree', roleTree.value)
   }).catch((error) => {
     ElMessage.error(`getRoleList error: ${JSON.stringify(error)}`)
   })
@@ -547,8 +550,6 @@ const submitMemberRoleLoading = ref(false)
 const submitMemberRoleDisabled = ref(false)
 const dialogUpdateMemberRoleVisible = ref(false)
 
-const memberRoleFormRef = ref(null)
-
 const defaultMemberRoleForm = () => {
   return {
     memberId: null,
@@ -558,18 +559,23 @@ const defaultMemberRoleForm = () => {
     }
   }
 }
+const memberRoleFormRef = ref(null)
 const memberRoleForm = reactive(defaultMemberRoleForm())
 
 const showUpdateMemberRoleDialog = (memberId) => {
   Object.assign(memberRoleForm, defaultMemberRoleForm())
   getMemberDetail({ memberId: memberId }).then(response => {
-    memberRoleForm.memberId = response.data.member.member_id
+    memberRoleForm.memberId = response.data.member.id
     memberRoleForm.role.id = response.data.role.id
     memberRoleForm.role.name = response.data.role.name
     dialogUpdateMemberRoleVisible.value = true
   }).catch((error) => {
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
   })
+}
+
+const handleRoleChange = (value) => {
+  memberRoleForm.role.id = Object.values(value).pop()
 }
 
 const onUpdateMemberRole = () => {

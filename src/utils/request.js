@@ -71,6 +71,8 @@ instance.interceptors.response.use(
             loadingInstance && loadingInstance.close()
             return Promise.resolve(response.data)
         } else if (response.data.errno === 4002) {
+            console.error('auth error', response.data.msg)
+            ElMessage.error(response.data.msg || 'auth error')
             const config = response.config
             const authErrorCallback = async (error) => {
                 await store.dispatch('memberLogout')

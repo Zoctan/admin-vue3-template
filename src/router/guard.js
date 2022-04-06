@@ -22,7 +22,7 @@ let addAsyncRoutersFlag = false
 const addAsyncRouters = async () => {
   if (!addAsyncRoutersFlag && store.getters.token && store.getters.token.accessToken) {
     try {
-      const accessedAsyncRouters = await store.dispatch('generateRoutes', store.getters.member)
+      const accessedAsyncRouters = await store.dispatch('generateRoutes', store.getters.token)
       accessedAsyncRouters.forEach(item => router.addRoute(item))
       console.debug('accessedAsyncRouters', accessedAsyncRouters)
       addAsyncRoutersFlag = true

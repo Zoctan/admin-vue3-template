@@ -4,7 +4,7 @@
       <NavBar />
     </el-header>
     <el-container>
-      <el-aside :style="{ elAsideWidth: !sidebarOpened ? '200px' : '64px' }">
+      <el-aside style="--el-aside-width: {{ !sidebarOpened ? '200px' : '64px' }}">
         <SideBar />
       </el-aside>
       <el-main>

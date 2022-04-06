@@ -39,6 +39,14 @@ export function logout() {
   })
 }
 
+export function validateAccessToken(data) {
+  return request({
+    url: '/member/validateAccessToken',
+    method: 'POST',
+    data: data
+  })
+}
+
 export function refreshToken(data) {
   return request({
     url: '/member/refreshToken',

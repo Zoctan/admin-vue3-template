@@ -134,6 +134,15 @@
         <el-form-item label="RoleName" prop="role.name">
           <el-input type="text" autocomplete="off" prefix-icon="user" v-model="roleForm.role.name" />
         </el-form-item>
+        <el-form-item label="ParentRole" v-if="roleForm.role.parent_id !== 0">
+          <el-cascader
+            v-model="parentRoleValue"
+            :options="roleTree"
+            :props="roleProps"
+            @change="handleParentRoleChange"
+            filterable
+          />
+        </el-form-item>
         <el-form-item label="Has All Rule" prop="role.has_all_rule">
           <el-select v-model="roleForm.role.has_all_rule">
             <el-option
@@ -156,7 +165,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Rule">
+        <el-form-item label="Rule" v-if="roleForm.role.has_all_rule === 0">
           <el-tree
             ref="ruleTreeRef"
             :data="ruleTree"
@@ -283,14 +292,22 @@
 <script setup>
 import { ref, watch, reactive, onMounted } from 'vue'
 import { resetForm, allEmpty } from 'utils/form'
+import { list2Tree, tree2List } from 'utils/tree'
 import { roleHasAllRuleMap, roleLockMap } from 'utils'
-import { add as addRole, list as listRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
+import { add as addRole, list as listRole, listParent as listParentRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
 import { add as addRule, list as listRule, updateList as updateRuleList, update as updateRule, removeList as removeRuleList } from 'api/rule'
 
-const roleListLoading = ref(false)
-
-const roleList = ref([])
 const ruleList = ref([])
+
+const roleListLoading = ref(false)
+const roleList = ref([])
+const roleTree = ref([])
+const roleProps = {
+  value: 'id',
+  label: 'name',
+  checkStrictly: true,
+}
+const parentRoleValue = ref([])
 
 const searchFormRef = ref(null)
 const searchForm = reactive({
@@ -379,7 +396,6 @@ const innerDialogRuleStatusMap = {
   }
 }
 const innerDialogRuleStatus = ref('add')
-const ruleFormRef = ref(null)
 const defaultRuleForm = () => {
   return {
     id: null,
@@ -391,86 +407,13 @@ const defaultRuleForm = () => {
     permission: null,
   }
 }
+const ruleFormRef = ref(null)
 const ruleForm = reactive(defaultRuleForm())
-
-// [
-//   { id: 1, description: 'Member:Add', permission: 'member:add' },
-//   { id: 2, description: 'Member:delete', permission: 'member:delete' },
-// ]
-// =>
-// [
-//   {
-//     id: 0,
-//     description: 'Member',
-//     resource: 'member',
-//     children: [
-//       { id: 1, description: 'add', action: 'add' },
-//       { id: 2, description: 'delete', action: 'delete' },
-//     ],
-//   }
-// ]
-const ruleList2Tree = (_ruleList) => {
-  let ruleList = []
-  Object.assign(ruleList, _ruleList)
-  let ruleTree = []
-  let ruleListLength = ruleList.length
-  while (0 < ruleListLength) {
-    ruleListLength--
-    const firstRule = ruleList.shift()
-    const ruleNode = {
-      id: 0,
-      description: firstRule.description.split(':')[0],
-      resource: firstRule.permission.split(':')[0],
-      children: [{
-        id: firstRule.id,
-        description: firstRule.description.split(':')[1],
-        action: firstRule.permission.split(':')[1],
-      }],
-    }
-    // add children
-    const childRuleList = ruleList.filter(rule => rule.description.split(':')[0] === firstRule.description.split(':')[0])
-    console.debug('childRuleList', childRuleList)
-    for (let i = 0; i < childRuleList.length; i++) {
-      const childRule = childRuleList[i]
-      ruleNode.children.push({
-        id: childRule.id,
-        description: childRule.description.split(':')[1],
-        action: childRule.permission.split(':')[1],
-      })
-    }
-    ruleTree.push(ruleNode)
-    // add to ruleTree while delete from ruleList
-    ruleList = ruleList.filter(rule => rule.description.split(':')[0] !== firstRule.description.split(':')[0])
-    ruleListLength -= childRuleList.length
-  }
-  console.debug('ruleTree', ruleTree)
-  return ruleTree
-}
-const ruleTree2List = (_ruleTree) => {
-  let ruleTree = []
-  Object.assign(ruleTree, _ruleTree)
-  let ruleList = []
-  ruleTree.forEach(rule => {
-    const parent = {
-      id: rule.id,
-      description: rule.description,
-      resource: rule.resource,
-    }
-    rule.children.forEach(child => {
-      ruleList.push({
-        id: child.id,
-        description: `${parent.description}:${child.description}`,
-        permission: `${parent.resource}:${child.action}`,
-      })
-    })
-  })
-  return ruleList
-}
 
 const getRuleList = () => {
   listRule().then(response => {
     ruleList.value = response.data
-    ruleTree.value = ruleList2Tree(response.data)
+    ruleTree.value = list2Tree(response.data)
   }).catch((error) => {
     ElMessage.error(`get ruleList error: ${JSON.stringify(error)}`)
   })
@@ -537,7 +480,7 @@ const onUpdateRule = () => {
   submitRuleLoading.value = true
   submitRuleDisabled.value = true
   if (ruleForm.action === null) {
-    const _ruleList = ruleTree2List([currentRuleTree])
+    const _ruleList = tree2List([currentRuleTree])
     for (let i = 0; i < _ruleList.length; i++) {
       _ruleList[i].description = `${ruleForm.parentDescription}:${_ruleList[i].description.split(':')[1]}`
       _ruleList[i].permission = `${ruleForm.resource}:${_ruleList[i].permission.split(':')[1]}`
@@ -578,7 +521,7 @@ const onRemoveRule = (node) => {
   submitRuleDisabled.value = true
   let _ruleList = [node.data]
   if (node.data.id === 0) {
-    _ruleList = ruleTree2List(node.data)
+    _ruleList = tree2List(node.data)
   }
   removeRuleList({ ruleList: _ruleList }).then(() => {
     getRuleList()
@@ -599,6 +542,7 @@ const getRoleList = (successCallback = null, errorCallback = null) => {
   searchForm.pageSize = page.pageSize
   listRole(searchForm).then(response => {
     roleList.value = response.data.list
+    roleTree.value = list2Tree(response.data.list)
     page.totalData = response.data.total
     page.currentPage = response.data.currentPage
     page.pageSize = response.data.pageSize
@@ -634,11 +578,11 @@ const dialogRoleVisible = ref(false)
 const submitRoleLoading = ref(false)
 const submitRoleDisabled = ref(false)
 
-const roleFormRef = ref(null)
 const defaultRoleForm = () => {
   return {
     role: {
       id: null,
+      parent_id: null,
       name: null,
       has_all_rule: null,
       lock: null,
@@ -646,7 +590,13 @@ const defaultRoleForm = () => {
     ruleList: []
   }
 }
+const roleFormRef = ref(null)
 const roleForm = reactive(defaultRoleForm())
+
+const handleParentRoleChange = (value) => {
+  roleForm.role.parent_id = Object.values(value).pop()
+  console.debug('parentRoleValue', parentRoleValue.value)
+}
 
 // ------- add role -------
 const showAddRoleDialog = () => {
@@ -677,12 +627,24 @@ const showUpdateRoleDialog = (roleId) => {
   Object.assign(roleForm, defaultRoleForm())
   getRoleDetail({ roleId: roleId }).then(response => {
     roleForm.role.id = response.data.role.id
+    roleForm.role.parent_id = response.data.role.parent_id
     roleForm.role.name = response.data.role.name
     roleForm.role.has_all_rule = response.data.role.has_all_rule
     roleForm.role.lock = response.data.role.lock
     roleForm.ruleList = roleForm.role.has_all_rule === 0 ? response.data.ruleList.map(rule => rule.id) : ruleList.value.map(rule => rule.id)
+
     dialogRoleStatus.value = 'update'
-    dialogRoleVisible.value = true
+    if (response.data.role.parent_id === 0) {
+      dialogRoleVisible.value = true
+    }
+    else {
+      listParentRole({ parentId: response.data.role.parent_id }).then(response => {
+        parentRoleValue.value = response.data.map(role => role.id).sort()
+        dialogRoleVisible.value = true
+      }).catch((error) => {
+        ElMessage.error(`list parent role error: ${JSON.stringify(error)}`)
+      })
+    }
   }).catch((error) => {
     ElMessage.error(`get role detail error: ${JSON.stringify(error)}`)
   })

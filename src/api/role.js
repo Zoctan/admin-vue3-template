@@ -16,6 +16,14 @@ export function list(data) {
   })
 }
 
+export function listParent(data) {
+  return request({
+    url: '/role/listParent',
+    method: 'POST',
+    data: data
+  })
+}
+
 export function detail(data) {
   return request({
     url: '/role/detail',
