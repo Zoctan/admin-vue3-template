@@ -1,7 +1,7 @@
 import { isNavigationFailure } from 'vue-router'
 import store from '@/store'
 import router from '@/router'
-import hasPermission from 'utils/hasPermission'
+import Permission from 'utils/Permission'
 import { ElMessage } from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -10,21 +10,25 @@ import 'nprogress/nprogress.css'
 // oreder: beforeEach -> beforeResolve -> afterEach
 // has token?
 //   yes:
-//     route hasn't "requiresAuth" and "auth" meta tag: go directly
-//     route has "requiresAuth" and "auth" meta tag:
-//                                                   "requiresAuth" and no "auth": go directly
-//                                                   "auth": check permission
+//     route hasn't "requiresAuth" or "permission" meta tag: go directly
+//     route has "requiresAuth" and "permission" meta tag:
+//                                                   "requiresAuth" and no "permission": go directly
+//                                                   "permission": check permission
 //   no:
-//     route hasn't "requiresAuth" and "auth" meta tag: go directly
-//     route has "requiresAuth" and "auth" meta tag: redirect to login page
+//     route hasn't "requiresAuth" or "permission" meta tag: go directly
+//     route has "requiresAuth" and "permission" meta tag: redirect to login page
+
+const permission = new Permission()
+
 // flag: already added dynamic routers
 let addAsyncRoutersFlag = false
 const addAsyncRouters = async () => {
+  console.debug('addAsyncRouters addAsyncRoutersFlag', addAsyncRoutersFlag)
   if (!addAsyncRoutersFlag && store.getters.token && store.getters.token.accessToken) {
     try {
       const accessedAsyncRouters = await store.dispatch('generateRoutes', store.getters.token)
       accessedAsyncRouters.forEach(item => router.addRoute(item))
-      console.debug('accessedAsyncRouters', accessedAsyncRouters)
+      console.debug('addAsyncRouters accessedAsyncRouters', accessedAsyncRouters)
       addAsyncRoutersFlag = true
     } catch (error) {
       ElMessage.error(`generate routes error: ${error}`)
@@ -34,9 +38,9 @@ const addAsyncRouters = async () => {
 (async () => await addAsyncRouters())()
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
-  console.debug('addAsyncRoutersFlag', addAsyncRoutersFlag)
-  console.debug('to', to)
-  console.debug('routers', router.getRoutes())
+  console.debug('beforeEach addAsyncRoutersFlag', addAsyncRoutersFlag)
+  console.debug('beforeEach to', to)
+  console.debug('beforeEach routers', router.getRoutes())
   if (store.getters.token && store.getters.token.accessToken) {
     // don't visit login again
     if (to.path === '/login') {
@@ -56,10 +60,10 @@ router.beforeEach(async (to, from, next) => {
           if (!to.meta.requiresAuth) {
             next()
           } else {
-            if (!to.meta.auth) {
+            if (!to.meta.permission) {
               next()
             } else {
-              if (hasPermission(to.meta.auth)) {
+              if (permission.check(to.meta.permission)) {
                 next()
               } else {
                 next({ path: '/401' })
@@ -76,7 +80,7 @@ router.beforeEach(async (to, from, next) => {
     if (!router.hasRoute(to.name)) {
       next({ path: '/404' })
     } else {
-      if (!to.meta.requiresAuth && !to.meta.auth) {
+      if (!to.meta.requiresAuth && !to.meta.permission) {
         next()
       } else {
         next({ path: '/login', query: { redirect: from.fullPath } })

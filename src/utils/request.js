@@ -70,45 +70,49 @@ instance.interceptors.response.use(
         if (response.data.errno === 0) {
             loadingInstance && loadingInstance.close()
             return Promise.resolve(response.data)
-        } else if (response.data.errno === 4002) {
-            console.error('auth error', response.data.msg)
-            ElMessage.error(response.data.msg || 'auth error')
-            const config = response.config
+        } else {
             const authErrorCallback = async (error) => {
                 await store.dispatch('memberLogout')
                 ElMessage.error(`auth error: ${error}, please login`)
                 return router.push({ path: '/login' })
             }
-            if (!isRefreshing) {
-                isRefreshing = true
-                const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
-                if (refreshToken === null || refreshToken === '') {
-                    return authErrorCallback('empty refreshToken')
+            if (response.data.errno === 4003) {
+                return authErrorCallback(response.msg)
+            } else if (response.data.errno === 4002) {
+                console.error('auth error', response.data.msg)
+                ElMessage.error(response.data.msg || 'auth error')
+                const config = response.config
+                if (!isRefreshing) {
+                    isRefreshing = true
+                    const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
+                    if (refreshToken === null || refreshToken === '') {
+                        return authErrorCallback('empty refreshToken')
+                    } else {
+                        ElMessage.info('refresh token, please wait...')
+                        return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
+                            // already refreshed token, retry pending requests
+                            requests.forEach(callback => callback(accessToken))
+                            requests = []
+                            return instance(getConfig(config, accessToken))
+                        }).catch((error) => {
+                            return authErrorCallback(error)
+                        }).finally(() => {
+                            isRefreshing = false
+                            loadingInstance && loadingInstance.close()
+                        })
+                    }
                 } else {
-                    ElMessage.info('refresh token, please wait...')
-                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
-                        // already refreshed token, retry pending requests
-                        requests.forEach(callback => callback(accessToken))
-                        requests = []
-                        return instance(getConfig(config, accessToken))
-                    }).catch((error) => {
-                        return authErrorCallback(error)
-                    }).finally(() => {
-                        isRefreshing = false
-                        loadingInstance && loadingInstance.close()
+                    // pending requests when refreshing token
+                    return new Promise((resolve) => {
+                        requests.push((accessToken) => {
+                            resolve(instance(getConfig(config, accessToken)))
+                        })
                     })
                 }
             } else {
-                // pending requests when refreshing token
-                return new Promise((resolve) => {
-                    requests.push((accessToken) => {
-                        resolve(instance(getConfig(config, accessToken)))
-                    })
-                })
+                loadingInstance && loadingInstance.close()
+                return Promise.reject(response.data)
             }
-        } else {
-            loadingInstance && loadingInstance.close()
-            return Promise.reject(response.data)
         }
     },
     (error) => {

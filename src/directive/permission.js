@@ -1,34 +1,26 @@
-import hasPermission from 'utils/hasPermission'
+import Permission, { Joint } from 'utils/Permission'
 
+const permission = new Permission()
+
+// https://vuejs.org/guide/reusability/custom-directives.html#directive-hooks
 export default {
-  // 当被绑定的元素挂载到 DOM 中时
   mounted(el, binding) {
-    const { value } = binding
-    const successCallback = () => el.parentNode && el.parentNode.removeChild(el)
-    const errorCallback = () => {
-      throw new Error(`
-      usage:
-      if need all permissions in array, use 'and': v-permission="['article:add','article:delete']" or v-permission="{joint:'and', list:['article:add','article:delete']}".
-      if just need one of permission in array, use 'or': v-permission="{joint:'or', list:['article:add','article:delete']}".
-    `)
-    }
-    if (value && value instanceof Array && value.length > 0) {
-      if (!hasPermission(value)) {
-        return successCallback()
-      }
+    const { value = [], arg = Joint.AND } = binding
+
+    if (value) {
+      return permission.check({
+        value: value,
+        joint: arg,
+        notAccessCallback: () => el.parentNode && el.parentNode.removeChild(el)
+      })
     } else {
-      if (value && value instanceof Object) {
-        const { joint, list } = value
-        if (list.length > 0) {
-          if (!hasPermission(list, joint)) {
-            return successCallback()
-          }
-        } else {
-          return errorCallback()
-        }
-      } else {
-        return errorCallback()
-      }
+      throw new Error(`
+        Usage:
+        If need all permissions in array, use 'and': v-permission:and[optional]="['article:add','article:delete']" or v-permission="{ joint:'and', list:['article:add','article:delete'] }.
+        If just need one of permission in array, use 'or': v-permission:or="['article:add','article:delete']".
+        If only one permission, use: v-permission="'article:add'".
+        Use object value instead of above: v-permission="{ joint:'or', list:['article:add','article:delete'] }.
+      `)
     }
   }
 }

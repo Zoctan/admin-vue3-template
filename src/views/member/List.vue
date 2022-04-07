@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <div class="filter-container" v-permission="['member:list']">
+    <div class="filter-container" v-permission="'member:list'">
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
           <el-button type="success" icon="refresh" circle @click="getMemberList()"></el-button>
@@ -115,18 +115,18 @@
       <el-table-column
         fixed="right"
         label="Operations"
-        v-permission="{ joint: 'or', list: ['member:update', 'member:delete'] }"
+        v-permission:or="['member:update', 'member:delete']"
       >
         <template #default="scope">
           <template v-if="scope.row.member.member_id !== member.id">
             <el-space wrap>
-              <span v-permission="['member:update']">
+              <span v-permission="'member:update'">
                 <el-button
                   @click="showUpdateMemberRoleDialog(scope.row.member.member_id)"
                 >Update Role</el-button>
                 <el-button @click="showUpdateMemberDialog(scope.row.member.member_id)">Update Member</el-button>
               </span>
-              <span v-permission="['member:delete']" v-if="scope.row.member.lock === 0">
+              <span v-permission="'member:delete'" v-if="scope.row.member.lock === 0">
                 <el-popconfirm
                   confirm-button-text="Yes"
                   cancel-button-text="No"

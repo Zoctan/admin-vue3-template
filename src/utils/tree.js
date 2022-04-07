@@ -70,21 +70,18 @@ export const list2Tree = (_list, parentIdKey = 'parent_id', idKey = 'id', childr
 //     ],
 //   }
 // ]
-// keyValue = (node) => { id: node.id, parent_id: node.parent_id, label: node.label }
+// keyValueMap = (node) => { return { id: node.id, parent_id: node.parent_id, label: node.label } }
 // =>
 // [
 //   { id: 1, parent_id: 0, label: 'Benci' },
 //   { id: 2, parent_id: 1, permission: 'A1' },
 // ]
 export const tree2List = (node, keyValueMap = () => { }, path = [], result = [], childrenKey = 'children') => {
-  if (!(childrenKey in node)) {
-    return
-  }
-  if (!node[childrenKey].length) {
-    result.push(path.concat(keyValueMap(node)))
-  }
-  for (const child of node[childrenKey]) {
-    tree2List(child, keyValueMap, path.concat(keyValueMap(node)), result, childrenKey)
+  result.push(keyValueMap(node))
+  if (node[childrenKey]) {
+    for (const child of node[childrenKey]) {
+      tree2List(child, keyValueMap, path.concat(keyValueMap(node)), result, childrenKey)
+    }
   }
   return result
 }

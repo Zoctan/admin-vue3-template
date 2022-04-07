@@ -58,7 +58,7 @@ const toLogin = () => router.push(`/login`)
 const toLogout = () =>
   store.dispatch('memberLogout')
     .then(() => {
-      if (!route.meta.requiresAuth && !route.meta.auth) {
+      if (!route.meta.requiresAuth && !route.meta.permission) {
         location.reload()
       } else {
         router.push({ path: '/login', query: { redirect: route.fullPath } })

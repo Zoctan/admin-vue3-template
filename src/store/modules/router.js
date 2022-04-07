@@ -1,6 +1,8 @@
 import { constRouters, asyncRouters } from '@/router'
 import { validateAccessToken } from 'api/member'
-import hasPermission from 'utils/hasPermission'
+import Permission from 'utils/Permission'
+
+const permission = new Permission()
 
 const defaultState = () => {
   return {
@@ -39,25 +41,20 @@ export default {
 }
 
 /**
- * 通过路由上的 meta.auth 判断是否与当前成员权限匹配
+ * 通过路由上的 meta.permission 判断是否与当前成员权限匹配
  * @param route
  */
 function checkPermission(route) {
-  // meta: { requiresAuth: true, auth: ['member:list'] }
-  // meta: { requiresAuth: true, auth: { joint: 'and', list: ['member:list'] } }
+  // Usage:
+  // default joint value is and:
+  //     meta: { requiresAuth: true, permission: ['member:list'] }, or no array => permission: 'member:list'
+  //     meta: { requiresAuth: true, permission: { joint: 'and', list: ['member:list'] } }
   if (route.meta && route.meta.requiresAuth) {
-    if (route.meta.auth) {
-      if (route.meta.auth instanceof Array && route.meta.auth.length > 0) {
-        return hasPermission(route.meta.auth)
-      } else if (route.meta.auth instanceof Object) {
-        const { joint, list } = route.meta.auth
-        if (list.length > 0) {
-          return hasPermission(list, joint)
-        }
-      } else {
-        return false
-      }
-    }
+    return permission.check({
+      value: route.meta.permission,
+      accessCallback: () => true,
+      notAccessCallback: () => false
+    })
   }
   return true
 }

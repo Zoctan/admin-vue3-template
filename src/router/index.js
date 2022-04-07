@@ -100,7 +100,7 @@ export const asyncRouters = [
             path: 'list',
             name: 'Member Manage',
             component: _import('member/list'),
-            meta: { icon: 'user', requiresAuth: true, auth: ['member:list'] }
+            meta: { icon: 'user', requiresAuth: true, permission: ['member:list'] }
         },]
     },
     {
@@ -112,7 +112,7 @@ export const asyncRouters = [
             path: 'list',
             name: 'Role Manage',
             component: _import('role/list'),
-            meta: { icon: 'user-filled', requiresAuth: true, auth: ['role:list'] }
+            meta: { icon: 'user-filled', requiresAuth: true, permission: ['role:list'] }
         }]
     },
 ]
