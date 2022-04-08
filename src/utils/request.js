@@ -9,6 +9,7 @@ let isRefreshing = false
 let requests = []
 // fullscreen loading instance
 let loadingInstance = null
+
 function retryAdapterEnhancer(adapter, options) {
     const { times = 1, delay = 3000 } = options
     return async (config) => {
@@ -67,40 +68,47 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
     (response) => {
+        loadingInstance && loadingInstance.close()
         if (response.data.errno === 0) {
-            loadingInstance && loadingInstance.close()
             return Promise.resolve(response.data)
         } else {
             const authErrorCallback = async (error) => {
                 await store.dispatch('memberLogout')
-                ElMessage.error(`auth error: ${error}, please login`)
-                return router.push({ path: '/login' })
+                ElMessage.error(`${error}, please login`)
+                router.push({ path: '/login' })
+                return Promise.reject(response.data)
             }
-            if (response.data.errno === 4003) {
+            if (response.data.errno === 4001) {
+                console.error('token error:', response.data.msg)
                 return authErrorCallback(response.msg)
             } else if (response.data.errno === 4002) {
-                console.error('auth error', response.data.msg)
-                ElMessage.error(response.data.msg || 'auth error')
+                console.error('access token error, msg:', response.data.msg)
+                console.error('access token error, requests:', requests)
+                console.error('access token error, isRefreshing:', isRefreshing)
                 const config = response.config
                 if (!isRefreshing) {
-                    isRefreshing = true
                     const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
                     if (refreshToken === null || refreshToken === '') {
                         return authErrorCallback('empty refreshToken')
-                    } else {
-                        ElMessage.info('refresh token, please wait...')
-                        return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
-                            // already refreshed token, retry pending requests
-                            requests.forEach(callback => callback(accessToken))
-                            requests = []
-                            return instance(getConfig(config, accessToken))
-                        }).catch((error) => {
-                            return authErrorCallback(error)
-                        }).finally(() => {
-                            isRefreshing = false
-                            loadingInstance && loadingInstance.close()
-                        })
                     }
+
+                    console.debug('refresh token, please wait...')
+                    ElMessage.info('refresh token, please wait...')
+
+                    isRefreshing = true
+                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
+                        ElMessage.success('refresh token success, retry pending requests...')
+                        console.debug('refresh token success, requests:', requests)
+                        isRefreshing = false
+                        // already refreshed token, retry pending requests
+                        requests.forEach(callback => callback(accessToken))
+                        requests = []
+                        return instance(getConfig(config, accessToken))
+                    }).catch((error) => {
+                        isRefreshing = false
+                        console.error('refresh token error:', error)
+                        return authErrorCallback(error)
+                    })
                 } else {
                     // pending requests when refreshing token
                     return new Promise((resolve) => {
@@ -109,15 +117,18 @@ instance.interceptors.response.use(
                         })
                     })
                 }
+            } else if (response.data.errno === 4003) {
+                console.error('refresh token error:', response.data.msg)
+                return authErrorCallback(response.msg)
             } else {
-                loadingInstance && loadingInstance.close()
+                console.error('response errno !== 0', response.data.msg)
                 return Promise.reject(response.data)
             }
         }
     },
     (error) => {
         loadingInstance && loadingInstance.close()
-        // console.error('response error', error.response.data.msg)
+        console.error('response error', error.response.data.msg)
         return Promise.reject(error)
     }
 )

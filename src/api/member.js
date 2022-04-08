@@ -39,11 +39,10 @@ export function logout() {
   })
 }
 
-export function validateAccessToken(data) {
+export function validateAccessToken() {
   return request({
     url: '/member/validateAccessToken',
-    method: 'POST',
-    data: data
+    method: 'POST'
   })
 }
 
