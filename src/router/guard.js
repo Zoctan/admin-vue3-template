@@ -48,8 +48,6 @@ router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAuth || to.meta.permission) {
       return next({ path: '/login', query: { redirect: from.fullPath } })
     }
-
-    return next()
   }
 
   // has token
@@ -74,9 +72,9 @@ router.beforeEach(async (to, from, next) => {
         return next({ path: '/401' })
       }
     }
-
-    return next()
   }
+
+  return next()
 })
 
 router.beforeResolve((to, from, next) => {

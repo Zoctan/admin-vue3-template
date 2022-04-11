@@ -77,6 +77,14 @@ export function list(data) {
   })
 }
 
+// export function list(params) {
+//   return request({
+//     url: '/member/list',
+//     method: 'GET',
+//     params
+//   })
+// }
+
 export function updatePassword(data) {
   return request({
     url: '/member/updatePassword',

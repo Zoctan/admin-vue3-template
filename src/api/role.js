@@ -42,7 +42,7 @@ export function update(data) {
 
 export function updateMemberRole(data) {
   return request({
-    url: '/memberRole/update',
+    url: '/role/updateMemberRole',
     method: 'PUT',
     data: data
   })

@@ -1,7 +1,5 @@
 import store from '@/store'
 
-const setsEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value))
-
 export const Joint = {
   AND: 'and',
   OR: 'or',
@@ -62,7 +60,7 @@ export default class Permission {
       // console.debug('intersect', intersect)
       // console.debug('setsEqual', setsEqual(needSet, intersect))
       if (this.joint === Joint.AND) {
-        return setsEqual(needSet, intersect)
+        return intersect.size === needSet.size
       } else if (this.joint === Joint.OR) {
         return intersect.size > 0
       }
