@@ -63,6 +63,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (addAsyncRoutersStatus === false || !router.hasRoute(to.name)) {
+      addAsyncRoutersStatus = null
       return next({ path: '/404' })
     }
 
