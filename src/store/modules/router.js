@@ -47,9 +47,9 @@ export default {
 function checkPermission(route) {
   // Usage:
   // default joint value is and:
-  //     meta: { requiresAuth: true, permission: ['member:list'] }, if only one item => permission: 'member:list'
-  //     meta: { requiresAuth: true, permission: { joint: 'and', list: ['member:list'] } }
-  if (route.meta && route.meta.requiresAuth) {
+  //     meta: { auth: true, permission: ['member:list'] }, if only one item => permission: 'member:list'
+  //     meta: { auth: true, permission: { joint: 'and', list: ['member:list'] } }
+  if (route.meta && route.meta.auth) {
     return permission.check({
       value: route.meta.permission,
       accessCallback: () => true,

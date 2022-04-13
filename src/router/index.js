@@ -14,7 +14,7 @@ export const constRouters = [
         path: '/dashboard',
         component: Layout,
         name: 'Dashboard',
-        meta: { icon: 'house', requiresAuth: true, },
+        meta: { icon: 'house', auth: true, },
         children: [{
             path: '',
             // dont't use repeat name
@@ -95,12 +95,12 @@ export const asyncRouters = [
             path: 'profile',
             name: 'Member Profile',
             component: _import('member/profile'),
-            meta: { hidden: true, requiresAuth: true }
+            meta: { hidden: true, auth: true }
         }, {
             path: 'list',
             name: 'Member Manage',
             component: _import('member/list'),
-            meta: { icon: 'user', requiresAuth: true, permission: ['member:list'] }
+            meta: { icon: 'user', auth: true, permission: ['member:list'] }
         },]
     },
     {
@@ -112,7 +112,7 @@ export const asyncRouters = [
             path: 'list',
             name: 'Role Manage',
             component: _import('role/list'),
-            meta: { icon: 'user-filled', requiresAuth: true, permission: ['role:list'] }
+            meta: { icon: 'user-filled', auth: true, permission: ['role:list'] }
         }]
     },
 ]

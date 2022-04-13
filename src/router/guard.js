@@ -45,7 +45,7 @@ router.beforeEach(async (to, from, next) => {
       return next({ path: '/404' })
     }
 
-    if (to.meta.requiresAuth || to.meta.permission) {
+    if (to.meta.auth || to.meta.permission) {
       return next({ path: '/login', query: { redirect: from.fullPath } })
     }
   }
@@ -67,7 +67,7 @@ router.beforeEach(async (to, from, next) => {
       return next({ path: '/404' })
     }
 
-    if (to.meta.requiresAuth && to.meta.permission) {
+    if (to.meta.auth && to.meta.permission) {
       if (!permission.check(to.meta.permission)) {
         ElMessage.error(`no permission to visit ${to.path}`)
         return next({ path: '/401' })
