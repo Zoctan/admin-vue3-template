@@ -12,94 +12,56 @@
         </el-form-item>
         <el-form-item label="Has All Rule" prop="role.has_all_rule">
           <el-select v-model="searchForm.role.has_all_rule" clearable>
-            <el-option
-              v-for="item in roleHasAllRuleMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === searchForm.role.has_all_rule"
-            />
+            <el-option v-for="item in roleHasAllRuleMap" :key="item.id" :label="item.label" :value="item.id"
+              :disabled="item.id === searchForm.role.has_all_rule" />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="role.lock">
           <el-select v-model="searchForm.role.lock" clearable>
-            <el-option
-              v-for="item in roleLockMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === searchForm.role.lock"
-            />
+            <el-option v-for="item in roleLockMap" :key="item.id" :label="item.label" :value="item.id"
+              :disabled="item.id === searchForm.role.lock" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            icon="search"
-            circle
-            :loading="onSearchLoading"
-            :disabled="onSearchDisabled"
-            @click="onSearch"
-          ></el-button>
-          <el-button
-            type="danger"
-            icon="refresh-left"
-            circle
-            :loading="restSearchLoading"
+          <el-button type="primary" icon="search" circle :loading="onSearchLoading" :disabled="onSearchDisabled"
+            @click="onSearch"></el-button>
+          <el-button type="danger" icon="refresh-left" circle :loading="restSearchLoading"
             :disabled="restSearchDisabled || !searched || allEmpty(searchForm, ['currentPage', 'pageSize'])"
-            @click="restSearch(searchFormRef)"
-          ></el-button>
+            @click="restSearch(searchFormRef)"></el-button>
         </el-form-item>
       </el-form>
     </div>
 
-    <el-table
-      v-loading="roleListLoading"
-      :data="roleList"
-      border
-      highlight-current-row
-      style="width: 100%"
-    >
+    <el-table v-loading="roleListLoading" :data="roleList" border highlight-current-row style="width: 100%">
       <el-table-column type="index" :index="getIndex" />
       <el-table-column label="Name" prop="name" width="150" />
       <el-table-column label="HasAllRule" prop="has_all_rule" width="110">
         <template #default="scope">
-          <el-tag
-            size="small"
-            :type="roleHasAllRuleMap[scope.row.has_all_rule].color"
-          >{{ roleHasAllRuleMap[scope.row.has_all_rule].label }}</el-tag>
+          <el-tag size="small" :type="roleHasAllRuleMap[scope.row.has_all_rule].color">{{
+            roleHasAllRuleMap[scope.row.has_all_rule].label
+          }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="Lock" prop="lock" width="100">
         <template #default="scope">
-          <el-tag
-            size="small"
-            :type="roleLockMap[scope.row.lock].color"
-          >{{ roleLockMap[scope.row.lock].label }}</el-tag>
+          <el-tag size="small" :type="roleLockMap[scope.row.lock].color">{{ roleLockMap[scope.row.lock].label }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="CreatedAt" prop="created_at" width="180" />
       <el-table-column label="UpdatedAt" prop="updated_at" width="180" />
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        v-permission:or="['role:detail', 'role:update', 'role:delete']"
-      >
+      <el-table-column fixed="right" label="Operations" v-permission:or="['role:detail', 'role:update', 'role:delete']">
         <template #default="scope">
-          <template v-if="scope.row.id !== member.role.id && scope.row.name !== 'SuperAdmin'">
+          <template
+            v-if="member.roleList.filter(role => role.id === scope.row.id) !== null && scope.row.name !== 'SuperAdmin'">
             <el-space wrap>
               <span v-permission="'role:update'">
                 <el-button @click="showUpdateRoleDialog(scope.row.id)">Update</el-button>
               </span>
               <span v-permission="'role:delete'">
-                <el-popconfirm
-                  confirm-button-text="Yes"
-                  cancel-button-text="No"
-                  icon-color="red"
-                  :title="`Are you sure to delete this role: ${scope.row.name}?`"
-                  @confirm="onDelete(scope.row.id)"
-                  :diabled="scope.row.lock === 0"
-                >
+                <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="red"
+                  :title="`Are you sure to delete this role: ${scope.row.name}?`" @confirm="onDelete(scope.row.id)"
+                  :diabled="scope.row.lock === 0">
                   <template #reference>
                     <el-button>Delete</el-button>
                   </template>
@@ -111,84 +73,42 @@
       </el-table-column>
     </el-table>
 
-    <el-pagination
-      background
-      layout="total, sizes, prev, pager, next, jumper"
-      v-model:currentPage="page.currentPage"
-      v-model:page-size="page.pageSize"
-      :page-sizes="page.pageSizes"
-      :total="page.totalData"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    ></el-pagination>
+    <el-pagination background layout="total, sizes, prev, pager, next, jumper" v-model:currentPage="page.currentPage"
+      v-model:page-size="page.pageSize" :page-sizes="page.pageSizes" :total="page.totalData"
+      @size-change="handleSizeChange" @current-change="handleCurrentChange"></el-pagination>
 
-    <el-dialog
-      v-model="dialogRoleVisible"
-      :title="dialogRoleStatusMap[dialogRoleStatus].title"
-      destroy-on-close
-    >
-      <el-form
-        ref="roleFormRef"
-        :model="roleForm"
-        status-icon
-        label-position="left"
-        label-width="110px"
-      >
+    <el-dialog v-model="dialogRoleVisible" :title="dialogRoleStatusMap[dialogRoleStatus].title" destroy-on-close>
+      <el-form ref="roleFormRef" :model="roleForm" status-icon label-position="left" label-width="110px">
         <el-form-item label="RoleName" prop="role.name" required>
           <el-input type="text" autocomplete="off" prefix-icon="user" v-model="roleForm.role.name" />
         </el-form-item>
         <el-form-item label="ParentRole">
-          <el-cascader
-            v-model="parentRoleValue"
-            :options="roleTree"
-            :props="roleProps"
-            @change="handleParentRoleChange"
-            filterable
-          />
+          <el-cascader v-model="parentRoleSelectIdList" :options="roleTree" :props="roleProps"
+            @change="handleParentRoleChange" filterable clearable />
         </el-form-item>
         <el-form-item label="Has All Rule" prop="role.has_all_rule" required>
           <el-select v-model="roleForm.role.has_all_rule">
-            <el-option
-              v-for="item in roleHasAllRuleMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === roleForm.role.has_all_rule"
-            />
+            <el-option v-for="item in roleHasAllRuleMap" :key="item.id" :label="item.label" :value="item.id"
+              :disabled="item.id === roleForm.role.has_all_rule" />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="role.lock" required>
           <el-select v-model="roleForm.role.lock">
-            <el-option
-              v-for="item in roleLockMap"
-              :key="item.id"
-              :label="item.label"
-              :value="item.id"
-              :disabled="item.id === roleForm.role.lock"
-            />
+            <el-option v-for="item in roleLockMap" :key="item.id" :label="item.label" :value="item.id"
+              :disabled="item.id === roleForm.role.lock" />
           </el-select>
         </el-form-item>
         <el-form-item label="Rule" v-if="roleForm.role.has_all_rule === 0">
-          <el-tree
-            ref="ruleTreeRef"
-            :data="ruleTree"
-            show-checkbox
-            node-key="id"
-            :default-checked-keys="roleForm.ruleList"
-            :props="defaultRuleProps"
-          />
+          <el-tree ref="ruleTreeRef" :data="ruleTree" show-checkbox node-key="id"
+            :default-checked-keys="roleForm.ruleList" :props="defaultRuleProps" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogRoleVisible = false">Cancel</el-button>
           <el-button type="danger" @click="resetForm(roleFormRef)">Reset</el-button>
-          <el-button
-            type="primary"
-            :loading="submitRoleLoading"
-            :disabled="submitRoleDisabled"
-            @click="dialogRoleStatusMap[dialogRoleStatus].submitAction(roleFormRef)"
-          >Confirm</el-button>
+          <el-button type="primary" :loading="submitRoleLoading" :disabled="submitRoleDisabled"
+            @click="dialogRoleStatusMap[dialogRoleStatus].submitAction(roleFormRef)">Confirm</el-button>
         </span>
       </template>
     </el-dialog>
@@ -196,64 +116,33 @@
     <el-dialog v-model="dialogRuleVisible" title="Rule Manage" destroy-on-close>
       <template #default>
         <el-input v-model="filterRuleText" placeholder="Filter keyword" />
-        <el-tree
-          ref="ruleTreeRef"
-          :data="ruleTree"
-          node-key="id"
-          :props="defaultRuleProps"
-          :filter-node-method="filterRuleNode"
-          :expand-on-click-node="false"
-        >
+        <el-tree ref="ruleTreeRef" :data="ruleTree" node-key="id" :props="defaultRuleProps"
+          :filter-node-method="filterRuleNode" :expand-on-click-node="false">
           <template #default="{ node }">
             <span class="custom-tree-node">
               <span>{{ node.label }}</span>
               <span>
-                <el-button
-                  type="text"
-                  @click="showAddRuleDialog(node)"
-                  v-if="node.data.parent_id === 0"
-                >Add</el-button>
+                <el-button type="text" @click="showAddRuleDialog(node)" v-if="node.data.parent_id === 0">Add</el-button>
                 <el-button type="text" @click="showUpdateRuleDialog(node)">Update</el-button>
-                <el-popconfirm
-                  confirm-button-text="Yes"
-                  cancel-button-text="No"
-                  icon-color="red"
-                  title="Are you sure to delete this rule?"
-                  @confirm="onRemoveRule(node)"
-                >
+                <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="red"
+                  title="Are you sure to delete this rule?" @confirm="onRemoveRule(node)">
                   <template #reference>
-                    <el-button
-                      :loading="submitRuleLoading"
-                      :disabled="submitRuleDisabled"
-                      type="text"
-                    >Delete</el-button>
+                    <el-button :loading="submitRuleLoading" :disabled="submitRuleDisabled" type="text">Delete
+                    </el-button>
                   </template>
                 </el-popconfirm>
               </span>
             </span>
           </template>
         </el-tree>
-        <el-dialog
-          v-model="innerDialogRuleVisible"
-          width="30%"
-          :title="innerDialogRuleStatusMap[innerDialogRuleStatus].title"
-          append-to-body
-        >
-          <el-form
-            ref="ruleFormRef"
-            :model="ruleForm"
-            status-icon
-            label-position="left"
-            label-width="100px"
-          >
+        <el-dialog v-model="innerDialogRuleVisible" width="30%"
+          :title="innerDialogRuleStatusMap[innerDialogRuleStatus].title" append-to-body>
+          <el-form ref="ruleFormRef" :model="ruleForm" status-icon label-position="left" label-width="100px">
             <el-form-item label="Description" prop="description" required>
               <el-input type="text" autocomplete="off" v-model="ruleForm.description" />
             </el-form-item>
-            <el-form-item
-              :label="ruleForm.parent_id === 0 || ruleForm.parent_id === null ? 'Resource' : 'Action'"
-              prop="permission"
-              required
-            >
+            <el-form-item :label="ruleForm.parent_id === 0 || ruleForm.parent_id === null ? 'Resource' : 'Action'"
+              prop="permission" required>
               <el-input type="text" autocomplete="off" v-model="ruleForm.permission" />
             </el-form-item>
           </el-form>
@@ -261,12 +150,8 @@
             <span class="dialog-footer">
               <el-button @click="innerDialogRuleVisible = false">Cancel</el-button>
               <el-button type="danger" @click="resetForm(ruleFormRef)">Reset</el-button>
-              <el-button
-                type="primary"
-                :loading="submitRuleLoading"
-                :disabled="submitRuleDisabled"
-                @click="innerDialogRuleStatusMap[innerDialogRuleStatus].submitAction(ruleFormRef)"
-              >Confirm</el-button>
+              <el-button type="primary" :loading="submitRuleLoading" :disabled="submitRuleDisabled"
+                @click="innerDialogRuleStatusMap[innerDialogRuleStatus].submitAction(ruleFormRef)">Confirm</el-button>
             </span>
           </template>
         </el-dialog>
@@ -303,7 +188,7 @@ const roleProps = {
   label: 'name',
   checkStrictly: true,
 }
-const parentRoleValue = ref([])
+const parentRoleSelectIdList = ref([])
 
 const searchFormRef = ref(null)
 const searchForm = reactive({
@@ -550,14 +435,18 @@ const roleFormRef = ref(null)
 const roleForm = reactive(defaultRoleForm())
 
 const handleParentRoleChange = (value) => {
+  if (!value) {
+    roleForm.role.parent_id = 0
+    return
+  }
   roleForm.role.parent_id = Object.values(value).pop()
-  console.debug('parentRoleValue', parentRoleValue.value)
+  console.debug('parentRoleSelectIdList', parentRoleSelectIdList.value)
 }
 
 // ------- add role -------
 const showAddRoleDialog = () => {
   Object.assign(roleForm, defaultRoleForm())
-  parentRoleValue.value = []
+  parentRoleSelectIdList.value = []
   dialogRoleStatus.value = 'add'
   dialogRoleVisible.value = true
 }
@@ -596,7 +485,7 @@ const showUpdateRoleDialog = (roleId) => {
     }
     else {
       listParentRole({ parentId: response.data.role.parent_id }).then(response => {
-        parentRoleValue.value = response.data.map(role => role.id).sort()
+        parentRoleSelectIdList.value = response.data.map(role => role.id).sort()
         dialogRoleVisible.value = true
       }).catch((error) => {
         ElMessage.error(`list parent role error: ${JSON.stringify(error)}`)
@@ -639,6 +528,7 @@ const onDelete = (roleId) => {
 .filter-container {
   margin-bottom: 20px;
 }
+
 .custom-tree-node {
   flex: 1;
   display: flex;
