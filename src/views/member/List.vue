@@ -153,20 +153,26 @@
     </el-dialog>
 
     <el-dialog v-model="dialogUpdateMemberRoleVisible" title="Update Member Role" destroy-on-close>
-      <el-form ref="memberRoleFormRef" :model="memberRoleForm" label-position="left" label-width="100px">
-        <el-form-item label="Old Role" prop="role.name">
-          <el-input v-model="memberRoleForm.role.name" disabled />
+      <el-form ref="memberRoleFormRef" :model="memberRoleForm" label-position="left" label-width="110px">
+        <el-form-item label="Current Role">
+          <template v-for="(role, index) in memberRoleForm.roleList" :key="role.id">
+            <el-tag size="small" effect="plain" class="mr-1" closable @close="onDeleteMemberRole(index)">{{
+              role.name
+            }}</el-tag>
+          </template>
         </el-form-item>
         <el-form-item label="New Role">
-          <el-cascader :options="roleTree" :props="roleProps" @change="handleRoleChange" filterable />
+          <el-cascader v-model="roleSelectIdList" :options="roleTree" :props="roleProps" @change="handleRoleChange"
+            filterable />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="submitMemberRoleLoading" :disabled="submitMemberRoleDisabled"
+            @click="onAddMemberRole">Add</el-button>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="dialogUpdateMemberRoleVisible = false">Cancel</el-button>
-          <el-button type="danger" @click="resetForm(memberRoleFormRef)">Reset</el-button>
-          <el-button type="primary" :loading="submitMemberRoleLoading" :disabled="submitMemberRoleDisabled"
-            @click="onUpdateMemberRole(memberRoleFormRef)">Confirm</el-button>
+          <el-button @click="onCloseDialogUpdateMemberRole">Close</el-button>
         </span>
       </template>
     </el-dialog>
@@ -180,7 +186,7 @@ import { resetForm, allEmpty } from 'utils/form'
 import { list2Tree } from 'utils/tree'
 import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
 import { list as listMember, detail as getMemberDetail, updateDetail as updateMemberDetail, add as addMember, remove as removeMember } from 'api/member'
-import { list as listRole, updateMemberRole } from 'api/role'
+import { list as listRole, addMemberRole, deleteMemberRole } from 'api/role'
 
 const store = useStore()
 const member = computed(() => store.getters.member.member)
@@ -188,12 +194,12 @@ const member = computed(() => store.getters.member.member)
 const memberListLoading = ref(false)
 const memberList = ref([])
 const roleList = ref([])
+const roleSelectIdList = ref([])
 const roleTree = ref([])
 const roleProps = {
   value: 'id',
   label: 'name',
   checkStrictly: true,
-  multiple: true,
 }
 
 const searchFormRef = ref(null)
@@ -438,10 +444,8 @@ const dialogUpdateMemberRoleVisible = ref(false)
 const defaultMemberRoleForm = () => {
   return {
     memberId: null,
-    role: {
-      id: null,
-      name: '',
-    }
+    roleId: null,
+    roleList: [],
   }
 }
 const memberRoleFormRef = ref(null)
@@ -451,7 +455,7 @@ const showUpdateMemberRoleDialog = (memberId) => {
   Object.assign(memberRoleForm, defaultMemberRoleForm())
   getMemberDetail({ memberId: memberId }).then(response => {
     memberRoleForm.memberId = response.data.member.id
-    memberRoleForm.role = response.data.role
+    memberRoleForm.roleList = response.data.roleList
     dialogUpdateMemberRoleVisible.value = true
   }).catch((error) => {
     ElMessage.error(`get member detail error: ${JSON.stringify(error)}`)
@@ -459,22 +463,62 @@ const showUpdateMemberRoleDialog = (memberId) => {
 }
 
 const handleRoleChange = (value) => {
-  memberRoleForm.role.id = Object.values(value).pop()
+  if (!value) {
+    return
+  }
+  const roleId = Object.values(value).pop()
+  for (let i = 0; i < memberRoleForm.roleList.length; i++) {
+    if (memberRoleForm.roleList[i].id === roleId) {
+      roleSelectIdList.value = []
+      return ElMessage.error('member already assumed this role')
+    }
+  }
+  memberRoleForm.roleId = roleId
 }
 
-const onUpdateMemberRole = () => {
+let isMemberRoleUpdate = false
+
+const onDeleteMemberRole = (index) => {
   submitMemberRoleLoading.value = true
   submitMemberRoleDisabled.value = true
-  updateMemberRole(memberRoleForm).then(() => {
-    getMemberList()
-    dialogUpdateMemberRoleVisible.value = false
-    ElMessage.success('update member role success')
+  const roleId = memberRoleForm.roleList[index].id
+  deleteMemberRole({ roleId: roleId, memberId: memberRoleForm.memberId }).then(() => {
+    isMemberRoleUpdate = true
+    memberRoleForm.roleList.splice(index, 1)
+    ElMessage.success('delete member role success')
   }).catch((error) => {
-    ElMessage.error(`update member role error: ${JSON.stringify(error)}`)
+    ElMessage.error(`delete member role error: ${JSON.stringify(error)}`)
   }).finally(() => {
     submitMemberRoleLoading.value = false
     submitMemberRoleDisabled.value = false
   })
+}
+
+const onAddMemberRole = () => {
+  submitMemberRoleLoading.value = true
+  submitMemberRoleDisabled.value = true
+  addMemberRole({ roleId: memberRoleForm.roleId, memberId: memberRoleForm.memberId }).then((response) => {
+    isMemberRoleUpdate = true
+    roleSelectIdList.value = []
+    memberRoleForm.roleList.push(response.data)
+    ElMessage.success('add member role success')
+  }).catch((error) => {
+    ElMessage.error(`add member role error: ${JSON.stringify(error)}`)
+  }).finally(() => {
+    submitMemberRoleLoading.value = false
+    submitMemberRoleDisabled.value = false
+  })
+}
+
+const onCloseDialogUpdateMemberRole = () => {
+  if (isMemberRoleUpdate) {
+    isMemberRoleUpdate = false
+    getMemberList(() => {
+      dialogUpdateMemberRoleVisible.value = false
+    })
+  } else {
+    dialogUpdateMemberRoleVisible.value = false
+  }
 }
 
 // ------- delete member -------

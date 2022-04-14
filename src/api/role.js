@@ -40,17 +40,25 @@ export function update(data) {
   })
 }
 
-export function updateMemberRole(data) {
+export function remove(data) {
   return request({
-    url: '/role/updateMemberRole',
-    method: 'PUT',
+    url: '/role/delete',
+    method: 'DELETE',
     data: data
   })
 }
 
-export function remove(data) {
+export function addMemberRole(data) {
   return request({
-    url: '/role/delete',
+    url: '/role/addMemberRole',
+    method: 'POST',
+    data: data
+  })
+}
+
+export function deleteMemberRole(data) {
+  return request({
+    url: '/role/deleteMemberRole',
     method: 'DELETE',
     data: data
   })

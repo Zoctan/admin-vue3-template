@@ -5,6 +5,7 @@ import { ElMessage, ElLoading } from 'element-plus'
 
 // refreshing token flag
 let isRefreshing = false
+let refreshSuccess = false
 // retry requests queue
 let requests = []
 // fullscreen loading instance
@@ -35,8 +36,9 @@ function retryAdapterEnhancer(adapter, options) {
     }
 }
 
-const getConfig = (config, accessToken) => {
+const setGetConfig = (config) => {
     config.baseURL = import.meta.env.VITE_API_DOMAIN
+    const accessToken = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
     config.headers['Authorization'] = accessToken
     return config
 }
@@ -57,9 +59,7 @@ instance.defaults.headers.post = {
 instance.interceptors.request.use(
     (config) => {
         loadingInstance = ElLoading.service({ fullscreen: true })
-        const accessToken = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
-        config = getConfig(config, accessToken)
-        return config
+        return setGetConfig(config)
     },
     (error) => {
         return Promise.reject(error)
@@ -96,24 +96,32 @@ instance.interceptors.response.use(
                     ElMessage.info('refresh token, please wait...')
 
                     isRefreshing = true
-                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then((accessToken) => {
+                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then(() => {
                         ElMessage.success('refresh token success, retry pending requests...')
                         console.debug('refresh token success, requests:', requests)
                         isRefreshing = false
-                        // already refreshed token, retry pending requests
-                        requests.forEach(callback => callback(accessToken))
-                        requests = []
-                        return instance(getConfig(config, accessToken))
+                        refreshSuccess = true
                     }).catch((error) => {
                         isRefreshing = false
+                        refreshSuccess = false
                         console.error('refresh token error:', error)
                         return authErrorCallback(error)
+                    }).finally(() => {
+                        if (refreshSuccess === true) {
+                            // already refreshed token, retry pending requests
+                            // don't put below code into above 'refreshToken' then()
+                            // because if instace() return Promise.reject()
+                            // that will be catched by above 'refreshToken' catch() and call authErrorCallback()
+                            requests.forEach(callback => callback())
+                            requests = []
+                            return instance(setGetConfig(config))
+                        }
                     })
                 } else {
                     // pending requests when refreshing token
                     return new Promise((resolve) => {
-                        requests.push((accessToken) => {
-                            resolve(instance(getConfig(config, accessToken)))
+                        requests.push(() => {
+                            resolve(instance(setGetConfig(config)))
                         })
                     })
                 }

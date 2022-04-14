@@ -4,7 +4,7 @@ const defaultState = () => {
   return {
     member: null,
     memberData: null,
-    role: null,
+    roleList: [],
     permissionList: []
   }
 }
@@ -14,10 +14,10 @@ export default {
 
   mutations: {
     SET_MEMBER: (state, _member) => {
-      const { member, memberData, role, permissionList } = _member
+      const { member, memberData, roleList, permissionList } = _member
       state.member = member
       state.memberData = memberData
-      state.role = role
+      state.roleList = roleList
       state.permissionList = permissionList
     },
     RESET_MEMBER: (state) => {
