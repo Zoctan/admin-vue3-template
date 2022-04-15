@@ -515,7 +515,7 @@ const onUpdateRole = () => {
 
 // ------- delete role -------
 const onDelete = (roleId) => {
-  removeRole({ roleId: roleId }).then(() => {
+  removeRole({ id: roleId }).then(() => {
     getRoleList()
     ElMessage.success('delete success')
   }).catch((error) => {

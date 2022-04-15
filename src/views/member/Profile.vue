@@ -203,7 +203,7 @@ import { ref, reactive, computed } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from 'utils/form'
 import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
-import { updateProfile, checkOldPassword, updatePassword } from 'api/member'
+import { updateProfile, validateOldPassword as validateMemberOldPassword, updatePassword } from 'api/member'
 
 const store = useStore()
 
@@ -274,7 +274,7 @@ const validateOldPassword = (rule, value, callback) => {
     submitPasswordDisabled.value = true
     callback(new Error('please input old password'))
   } else {
-    checkOldPassword({ oldPassword: value }).then(() => {
+    validateMemberOldPassword({ oldPassword: value }).then(() => {
       submitPasswordDisabled.value = false
       callback()
     }).catch(error => {

@@ -1,16 +1,16 @@
 import request from 'utils/request'
 
-export function checkExist(data) {
+export function isMemberExist(data) {
   return request({
-    url: '/member/checkExist',
+    url: '/member/isMemberExist',
     method: 'POST',
     data: data
   })
 }
 
-export function checkOldPassword(data) {
+export function validateOldPassword(data) {
   return request({
-    url: '/member/checkOldPassword',
+    url: '/member/validateOldPassword',
     method: 'POST',
     data: data
   })
@@ -76,14 +76,6 @@ export function list(data) {
     data: data
   })
 }
-
-// export function list(params) {
-//   return request({
-//     url: '/member/list',
-//     method: 'GET',
-//     params
-//   })
-// }
 
 export function updatePassword(data) {
   return request({

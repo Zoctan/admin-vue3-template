@@ -411,7 +411,7 @@ const memberFormRules = reactive({
 
 const showUpdateMemberDialog = (memberId) => {
   Object.assign(memberForm, defaultMemberForm())
-  getMemberDetail({ memberId: memberId }).then(response => {
+  getMemberDetail({ id: memberId }).then(response => {
     memberForm.member = response.data.member
     memberForm.memberData = response.data.memberData
     dialogMemberStatus.value = 'update'
@@ -453,7 +453,7 @@ const memberRoleForm = reactive(defaultMemberRoleForm())
 
 const showUpdateMemberRoleDialog = (memberId) => {
   Object.assign(memberRoleForm, defaultMemberRoleForm())
-  getMemberDetail({ memberId: memberId }).then(response => {
+  getMemberDetail({ id: memberId }).then(response => {
     memberRoleForm.memberId = response.data.member.id
     memberRoleForm.roleList = response.data.roleList
     dialogUpdateMemberRoleVisible.value = true
@@ -523,7 +523,7 @@ const onCloseDialogUpdateMemberRole = () => {
 
 // ------- delete member -------
 const onDelete = (memberId) => {
-  removeMember({ memberId: memberId }).then(() => {
+  removeMember({ id: memberId }).then(() => {
     getMemberList()
     ElMessage.success('delete success')
   }).catch((error) => {

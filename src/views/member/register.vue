@@ -62,7 +62,7 @@ import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { resetForm } from 'utils/form'
-import { checkExist } from 'api/member'
+import { isMemberExist } from 'api/member'
 import background from 'assets/image/maldives.jpg'
 
 const props = defineProps({
@@ -96,7 +96,7 @@ const validateUsername = (rule, value, callback) => {
       submitDisabled.value = true
       callback(new Error('username length must be over 3'))
     } else {
-      checkExist({ username: value }).then(() => {
+      isMemberExist({ username: value }).then(() => {
         submitDisabled.value = false
         callback()
       }).catch(error => {
