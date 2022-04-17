@@ -115,6 +115,18 @@ export const asyncRouters = [
             meta: { icon: 'user-filled', auth: true, permission: ['role:list'] }
         }]
     },
+    {
+        path: '/log',
+        component: Layout,
+        name: 'Log',
+        meta: { icon: 'user-filled', dropDown: true, },
+        children: [{
+            path: 'list',
+            name: 'Log Manage',
+            component: _import('log/list'),
+            meta: { icon: 'user-filled', auth: true, permission: ['log:list'] }
+        }]
+    },
 ]
 
 const defaultRouter = () => createRouter({
