@@ -16,7 +16,7 @@
       <template v-if="memberData">
         <el-dropdown class>
           <span class="el-dropdown-link">
-            <el-avatar class="avatar" :size="30" :src="memberData.avatar || avatar"></el-avatar>
+            <el-avatar class="avatar mr-1" :size="30" :src="memberData.avatar || avatar"></el-avatar>
             {{ memberData.nickname || 'None' }}
             <el-icon class="el-icon--right">
               <arrow-down />
