@@ -79,32 +79,32 @@ instance.interceptors.response.use(
                 return Promise.reject(response.data)
             }
             if (response.data.errno === 4001) {
-                console.error('token error:', response.data.msg)
+                console.error('Token error:', response.data.msg)
                 return authErrorCallback(response.msg)
             } else if (response.data.errno === 4002) {
-                console.error('access token error, msg:', response.data.msg)
-                console.error('access token error, requests:', requests)
-                console.error('access token error, isRefreshing:', isRefreshing)
+                console.error('Access token error, msg:', response.data.msg)
+                console.error('Access token error, requests:', requests)
+                console.error('Access token error, isRefreshing:', isRefreshing)
                 const config = response.config
                 if (!isRefreshing) {
                     const refreshToken = store.getters.token && store.getters.token.refreshToken ? store.getters.token.refreshToken : ''
                     if (refreshToken === null || refreshToken === '') {
-                        return authErrorCallback('empty refreshToken')
+                        return authErrorCallback('Empty refreshToken.')
                     }
 
-                    console.debug('refresh token, please wait...')
-                    ElMessage.info('refresh token, please wait...')
+                    console.debug('Refresh token, please wait...')
+                    ElMessage.info('Refresh token, please wait...')
 
                     isRefreshing = true
-                    return store.dispatch('refreshToken', { refreshToken: refreshToken }).then(() => {
-                        ElMessage.success('refresh token success, retry pending requests...')
-                        console.debug('refresh token success, requests:', requests)
+                    return store.dispatch('refreshAccessToken', { refreshToken: refreshToken }).then(() => {
+                        ElMessage.success('Refresh access token success, retry pending requests...')
+                        console.debug('Refresh access token success, requests:', requests)
                         isRefreshing = false
                         refreshSuccess = true
                     }).catch((error) => {
                         isRefreshing = false
                         refreshSuccess = false
-                        console.error('refresh token error:', error)
+                        console.error('Refresh access token error:', error)
                         return authErrorCallback(error)
                     }).finally(() => {
                         if (refreshSuccess === true) {
@@ -126,7 +126,7 @@ instance.interceptors.response.use(
                     })
                 }
             } else if (response.data.errno === 4003) {
-                console.error('refresh token error:', response.data.msg)
+                console.error('Refresh access token error:', response.data.msg)
                 return authErrorCallback(response.msg)
             } else {
                 console.error('response errno !== 0', response.data.msg)

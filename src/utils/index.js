@@ -67,3 +67,21 @@ export const roleLockMap = {
     color: 'danger',
   },
 }
+
+export const logLevelMap = {
+  0: {
+    id: 0,
+    label: 'info',
+    color: 'info',
+  },
+  1: {
+    id: 1,
+    label: 'warn',
+    color: 'warning',
+  },
+  2: {
+    id: 2,
+    label: 'error',
+    color: 'danger',
+  },
+}

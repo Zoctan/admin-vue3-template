@@ -48,8 +48,12 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="CreatedAt" prop="created_at" width="180" />
-      <el-table-column label="UpdatedAt" prop="updated_at" width="180" />
+      <el-table-column label="UpdatedAt / CreatedAt" width="200">
+        <template #default="scope">
+          <div>{{ scope.row.updated_at || 'None' }}</div>
+          <div>{{ scope.row.created_at }}</div>
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" label="Operations" v-permission:or="['role:detail', 'role:update', 'role:delete']">
         <template #default="scope">
           <template
@@ -175,6 +179,11 @@ import { roleHasAllRuleMap, roleLockMap } from 'utils'
 import { add as addRole, list as listRole, listParent as listParentRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
 import { add as addRule, list as listRule, update as updateRule, removeList as removeRuleList } from 'api/rule'
 
+onMounted(async () => {
+  await getRuleList()
+  await getRoleList()
+})
+
 const store = useStore()
 const member = computed(() => store.getters.member)
 
@@ -206,13 +215,7 @@ const onSearchDisabled = ref(false)
 
 const onSearch = () => {
   searched.value = true
-  onSearchLoading.value = true
-  onSearchDisabled.value = true
-  const callback = () => {
-    onSearchLoading.value = false
-    onSearchDisabled.value = false
-  }
-  getRoleList(callback, callback)
+  getRoleList()
 }
 
 const restSearchLoading = ref(false)
@@ -222,12 +225,11 @@ const restSearch = (formEl) => {
   searched.value = false
   restSearchLoading.value = true
   restSearchDisabled.value = true
-  const callback = () => {
+  resetForm(formEl)
+  getRoleList(() => {
     restSearchLoading.value = false
     restSearchDisabled.value = false
-  }
-  resetForm(formEl)
-  getRoleList(callback, callback)
+  })
 }
 
 const page = reactive({
@@ -289,7 +291,7 @@ const ruleFormRef = ref(null)
 const ruleForm = reactive(defaultRuleForm())
 
 const getRuleList = () => {
-  listRule().then(response => {
+  listRule().then((response) => {
     ruleList.value = response.data
     ruleTree.value = list2Tree(response.data)
   }).catch((error) => {
@@ -375,34 +377,28 @@ const onRemoveRule = (node) => {
   })
 }
 
-const getRoleList = (successCallback = null, errorCallback = null) => {
+const getRoleList = (finalCallback = null) => {
   roleListLoading.value = true
   onSearchLoading.value = true
   onSearchDisabled.value = true
   searchForm.currentPage = page.currentPage
   searchForm.pageSize = page.pageSize
-  listRole(searchForm).then(response => {
+  listRole(searchForm).then((response) => {
     roleList.value = response.data.list
     roleTree.value = list2Tree(response.data.list)
     page.totalData = response.data.total
     page.currentPage = response.data.currentPage
     page.pageSize = response.data.pageSize
     page.totalPage = response.data.totalPage
-    successCallback && successCallback()
   }).catch((error) => {
-    errorCallback && errorCallback()
     ElMessage.error(`get roleList error: ${JSON.stringify(error)}`)
   }).finally(() => {
     roleListLoading.value = false
     onSearchLoading.value = false
     onSearchDisabled.value = false
+    finalCallback && finalCallback()
   })
 }
-
-onMounted(async () => {
-  await getRuleList()
-  await getRoleList()
-})
 
 const dialogRoleStatusMap = {
   add: {
@@ -471,7 +467,7 @@ const onAddRole = () => {
 // ------- update role -------
 const showUpdateRoleDialog = (roleId) => {
   Object.assign(roleForm, defaultRoleForm())
-  getRoleDetail({ roleId: roleId }).then(response => {
+  getRoleDetail({ roleId: roleId }).then((response) => {
     roleForm.role.id = response.data.role.id
     roleForm.role.parent_id = response.data.role.parent_id
     roleForm.role.name = response.data.role.name
@@ -484,7 +480,7 @@ const showUpdateRoleDialog = (roleId) => {
       dialogRoleVisible.value = true
     }
     else {
-      listParentRole({ parentId: response.data.role.parent_id }).then(response => {
+      listParentRole({ parentId: response.data.role.parent_id }).then((response) => {
         parentRoleSelectIdList.value = response.data.map(role => role.id).sort()
         dialogRoleVisible.value = true
       }).catch((error) => {

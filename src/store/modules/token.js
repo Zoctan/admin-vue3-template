@@ -1,4 +1,4 @@
-import { refreshToken as refreshTokenApi } from 'api/member'
+import { refreshAccessToken as refreshAccessTokenApi } from 'api/member'
 
 const defaultState = () => {
   return {
@@ -28,9 +28,9 @@ export default {
   },
 
   actions: {
-    refreshToken({ commit }, data) {
+    refreshAccessToken({ commit }, data) {
       return new Promise((resolve, reject) => {
-        refreshTokenApi(data).then(response => {
+        refreshAccessTokenApi(data).then((response) => {
           commit('SET_ACCESS_TOKEN', response.data)
           resolve(response.data)
         }).catch(error => {

@@ -46,9 +46,9 @@ export function validateAccessToken() {
   })
 }
 
-export function refreshToken(data) {
+export function refreshAccessToken(data) {
   return request({
-    url: '/member/refreshToken',
+    url: '/member/refreshAccessToken',
     method: 'PUT',
     data: data
   })

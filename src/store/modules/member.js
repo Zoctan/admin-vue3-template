@@ -28,7 +28,7 @@ export default {
   actions: {
     memberLogin({ commit }, params) {
       return new Promise((resolve, reject) => {
-        login(params).then(response => {
+        login(params).then((response) => {
           commit('SET_TOKEN', response.data)
           resolve(response.data)
         }).catch(error => {
@@ -38,7 +38,7 @@ export default {
     },
     memberRegister({ commit }, params) {
       return new Promise((resolve, reject) => {
-        register(params).then(response => {
+        register(params).then((response) => {
           commit('SET_TOKEN', response.data)
           resolve(response.data)
         }).catch(error => {
@@ -48,7 +48,7 @@ export default {
     },
     memberProfile({ commit }) {
       return new Promise((resolve, reject) => {
-        profile().then(response => {
+        profile().then((response) => {
           commit('SET_MEMBER', response.data)
           resolve(response.data)
         }).catch(error => {

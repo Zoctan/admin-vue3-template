@@ -119,12 +119,12 @@ export const asyncRouters = [
         path: '/log',
         component: Layout,
         name: 'Log',
-        meta: { icon: 'user-filled', dropDown: true, },
+        meta: { icon: 'document', },
         children: [{
             path: 'list',
             name: 'Log Manage',
             component: _import('log/list'),
-            meta: { icon: 'user-filled', auth: true, permission: ['log:list'] }
+            meta: { icon: 'document', auth: true, permission: ['log:list'] }
         }]
     },
 ]
