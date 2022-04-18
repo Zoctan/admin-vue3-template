@@ -1,8 +1,10 @@
 import request from 'utils/request'
 
+const group = 'fake'
+
 export function getName() {
   return request({
-    url: '/fake/getName',
+    url: `/${group}/getName`,
     method: 'GET'
   })
 }

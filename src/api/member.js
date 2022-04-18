@@ -1,8 +1,10 @@
 import request from 'utils/request'
 
+const group = 'member'
+
 export function isMemberExist(data) {
   return request({
-    url: '/member/isMemberExist',
+    url: `/${group}/isMemberExist`,
     method: 'POST',
     data: data
   })
@@ -10,7 +12,7 @@ export function isMemberExist(data) {
 
 export function validateOldPassword(data) {
   return request({
-    url: '/member/validateOldPassword',
+    url: `/${group}/validateOldPassword`,
     method: 'POST',
     data: data
   })
@@ -18,7 +20,7 @@ export function validateOldPassword(data) {
 
 export function register(data) {
   return request({
-    url: '/member/register',
+    url: `/${group}/register`,
     method: 'POST',
     data: data
   })
@@ -26,7 +28,7 @@ export function register(data) {
 
 export function login(data) {
   return request({
-    url: '/member/login',
+    url: `/${group}/login`,
     method: 'POST',
     data: data
   })
@@ -34,21 +36,21 @@ export function login(data) {
 
 export function logout() {
   return request({
-    url: '/member/logout',
+    url: `/${group}/logout`,
     method: 'DELETE'
   })
 }
 
 export function validateAccessToken() {
   return request({
-    url: '/member/validateAccessToken',
+    url: `/${group}/validateAccessToken`,
     method: 'POST'
   })
 }
 
 export function refreshAccessToken(data) {
   return request({
-    url: '/member/refreshAccessToken',
+    url: `/${group}/refreshAccessToken`,
     method: 'PUT',
     data: data
   })
@@ -56,7 +58,7 @@ export function refreshAccessToken(data) {
 
 export function detail(data) {
   return request({
-    url: '/member/detail',
+    url: `/${group}/detail`,
     method: 'POST',
     data: data
   })
@@ -64,14 +66,14 @@ export function detail(data) {
 
 export function profile() {
   return request({
-    url: '/member/profile',
+    url: `/${group}/profile`,
     method: 'GET'
   })
 }
 
 export function list(data) {
   return request({
-    url: '/member/list',
+    url: `/${group}/list`,
     method: 'POST',
     data: data
   })
@@ -79,7 +81,7 @@ export function list(data) {
 
 export function updatePassword(data) {
   return request({
-    url: '/member/updatePassword',
+    url: `/${group}/updatePassword`,
     method: 'PUT',
     data: data
   })
@@ -87,7 +89,7 @@ export function updatePassword(data) {
 
 export function updateProfile(data) {
   return request({
-    url: '/member/updateProfile',
+    url: `/${group}/updateProfile`,
     method: 'PUT',
     data: data
   })
@@ -95,7 +97,7 @@ export function updateProfile(data) {
 
 export function updateDetail(data) {
   return request({
-    url: '/member/updateDetail',
+    url: `/${group}/updateDetail`,
     method: 'PUT',
     data: data
   })
@@ -103,7 +105,7 @@ export function updateDetail(data) {
 
 export function add(data) {
   return request({
-    url: '/member/add',
+    url: `/${group}/add`,
     method: 'POST',
     data: data
   })
@@ -111,7 +113,7 @@ export function add(data) {
 
 export function remove(data) {
   return request({
-    url: '/member/delete',
+    url: `/${group}/delete`,
     method: 'DELETE',
     data: data
   })

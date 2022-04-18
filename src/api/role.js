@@ -1,8 +1,10 @@
 import request from 'utils/request'
 
+const group = 'role'
+
 export function add(data) {
   return request({
-    url: '/role/add',
+    url: `/${group}/add`,
     method: 'POST',
     data: data
   })
@@ -10,7 +12,7 @@ export function add(data) {
 
 export function list(data) {
   return request({
-    url: '/role/list',
+    url: `/${group}/list`,
     method: 'POST',
     data: data
   })
@@ -18,7 +20,7 @@ export function list(data) {
 
 export function listParent(data) {
   return request({
-    url: '/role/listParent',
+    url: `/${group}/listParent`,
     method: 'POST',
     data: data
   })
@@ -26,7 +28,7 @@ export function listParent(data) {
 
 export function detail(data) {
   return request({
-    url: '/role/detail',
+    url: `/${group}/detail`,
     method: 'POST',
     data: data
   })
@@ -34,7 +36,7 @@ export function detail(data) {
 
 export function update(data) {
   return request({
-    url: '/role/update',
+    url: `/${group}/update`,
     method: 'PUT',
     data: data
   })
@@ -42,7 +44,7 @@ export function update(data) {
 
 export function remove(data) {
   return request({
-    url: '/role/delete',
+    url: `/${group}/delete`,
     method: 'DELETE',
     data: data
   })
@@ -50,7 +52,7 @@ export function remove(data) {
 
 export function addMemberRole(data) {
   return request({
-    url: '/role/addMemberRole',
+    url: `/${group}/addMemberRole`,
     method: 'POST',
     data: data
   })
@@ -58,7 +60,7 @@ export function addMemberRole(data) {
 
 export function deleteMemberRole(data) {
   return request({
-    url: '/role/deleteMemberRole',
+    url: `/${group}/deleteMemberRole`,
     method: 'DELETE',
     data: data
   })

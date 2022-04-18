@@ -1,8 +1,10 @@
 import request from 'utils/request'
 
+const group = 'log'
+
 export function list(data) {
   return request({
-    url: '/log/list',
+    url: `/${group}/list`,
     method: 'POST',
     data: data
   })
@@ -10,7 +12,7 @@ export function list(data) {
 
 export function remove(data) {
   return request({
-    url: '/log/delete',
+    url: `/${group}/delete`,
     method: 'DELETE',
     data: data
   })

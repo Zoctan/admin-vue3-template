@@ -1,6 +1,14 @@
 import request from 'utils/request'
 
-const group = 'rule'
+const group = 'pair'
+
+export function getValue(data) {
+  return request({
+    url: `/${group}/getValue`,
+    method: 'POST',
+    data: data
+  })
+}
 
 export function add(data) {
   return request({
@@ -18,26 +26,10 @@ export function list(data) {
   })
 }
 
-export function updateList(data) {
-  return request({
-    url: `/${group}/updateList`,
-    method: 'PUT',
-    data: data
-  })
-}
-
 export function update(data) {
   return request({
     url: `/${group}/update`,
     method: 'PUT',
-    data: data
-  })
-}
-
-export function removeList(data) {
-  return request({
-    url: `/${group}/deleteList`,
-    method: 'DELETE',
     data: data
   })
 }

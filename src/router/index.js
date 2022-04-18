@@ -116,15 +116,25 @@ export const asyncRouters = [
         }]
     },
     {
+        path: '/pair',
+        component: Layout,
+        name: 'Pair',
+        meta: { icon: 'setting', auth: true, permission: ['pair:list'] },
+        children: [{
+            path: 'list',
+            name: 'PairX',
+            component: _import('pair/list'),
+        }]
+    },
+    {
         path: '/log',
         component: Layout,
         name: 'Log',
-        meta: { icon: 'document', },
+        meta: { icon: 'document', auth: true, permission: ['log:list'] },
         children: [{
             path: 'list',
-            name: 'Log Manage',
+            name: 'LogX',
             component: _import('log/list'),
-            meta: { icon: 'document', auth: true, permission: ['log:list'] }
         }]
     },
 ]
