@@ -467,7 +467,7 @@ const onAddRole = () => {
 // ------- update role -------
 const showUpdateRoleDialog = (roleId) => {
   Object.assign(roleForm, defaultRoleForm())
-  getRoleDetail({ roleId: roleId }).then((response) => {
+  getRoleDetail({ id: roleId }).then((response) => {
     roleForm.role.id = response.data.role.id
     roleForm.role.parent_id = response.data.role.parent_id
     roleForm.role.name = response.data.role.name
