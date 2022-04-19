@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "author": "Zoctan <zoctan@163.com> (https://github.com/Zoctan)",
-  "description": "A Vue.js admin project seed",
+  "description": "Vue admin project seed",
   "keywords": [
     "Vue.js",
     "admin"
@@ -20,15 +20,14 @@
   "contributors": [],
   "scripts": {
     "dev": "vite",
-    "test": "cross-env vite build --mode development",
-    "build": "cross-env vite build --mode production",
+    "test": "vite build --mode development",
+    "build": "vite build --mode production",
     "preview": "vite preview"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^1.1.4",
     "axios": "^0.26.1",
     "element-plus": "^2.1.10",
-    "jsoneditor": "^9.7.4",
     "nprogress": "^0.2.0",
     "vue": "^3.2.33",
     "vue-router": "^4.0.14",

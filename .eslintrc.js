@@ -116,6 +116,7 @@ module.exports = {
         defineEmits: 'readonly',
         defineExpose: 'readonly',
         withDefaults: 'readonly',
+        ElMessage: 'readonly',
     },
 
     /**

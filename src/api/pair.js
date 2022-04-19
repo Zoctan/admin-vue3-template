@@ -36,7 +36,7 @@ export function update(data) {
 
 export function remove(data) {
   return request({
-    url: `/${group}/delete`,
+    url: `/${group}/remove`,
     method: 'DELETE',
     data: data
   })

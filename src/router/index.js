@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/layout/index.vue'
 
-// 使用 Glob 动态引入：https://cn.vitejs.dev/guide/features.html#glob-import
+// importing multiple modules from the file system: https://cn.vitejs.dev/guide/features.html#glob-import
 const modules = import.meta.glob('/src/views/**/**.vue')
 const _import = (file) => modules[`/src/views/${file}.vue`]
 // console.debug('modules', modules)
@@ -40,7 +40,7 @@ export const constRouters = [
     {
         path: '/nestedMenu',
         component: Layout,
-        name: 'NestedMenu',
+        name: 'Nested Menu',
         meta: { icon: 'menu', dropDown: true, },
         children: [{
             path: '11',
@@ -116,6 +116,17 @@ export const asyncRouters = [
         }]
     },
     {
+        path: '/imageUpload',
+        component: Layout,
+        name: 'Image Upload',
+        meta: { icon: 'upload', auth: true },
+        children: [{
+            path: 'add',
+            name: 'Image UploadX',
+            component: _import('imageUpload/add'),
+        }]
+    },
+    {
         path: '/pair',
         component: Layout,
         name: 'Pair',
@@ -141,15 +152,14 @@ export const asyncRouters = [
 
 const defaultRouter = () => createRouter({
     /**
-     * 历史模式：https://router.vuejs.org/zh/guide/essentials/history-mode.html
-     * Hash 模式：createWebHashHistory
-     * HTML5 模式（推荐）：createWebHistory
+     * History modes: https://router.vuejs.org/zh/guide/essentials/history-mode.html
+     * Hash Mode: createWebHashHistory
+     * HTML5 Mode: createWebHistory
      */
     history: createWebHistory(),
     routes: constRouters,
     /**
-     * 滚动行为：使用前端路由，当切换到新路由时，想要页面滚到顶部，或者是保持原先的滚动位置，就像重新加载页面那样。
-     * https://router.vuejs.org/zh/guide/advanced/scroll-behavior.html
+     * Scroll behavior: https://router.vuejs.org/zh/guide/advanced/scroll-behavior.html
      * 
      * @param {*} to 
      * @param {*} from 
@@ -160,7 +170,7 @@ const defaultRouter = () => createRouter({
         if (savedPosition) {
             return savedPosition
         } else {
-            // 滚动到顶部
+            // always scroll to top
             return {
                 top: 0,
                 behavior: 'smooth',

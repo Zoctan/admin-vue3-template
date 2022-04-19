@@ -36,7 +36,7 @@ export function update(data) {
 
 export function removeList(data) {
   return request({
-    url: `/${group}/deleteList`,
+    url: `/${group}/removeList`,
     method: 'DELETE',
     data: data
   })
@@ -44,7 +44,7 @@ export function removeList(data) {
 
 export function remove(data) {
   return request({
-    url: `/${group}/delete`,
+    url: `/${group}/remove`,
     method: 'DELETE',
     data: data
   })

@@ -3,6 +3,8 @@ import store from '@/store'
 import router from '@/router'
 import { ElMessage, ElLoading } from 'element-plus'
 
+export const baseUrl = import.meta.env.VITE_API_DOMAIN
+
 // refreshing token flag
 let isRefreshing = false
 let refreshSuccess = false
@@ -37,7 +39,7 @@ function retryAdapterEnhancer(adapter, options) {
 }
 
 const setGetConfig = (config) => {
-    config.baseURL = import.meta.env.VITE_API_DOMAIN
+    config.baseURL = baseUrl
     const accessToken = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
     config.headers['Authorization'] = accessToken
     return config

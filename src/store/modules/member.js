@@ -28,32 +28,38 @@ export default {
   actions: {
     memberLogin({ commit }, params) {
       return new Promise((resolve, reject) => {
-        login(params).then((response) => {
-          commit('SET_TOKEN', response.data)
-          resolve(response.data)
-        }).catch(error => {
-          reject(error)
-        })
+        login(params)
+          .then((response) => {
+            commit('SET_TOKEN', response.data)
+            resolve(response.data)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
     memberRegister({ commit }, params) {
       return new Promise((resolve, reject) => {
-        register(params).then((response) => {
-          commit('SET_TOKEN', response.data)
-          resolve(response.data)
-        }).catch(error => {
-          reject(error)
-        })
+        register(params)
+          .then((response) => {
+            commit('SET_TOKEN', response.data)
+            resolve(response.data)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
     memberProfile({ commit }) {
       return new Promise((resolve, reject) => {
-        profile().then((response) => {
-          commit('SET_MEMBER', response.data)
-          resolve(response.data)
-        }).catch(error => {
-          reject(error)
-        })
+        profile()
+          .then((response) => {
+            commit('SET_MEMBER', response.data)
+            resolve(response.data)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
     memberLogout({ commit }) {

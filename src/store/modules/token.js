@@ -30,12 +30,14 @@ export default {
   actions: {
     refreshAccessToken({ commit }, data) {
       return new Promise((resolve, reject) => {
-        refreshAccessTokenApi(data).then((response) => {
-          commit('SET_ACCESS_TOKEN', response.data)
-          resolve(response.data)
-        }).catch(error => {
-          reject(error)
-        })
+        refreshAccessTokenApi(data)
+          .then((response) => {
+            commit('SET_ACCESS_TOKEN', response.data)
+            resolve(response.data)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
   }

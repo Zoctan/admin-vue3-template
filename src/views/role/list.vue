@@ -4,22 +4,22 @@
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
           <el-button type="info" icon="menu" @click="dialogRuleVisible = true">Rule Manage</el-button>
-          <el-button type="success" icon="refresh" circle @click="getRoleList()"></el-button>
+          <el-button type="success" icon="refresh" circle @click="getRoleList"></el-button>
           <el-button type="primary" icon="plus" circle @click="showAddRoleDialog"></el-button>
         </el-form-item>
         <el-form-item label="RoleName" prop="role.name">
-          <el-input v-model="searchForm.role.name"></el-input>
+          <el-input v-model="searchForm.role.name" />
         </el-form-item>
         <el-form-item label="Has All Rule" prop="role.has_all_rule">
           <el-select v-model="searchForm.role.has_all_rule" clearable>
-            <el-option v-for="item in roleHasAllRuleMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === searchForm.role.has_all_rule" />
+            <el-option v-for="item in roleHasAllRuleMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === searchForm.role.has_all_rule" />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="role.lock">
           <el-select v-model="searchForm.role.lock" clearable>
-            <el-option v-for="item in roleLockMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === searchForm.role.lock" />
+            <el-option v-for="item in roleLockMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === searchForm.role.lock" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -37,14 +37,15 @@
       <el-table-column label="Name" prop="name" width="150" />
       <el-table-column label="HasAllRule" prop="has_all_rule" width="110">
         <template #default="scope">
-          <el-tag size="small" :type="roleHasAllRuleMap[scope.row.has_all_rule].color">{{
-            roleHasAllRuleMap[scope.row.has_all_rule].label
-          }}</el-tag>
+          <el-tag size="small" v-if="roleHasAllRuleMap.length > 0"
+            :type="roleHasAllRuleMap[scope.row.has_all_rule].color">
+            {{ roleHasAllRuleMap[scope.row.has_all_rule].label }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="Lock" prop="lock" width="100">
         <template #default="scope">
-          <el-tag size="small" :type="roleLockMap[scope.row.lock].color">{{ roleLockMap[scope.row.lock].label }}
+          <el-tag size="small" v-if="roleLockMap.length > 0" :type="roleLockMap[scope.row.lock].color">
+            {{ roleLockMap[scope.row.lock].label }}
           </el-tag>
         </template>
       </el-table-column>
@@ -54,7 +55,7 @@
           <div>{{ scope.row.created_at }}</div>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="Operations" v-permission:or="['role:detail', 'role:update', 'role:delete']">
+      <el-table-column fixed="right" label="Operations" v-permission:or="['role:detail', 'role:update', 'role:remove']">
         <template #default="scope">
           <template
             v-if="member.roleList.filter(role => role.id === scope.row.id) !== null && scope.row.name !== 'SuperAdmin'">
@@ -62,12 +63,12 @@
               <span v-permission="'role:update'">
                 <el-button @click="showUpdateRoleDialog(scope.row.id)">Update</el-button>
               </span>
-              <span v-permission="'role:delete'">
+              <span v-permission="'role:remove'">
                 <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="red"
-                  :title="`Are you sure to delete this role: ${scope.row.name}?`" @confirm="onDelete(scope.row.id)"
+                  :title="`Are you sure to remove this role: ${scope.row.name}?`" @confirm="onRemove(scope.row.id)"
                   :diabled="scope.row.lock === 0">
                   <template #reference>
-                    <el-button>Delete</el-button>
+                    <el-button>Remove</el-button>
                   </template>
                 </el-popconfirm>
               </span>
@@ -129,9 +130,9 @@
                 <el-button type="text" @click="showAddRuleDialog(node)" v-if="node.data.parent_id === 0">Add</el-button>
                 <el-button type="text" @click="showUpdateRuleDialog(node)">Update</el-button>
                 <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="red"
-                  title="Are you sure to delete this rule?" @confirm="onRemoveRule(node)">
+                  title="Are you sure to remove this rule?" @confirm="onRemoveRule(node)">
                   <template #reference>
-                    <el-button :loading="submitRuleLoading" :disabled="submitRuleDisabled" type="text">Delete
+                    <el-button :loading="submitRuleLoading" :disabled="submitRuleDisabled" type="text">Remove
                     </el-button>
                   </template>
                 </el-popconfirm>
@@ -175,12 +176,17 @@ import { ref, watch, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm, allEmpty } from 'utils/form'
 import { list2Tree, tree2List } from 'utils/tree'
-import { roleHasAllRuleMap, roleLockMap } from 'utils'
+import Pair from 'utils/Pair'
 import { add as addRole, list as listRole, listParent as listParentRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
 import { add as addRule, list as listRule, update as updateRule, removeList as removeRuleList } from 'api/rule'
 
+const roleHasAllRuleMap = ref([])
+const roleLockMap = ref([])
+
 onMounted(async () => {
-  await getRuleList()
+  const dataList = await Pair.getValueByKey(['roleHasAllRuleMap', 'roleLockMap'])
+  roleHasAllRuleMap.value = dataList[0].value
+  roleLockMap.value = dataList[1].value
   await getRoleList()
 })
 
@@ -188,7 +194,6 @@ const store = useStore()
 const member = computed(() => store.getters.member)
 
 const ruleList = ref([])
-
 const roleListLoading = ref(false)
 const roleList = ref([])
 const roleTree = ref([])
@@ -199,6 +204,11 @@ const roleProps = {
 }
 const parentRoleSelectIdList = ref([])
 
+const searched = ref(false)
+const onSearchLoading = ref(false)
+const onSearchDisabled = ref(false)
+const restSearchLoading = ref(false)
+const restSearchDisabled = ref(false)
 const searchFormRef = ref(null)
 const searchForm = reactive({
   role: {
@@ -206,30 +216,27 @@ const searchForm = reactive({
     name: null,
     has_all_rule: null,
     lock: null,
-  }
+  },
+  currentPage: null,
+  pageSize: null,
 })
-
-const searched = ref(false)
-const onSearchLoading = ref(false)
-const onSearchDisabled = ref(false)
 
 const onSearch = () => {
   searched.value = true
   getRoleList()
 }
 
-const restSearchLoading = ref(false)
-const restSearchDisabled = ref(false)
-
-const restSearch = (formEl) => {
+const restSearch = async (formEl) => {
   searched.value = false
   restSearchLoading.value = true
   restSearchDisabled.value = true
   resetForm(formEl)
-  getRoleList(() => {
+  try {
+    await getRoleList()
+  } finally {
     restSearchLoading.value = false
     restSearchDisabled.value = false
-  })
+  }
 }
 
 const page = reactive({
@@ -291,11 +298,18 @@ const ruleFormRef = ref(null)
 const ruleForm = reactive(defaultRuleForm())
 
 const getRuleList = () => {
-  listRule().then((response) => {
-    ruleList.value = response.data
-    ruleTree.value = list2Tree(response.data)
-  }).catch((error) => {
-    ElMessage.error(`get ruleList error: ${JSON.stringify(error)}`)
+  return new Promise((resolve, reject) => {
+    listRule()
+      .then((response) => {
+        ruleList.value = response.data
+        ruleTree.value = list2Tree(response.data)
+        resolve(response)
+      })
+      .catch((error) => {
+        ElMessage.error('get rule list error')
+        console.error('get rule list error', error)
+        reject(error)
+      })
   })
 }
 
@@ -322,21 +336,26 @@ const showAddRuleDialog = (node) => {
 const onAddRule = () => {
   submitRuleLoading.value = true
   submitRuleDisabled.value = true
-  addRule(ruleForm).then(() => {
-    getRuleList()
-    innerDialogRuleVisible.value = false
-    ElMessage.success('add rule success')
-  }).catch((error) => {
-    ElMessage.error(`add rule error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    submitRuleLoading.value = false
-    submitRuleDisabled.value = false
-  })
+  addRule(ruleForm)
+    .then(async () => {
+      await getRuleList()
+      innerDialogRuleVisible.value = false
+      ElMessage.success('add rule success')
+    })
+    .catch((error) => {
+      ElMessage.error('add rule error')
+      console.error('add rule error', error)
+    })
+    .finally(() => {
+      submitRuleLoading.value = false
+      submitRuleDisabled.value = false
+    })
 }
 
-const showUpdateRuleDialog = (node) => {
+const showUpdateRuleDialog = async (node) => {
   Object.assign(ruleForm, defaultRuleForm())
   Object.assign(ruleForm, node.data)
+  await getRuleList()
   innerDialogRuleStatus.value = 'update'
   innerDialogRuleVisible.value = true
 }
@@ -344,20 +363,23 @@ const showUpdateRuleDialog = (node) => {
 const onUpdateRule = () => {
   submitRuleLoading.value = true
   submitRuleDisabled.value = true
-  updateRule(ruleForm).then(() => {
-    getRuleList()
-    innerDialogRuleVisible.value = false
-    ElMessage.success('update rule success')
-  }).catch((error) => {
-    ElMessage.error(`update rule error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    submitRuleLoading.value = false
-    submitRuleDisabled.value = false
-  })
+  updateRule(ruleForm)
+    .then(async () => {
+      await getRuleList()
+      innerDialogRuleVisible.value = false
+      ElMessage.success('update rule success')
+    })
+    .catch((error) => {
+      ElMessage.error('update rule error')
+      console.error('update rule error', error)
+    })
+    .finally(() => {
+      submitRuleLoading.value = false
+      submitRuleDisabled.value = false
+    })
 }
 
 const onRemoveRule = (node) => {
-  console.debug('onRemoveRule node', node)
   submitRuleLoading.value = true
   submitRuleDisabled.value = true
   const data = node.data
@@ -366,37 +388,48 @@ const onRemoveRule = (node) => {
     _ruleList = tree2List(data, (data) => { return { id: data.id } })
   }
   const ruleIdList = _ruleList.map(rule => rule.id)
-  removeRuleList({ ruleIdList: ruleIdList }).then(() => {
-    getRuleList()
-    ElMessage.success('remove rule success')
-  }).catch((error) => {
-    ElMessage.error(`remove rule error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    submitRuleLoading.value = false
-    submitRuleDisabled.value = false
-  })
+  removeRuleList({ ruleIdList: ruleIdList })
+    .then(async () => {
+      await getRuleList()
+      ElMessage.success('remove rule success')
+    })
+    .catch((error) => {
+      ElMessage.error('remove rule error')
+      console.error('remove rule error', error)
+    })
+    .finally(() => {
+      submitRuleLoading.value = false
+      submitRuleDisabled.value = false
+    })
 }
 
-const getRoleList = (finalCallback = null) => {
-  roleListLoading.value = true
-  onSearchLoading.value = true
-  onSearchDisabled.value = true
-  searchForm.currentPage = page.currentPage
-  searchForm.pageSize = page.pageSize
-  listRole(searchForm).then((response) => {
-    roleList.value = response.data.list
-    roleTree.value = list2Tree(response.data.list)
-    page.totalData = response.data.total
-    page.currentPage = response.data.currentPage
-    page.pageSize = response.data.pageSize
-    page.totalPage = response.data.totalPage
-  }).catch((error) => {
-    ElMessage.error(`get roleList error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    roleListLoading.value = false
-    onSearchLoading.value = false
-    onSearchDisabled.value = false
-    finalCallback && finalCallback()
+const getRoleList = () => {
+  return new Promise((resolve, reject) => {
+    roleListLoading.value = true
+    onSearchLoading.value = true
+    onSearchDisabled.value = true
+    searchForm.currentPage = page.currentPage
+    searchForm.pageSize = page.pageSize
+    listRole(searchForm)
+      .then((response) => {
+        roleList.value = response.data.list
+        roleTree.value = list2Tree(response.data.list)
+        page.totalData = response.data.total
+        page.currentPage = response.data.currentPage
+        page.pageSize = response.data.pageSize
+        page.totalPage = response.data.totalPage
+        resolve(response)
+      })
+      .catch((error) => {
+        ElMessage.error('get role list error')
+        console.error('get role list error', error)
+        reject(error)
+      })
+      .finally(() => {
+        roleListLoading.value = false
+        onSearchLoading.value = false
+        onSearchDisabled.value = false
+      })
   })
 }
 
@@ -414,7 +447,6 @@ const dialogRoleStatus = ref('add')
 const dialogRoleVisible = ref(false)
 const submitRoleLoading = ref(false)
 const submitRoleDisabled = ref(false)
-
 const defaultRoleForm = () => {
   return {
     role: {
@@ -436,13 +468,13 @@ const handleParentRoleChange = (value) => {
     return
   }
   roleForm.role.parent_id = Object.values(value).pop()
-  console.debug('parentRoleSelectIdList', parentRoleSelectIdList.value)
 }
 
 // ------- add role -------
-const showAddRoleDialog = () => {
+const showAddRoleDialog = async () => {
   Object.assign(roleForm, defaultRoleForm())
   parentRoleSelectIdList.value = []
+  await getRuleList()
   dialogRoleStatus.value = 'add'
   dialogRoleVisible.value = true
 }
@@ -452,44 +484,55 @@ const onAddRole = () => {
   submitRoleDisabled.value = true
   // no parent id
   roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(id => id !== 0)
-  addRole(roleForm).then(() => {
-    getRoleList()
-    dialogRoleVisible.value = false
-    ElMessage.success('add role success')
-  }).catch((error) => {
-    ElMessage.error(`add role error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    submitRoleLoading.value = false
-    submitRoleDisabled.value = false
-  })
+  addRole(roleForm)
+    .then(async () => {
+      await getRoleList()
+      dialogRoleVisible.value = false
+      ElMessage.success('add role success')
+    })
+    .catch((error) => {
+      ElMessage.error('add role error')
+      console.error('add role error', error)
+    })
+    .finally(() => {
+      submitRoleLoading.value = false
+      submitRoleDisabled.value = false
+    })
 }
 
 // ------- update role -------
-const showUpdateRoleDialog = (roleId) => {
+const showUpdateRoleDialog = async (roleId) => {
   Object.assign(roleForm, defaultRoleForm())
-  getRoleDetail({ id: roleId }).then((response) => {
-    roleForm.role.id = response.data.role.id
-    roleForm.role.parent_id = response.data.role.parent_id
-    roleForm.role.name = response.data.role.name
-    roleForm.role.has_all_rule = response.data.role.has_all_rule
-    roleForm.role.lock = response.data.role.lock
-    roleForm.ruleList = roleForm.role.has_all_rule === 0 ? response.data.ruleList.map(rule => rule.id) : ruleList.value.map(rule => rule.id)
+  await getRuleList()
+  getRoleDetail({ id: roleId })
+    .then((response) => {
+      roleForm.role.id = response.data.role.id
+      roleForm.role.parent_id = response.data.role.parent_id
+      roleForm.role.name = response.data.role.name
+      roleForm.role.has_all_rule = response.data.role.has_all_rule
+      roleForm.role.lock = response.data.role.lock
+      roleForm.ruleList = roleForm.role.has_all_rule === 0 ? response.data.ruleList.map(rule => rule.id) : ruleList.value.map(rule => rule.id)
 
-    dialogRoleStatus.value = 'update'
-    if (response.data.role.parent_id === 0) {
-      dialogRoleVisible.value = true
-    }
-    else {
-      listParentRole({ parentId: response.data.role.parent_id }).then((response) => {
-        parentRoleSelectIdList.value = response.data.map(role => role.id).sort()
+      dialogRoleStatus.value = 'update'
+      if (response.data.role.parent_id === 0) {
         dialogRoleVisible.value = true
-      }).catch((error) => {
-        ElMessage.error(`list parent role error: ${JSON.stringify(error)}`)
-      })
-    }
-  }).catch((error) => {
-    ElMessage.error(`get role detail error: ${JSON.stringify(error)}`)
-  })
+      }
+      else {
+        listParentRole({ parentId: response.data.role.parent_id })
+          .then((response) => {
+            parentRoleSelectIdList.value = response.data.map(role => role.id).sort()
+            dialogRoleVisible.value = true
+          })
+          .catch((error) => {
+            ElMessage.error('list parent role error')
+            console.error('list parent role error', error)
+          })
+      }
+    })
+    .catch((error) => {
+      ElMessage.error('get role detail error')
+      console.error('get role detail error', error)
+    })
 }
 
 const onUpdateRole = () => {
@@ -497,26 +540,33 @@ const onUpdateRole = () => {
   submitRoleDisabled.value = true
   // no parent id
   roleForm.ruleList = ruleTreeRef.value.getCheckedKeys(false).filter(key => key !== 0)
-  updateRole(roleForm).then(() => {
-    getRoleList()
-    dialogRoleVisible.value = false
-    ElMessage.success('update role success')
-  }).catch((error) => {
-    ElMessage.error(`update role error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    submitRoleLoading.value = false
-    submitRoleDisabled.value = false
-  })
+  updateRole(roleForm)
+    .then(async () => {
+      await getRoleList()
+      dialogRoleVisible.value = false
+      ElMessage.success('update role success')
+    })
+    .catch((error) => {
+      ElMessage.error('update role error')
+      console.error('update role error', error)
+    })
+    .finally(() => {
+      submitRoleLoading.value = false
+      submitRoleDisabled.value = false
+    })
 }
 
-// ------- delete role -------
-const onDelete = (roleId) => {
-  removeRole({ id: roleId }).then(() => {
-    getRoleList()
-    ElMessage.success('delete success')
-  }).catch((error) => {
-    ElMessage.error(`delete error: ${JSON.stringify(error)}`)
-  })
+// ------- remove role -------
+const onRemove = (roleId) => {
+  removeRole({ id: roleId })
+    .then(async () => {
+      await getRoleList()
+      ElMessage.success('remove role success')
+    })
+    .catch((error) => {
+      ElMessage.error('remove role error')
+      console.error('remove role error', error)
+    })
 }
 </script>
 

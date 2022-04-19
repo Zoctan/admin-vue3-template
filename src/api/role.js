@@ -44,7 +44,7 @@ export function update(data) {
 
 export function remove(data) {
   return request({
-    url: `/${group}/delete`,
+    url: `/${group}/remove`,
     method: 'DELETE',
     data: data
   })
@@ -58,9 +58,9 @@ export function addMemberRole(data) {
   })
 }
 
-export function deleteMemberRole(data) {
+export function removeMemberRole(data) {
   return request({
-    url: `/${group}/deleteMemberRole`,
+    url: `/${group}/removeMemberRole`,
     method: 'DELETE',
     data: data
   })

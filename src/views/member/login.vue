@@ -5,40 +5,18 @@
   <div class="login">
     <div class="title">{{ siteName }} Login</div>
     <el-card class="box-card">
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        status-icon
-        label-position="left"
-        label-width="100px"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" status-icon label-position="left" label-width="100px">
         <el-form-item label="Username" prop="username" required>
-          <el-input
-            type="text"
-            autocomplete="on"
-            prefix-icon="user"
-            v-model="form.username"
-            placeholder="please input username"
-          />
+          <el-input type="text" autocomplete="on" prefix-icon="user" v-model="form.username"
+            placeholder="please input username" />
         </el-form-item>
         <el-form-item label="Password" prop="password" required>
-          <el-input
-            type="password"
-            autocomplete="on"
-            prefix-icon="lock"
-            v-model="form.password"
-            placeholder="please input password"
-            show-password
-          />
+          <el-input type="password" autocomplete="on" prefix-icon="lock" v-model="form.password"
+            placeholder="please input password" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            :loading="submitLoading"
-            :disabled="submitDisabled"
-            @click="onLogin(formRef)"
-          >Login</el-button>
+          <el-button type="primary" :loading="submitLoading" :disabled="submitDisabled" @click="onLogin(formRef)">Login
+          </el-button>
           <el-button type="info" @click="toRegister">Go to register</el-button>
           <el-button @click="resetForm(formRef)">Reset</el-button>
         </el-form-item>
@@ -54,6 +32,8 @@ import { useRouter } from 'vue-router'
 import { resetForm } from 'utils/form'
 import background from 'assets/image/maldives.jpg'
 
+const siteName = import.meta.env.VITE_SITE_NAME
+
 const props = defineProps({
   redirect: {
     type: String,
@@ -64,11 +44,8 @@ const props = defineProps({
 const store = useStore()
 const router = useRouter()
 
-const siteName = import.meta.env.VITE_SITE_NAME
-
 const submitLoading = ref(false)
 const submitDisabled = ref(false)
-
 const formRef = ref(null)
 const form = reactive({
   username: 'admin',
@@ -118,17 +95,22 @@ const onLogin = (formEl) => {
       return ElMessage.error('login form error')
     }
     submitLoading.value = true
-    store.dispatch('memberLogin', form).then(() => {
-      // get member profile
-      store.dispatch('memberProfile').then(() => {
-        router.replace({ path: props.redirect || '/' })
-        ElMessage.success('login success')
+    store.dispatch('memberLogin', form)
+      .then(() => {
+        // get member profile
+        store.dispatch('memberProfile')
+          .then(() => {
+            router.replace({ path: props.redirect || '/' })
+            ElMessage.success('login success')
+          })
       })
-    }).catch(error => {
-      ElMessage.error(`login error: ${JSON.stringify(error)}`)
-    }).finally(() => {
-      submitLoading.value = false
-    })
+      .catch(error => {
+        ElMessage.error('login error')
+        console.error('login error', error)
+      })
+      .finally(() => {
+        submitLoading.value = false
+      })
   })
 }
 </script>
@@ -139,22 +121,26 @@ const onLogin = (formEl) => {
   height: 100%;
   z-index: -1;
   position: absolute;
+
   img {
     width: 100%;
     height: 100%;
   }
 }
+
 .login {
   z-index: 1;
   position: absolute;
   width: 100%;
   margin-top: 5rem;
+
   .title {
     font-size: 1.8rem;
     font-weight: 700;
     text-align: center;
     color: white;
   }
+
   .box-card {
     margin: 0 auto;
     width: 30rem;

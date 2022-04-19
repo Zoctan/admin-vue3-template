@@ -28,13 +28,15 @@ export default {
   actions: {
     generateRoutes({ commit }) {
       return new Promise((resolve, reject) => {
-        validateAccessToken().then(() => {
-          const accessedAsyncRouters = filterAsyncRouter(asyncRouters)
-          commit('SET_ROUTERS', accessedAsyncRouters)
-          resolve(accessedAsyncRouters)
-        }).catch(error => {
-          reject(error)
-        })
+        validateAccessToken()
+          .then(() => {
+            const accessedAsyncRouters = filterAsyncRouter(asyncRouters)
+            commit('SET_ROUTERS', accessedAsyncRouters)
+            resolve(accessedAsyncRouters)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     }
   }

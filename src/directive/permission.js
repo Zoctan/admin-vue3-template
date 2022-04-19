@@ -16,11 +16,11 @@ export default {
     } else {
       throw new Error(`
         Usage:
-        If need all permissions in array, use 'and': v-permission:and[optional]="['article:add','article:delete']".
+        If need all permissions in array, use 'and': v-permission:and[optional]="['article:add','article:remove']".
         If only one permission, use: v-permission="'article:add'".
-        If just need one of permission in array, use 'or': v-permission:or="['article:add','article:delete']".
-        Use object value instead of above: v-permission="{ joint:'and', list:['article:add','article:delete'] }",
-                                           v-permission="{ joint:'or', list:['article:add','article:delete'] }".
+        If just need one of permission in array, use 'or': v-permission:or="['article:add','article:remove']".
+        Use object value instead of above: v-permission="{ joint:'and', list:['article:add','article:remove'] }",
+                                           v-permission="{ joint:'or', list:['article:add','article:remove'] }".
       `)
     }
   }

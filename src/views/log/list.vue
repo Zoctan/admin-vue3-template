@@ -3,15 +3,15 @@
     <div class="filter-container" v-permission="'log:list'">
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
-          <el-button type="success" icon="refresh" circle @click="getLogList()"></el-button>
+          <el-button type="success" icon="refresh" circle @click="getLogList"></el-button>
         </el-form-item>
         <el-form-item label="Content" prop="log.content">
-          <el-input v-model="searchForm.log.content"></el-input>
+          <el-input v-model="searchForm.log.content" />
         </el-form-item>
         <el-form-item label="Level" prop="log.level">
           <el-select v-model="searchForm.log.level" clearable>
-            <el-option v-for="item in logLevelMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === searchForm.log.level" />
+            <el-option v-for="item in logLevelMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === searchForm.log.level" />
           </el-select>
         </el-form-item>
         <el-form-item label="CreatedAt" prop="log.created_at">
@@ -32,7 +32,7 @@
       <el-table-column type="index" :index="getIndex" />
       <el-table-column label="Level" prop="level" width="100">
         <template #default="scope">
-          <el-tag size="small" :type="logLevelMap[scope.row.level].color">
+          <el-tag size="small" v-if="logLevelMap.length > 0" :type="logLevelMap[scope.row.level].color">
             {{ logLevelMap[scope.row.level].label }}
           </el-tag>
         </template>
@@ -50,15 +50,15 @@
       </el-table-column>
       <el-table-column label="IpCity" prop="ip_city" width="150" />
       <el-table-column label="CreatedAt" prop="created_at" width="180" />
-      <el-table-column fixed="right" label="Operations" v-permission="'log:delete'">
+      <el-table-column fixed="right" label="Operations" v-permission="'log:remove'">
         <template #default="scope">
           <el-space wrap>
             <el-button @click="showLogDialog(scope.row.id)">Show</el-button>
-            <span v-permission="'log:delete'">
+            <span v-permission="'log:remove'">
               <el-popconfirm confirm-button-text="Yes" cancel-button-text="No" icon-color="red"
-                :title="`Are you sure to delete this log?`" @confirm="onDelete(scope.row.id)">
+                :title="`Are you sure to remove this log?`" @confirm="onRemove(scope.row.id)">
                 <template #reference>
-                  <el-button>Delete</el-button>
+                  <el-button>Remove</el-button>
                 </template>
               </el-popconfirm>
             </span>
@@ -81,8 +81,8 @@
         <el-descriptions-item label="MemberUsername">{{ currentLog.member_username }}</el-descriptions-item>
         <el-descriptions-item label="Ip">{{ long2ip(currentLog.ip) }}</el-descriptions-item>
         <el-descriptions-item label="IpCity">{{ currentLog.ip_city }}</el-descriptions-item>
-        <el-descriptions-item label="Content" :span="2">{{ currentLog.content }}</el-descriptions-item>
-        <el-descriptions-item label="Extra" :span="2">{{ currentLog.extra }}</el-descriptions-item>
+        <el-descriptions-item label="Content" :span="4">{{ currentLog.content }}</el-descriptions-item>
+        <el-descriptions-item label="Extra" :span="4">{{ currentLog.extra }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
@@ -97,46 +97,51 @@
 import { ref, reactive, onMounted } from 'vue'
 import { resetForm, allEmpty } from 'utils/form'
 import { long2ip } from 'utils/ip'
-import { logLevelMap } from 'utils'
+import Pair from 'utils/Pair'
 import { list as listLog, remove as removeLog } from 'api/log'
 
+const logLevelMap = ref([])
+
 onMounted(async () => {
+  logLevelMap.value = await Pair.getValueByKey('logLevelMap').value
   await getLogList()
 })
 
 const logListLoading = ref(false)
 const logList = ref([])
 
+const searched = ref(false)
+const onSearchLoading = ref(false)
+const onSearchDisabled = ref(false)
+const restSearchLoading = ref(false)
+const restSearchDisabled = ref(false)
 const searchFormRef = ref(null)
 const searchForm = reactive({
   log: {
     level: null,
     content: null,
     created_at: null,
-  }
+  },
+  currentPage: null,
+  pageSize: null,
 })
-
-const searched = ref(false)
-const onSearchLoading = ref(false)
-const onSearchDisabled = ref(false)
 
 const onSearch = () => {
   searched.value = true
   getLogList()
 }
 
-const restSearchLoading = ref(false)
-const restSearchDisabled = ref(false)
-
-const restSearch = (formEl) => {
+const restSearch = async (formEl) => {
   searched.value = false
   restSearchLoading.value = true
   restSearchDisabled.value = true
   resetForm(formEl)
-  getLogList(() => {
+  try {
+    await getLogList()
+  } finally {
     restSearchLoading.value = false
     restSearchDisabled.value = false
-  })
+  }
 }
 
 const page = reactive({
@@ -164,31 +169,37 @@ const getIndex = (index) => {
   return (page.currentPage - 1) * page.pageSize + index + 1
 }
 
-const getLogList = (finalCallback = null) => {
-  logListLoading.value = true
-  onSearchLoading.value = true
-  onSearchDisabled.value = true
-  searchForm.currentPage = page.currentPage
-  searchForm.pageSize = page.pageSize
-  listLog(searchForm).then((response) => {
-    logList.value = response.data.list
-    page.totalData = response.data.total
-    page.currentPage = response.data.currentPage
-    page.pageSize = response.data.pageSize
-    page.totalPage = response.data.totalPage
-  }).catch((error) => {
-    ElMessage.error(`get logList error: ${JSON.stringify(error)}`)
-  }).finally(() => {
-    logListLoading.value = false
-    onSearchLoading.value = false
-    onSearchDisabled.value = false
-    finalCallback && finalCallback()
+const getLogList = () => {
+  return new Promise((resolve, reject) => {
+    logListLoading.value = true
+    onSearchLoading.value = true
+    onSearchDisabled.value = true
+    searchForm.currentPage = page.currentPage
+    searchForm.pageSize = page.pageSize
+    listLog(searchForm)
+      .then((response) => {
+        logList.value = response.data.list
+        page.totalData = response.data.total
+        page.currentPage = response.data.currentPage
+        page.pageSize = response.data.pageSize
+        page.totalPage = response.data.totalPage
+        resolve(response)
+      })
+      .catch((error) => {
+        ElMessage.error('get log list error')
+        console.error('get log list error', error)
+        reject(error)
+      })
+      .finally(() => {
+        logListLoading.value = false
+        onSearchLoading.value = false
+        onSearchDisabled.value = false
+      })
   })
 }
 
 const dialogLogVisible = ref(false)
 const currentLog = ref({})
-
 const showLogDialog = (logId) => {
   for (let i = 0; i < logList.value.length; i++) {
     if (logList.value[i].id === logId) {
@@ -199,14 +210,17 @@ const showLogDialog = (logId) => {
   }
 }
 
-// ------- delete log -------
-const onDelete = (logId) => {
-  removeLog({ id: logId }).then(() => {
-    getLogList()
-    ElMessage.success('delete success')
-  }).catch((error) => {
-    ElMessage.error(`delete error: ${JSON.stringify(error)}`)
-  })
+// ------- remove log -------
+const onRemove = (logId) => {
+  removeLog({ id: logId })
+    .then(async () => {
+      await getLogList()
+      ElMessage.success('remove log success')
+    })
+    .catch((error) => {
+      ElMessage.error('remove log error')
+      console.error('remove log error', error)
+    })
 }
 </script>
 
@@ -214,6 +228,7 @@ const onDelete = (logId) => {
 .filter-container {
   margin-bottom: 20px;
 }
+
 .content {
   width: 230px;
   white-space: nowrap;

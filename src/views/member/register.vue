@@ -5,50 +5,22 @@
   <div class="login">
     <div class="title">{{ siteName }} Register</div>
     <el-card class="box-card">
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        status-icon
-        label-position="left"
-        label-width="100px"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" status-icon label-position="left" label-width="100px">
         <el-form-item label="Username" prop="username" required>
-          <el-input
-            type="text"
-            autocomplete="off"
-            prefix-icon="user"
-            v-model="form.username"
-            placeholder="please input username"
-          />
+          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="form.username"
+            placeholder="please input username" />
         </el-form-item>
         <el-form-item label="Password" prop="password" required>
-          <el-input
-            type="password"
-            autocomplete="off"
-            prefix-icon="lock"
-            v-model="form.password"
-            placeholder="please input password"
-            show-password
-          />
+          <el-input type="password" autocomplete="off" prefix-icon="lock" v-model="form.password"
+            placeholder="please input password" show-password />
         </el-form-item>
         <el-form-item label="Password2" prop="checkPassword" required>
-          <el-input
-            type="password"
-            autocomplete="off"
-            prefix-icon="lock"
-            v-model="form.checkPassword"
-            placeholder="please input password again"
-            show-password
-          />
+          <el-input type="password" autocomplete="off" prefix-icon="lock" v-model="form.checkPassword"
+            placeholder="please input password again" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button
-            type="primary"
-            :loading="submitLoading"
-            :disabled="submitDisabled"
-            @click="onRegister(formRef)"
-          >Register</el-button>
+          <el-button type="primary" :loading="submitLoading" :disabled="submitDisabled" @click="onRegister(formRef)">
+            Register</el-button>
           <el-button type="info" @click="toLogin">Go to login</el-button>
           <el-button @click="resetForm(formRef)">Reset</el-button>
         </el-form-item>
@@ -65,6 +37,8 @@ import { resetForm } from 'utils/form'
 import { isMemberExist } from 'api/member'
 import background from 'assets/image/maldives.jpg'
 
+const siteName = import.meta.env.VITE_SITE_NAME
+
 const props = defineProps({
   redirect: {
     type: String,
@@ -75,11 +49,8 @@ const props = defineProps({
 const store = useStore()
 const router = useRouter()
 
-const siteName = import.meta.env.VITE_SITE_NAME
-
 const submitLoading = ref(false)
 const submitDisabled = ref(false)
-
 const formRef = ref()
 const form = reactive({
   username: '',
@@ -114,7 +85,6 @@ const validatePassword = (rule, value, callback) => {
       submitDisabled.value = true
       callback(new Error('password length must be over 3'))
     } else {
-      console.debug('form.checkPassword', form.checkPassword)
       if (form.checkPassword !== '') {
         if (!formRef.value) return
         formRef.value.validateField('checkPassword')
@@ -129,7 +99,6 @@ const validateCheckPassword = (rule, value, callback) => {
     submitDisabled.value = true
     callback(new Error('please input password again'))
   } else {
-    console.debug('form.password', form.password)
     if (value !== form.password) {
       submitDisabled.value = true
       callback(new Error('two password inputed are not same'))
@@ -155,16 +124,21 @@ const onRegister = (formEl) => {
       return ElMessage.error('register form error')
     }
     submitLoading.value = true
-    store.dispatch('memberRegister', form).then(() => {
-      store.dispatch('memberProfile').then(() => {
-        router.replace({ path: props.redirect || '/member/profile' })
-        ElMessage.success('register success')
+    store.dispatch('memberRegister', form)
+      .then(() => {
+        store.dispatch('memberProfile')
+          .then(() => {
+            router.replace({ path: props.redirect || '/member/profile' })
+            ElMessage.success('register success')
+          })
       })
-    }).catch((error) => {
-      ElMessage.error(`register error: ${JSON.stringify(error)}`)
-    }).finally(() => {
-      submitLoading.value = false
-    })
+      .catch((error) => {
+        ElMessage.error('register error')
+        console.error('register error', error)
+      })
+      .finally(() => {
+        submitLoading.value = false
+      })
   })
 }
 </script>
@@ -175,22 +149,26 @@ const onRegister = (formEl) => {
   height: 100%;
   z-index: -1;
   position: absolute;
+
   img {
     width: 100%;
     height: 100%;
   }
 }
+
 .login {
   z-index: 1;
   position: absolute;
   width: 100%;
   margin-top: 5rem;
+
   .title {
     font-size: 1.8rem;
     font-weight: 700;
     text-align: center;
     color: white;
   }
+
   .box-card {
     margin: 0 auto;
     width: 30rem;
