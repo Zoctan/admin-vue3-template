@@ -61,11 +61,11 @@ const form = reactive({
 const validateUsername = (rule, value, callback) => {
   if (!value) {
     submitDisabled.value = true
-    callback(new Error('please input username'))
+    callback(new Error('Please input username'))
   } else {
     if (value.length < 3) {
       submitDisabled.value = true
-      callback(new Error('username length must be over 3'))
+      callback(new Error('Username length must be over 3'))
     } else {
       isMemberExist({ username: value }).then(() => {
         submitDisabled.value = false
@@ -79,11 +79,11 @@ const validateUsername = (rule, value, callback) => {
 const validatePassword = (rule, value, callback) => {
   if (!value) {
     submitDisabled.value = true
-    callback(new Error('please input password'))
+    callback(new Error('Please input password'))
   } else {
     if (value.length < 3) {
       submitDisabled.value = true
-      callback(new Error('password length must be over 3'))
+      callback(new Error('Password length must be over 3'))
     } else {
       if (form.checkPassword !== '') {
         if (!formRef.value) return
@@ -97,11 +97,11 @@ const validatePassword = (rule, value, callback) => {
 const validateCheckPassword = (rule, value, callback) => {
   if (!value) {
     submitDisabled.value = true
-    callback(new Error('please input password again'))
+    callback(new Error('Please input password again'))
   } else {
     if (value !== form.password) {
       submitDisabled.value = true
-      callback(new Error('two password inputed are not same'))
+      callback(new Error('Two password inputed are not same'))
     } else {
       submitDisabled.value = false
       callback()
@@ -121,7 +121,7 @@ const onRegister = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      return ElMessage.error('register form error')
+      return ElMessage.error('Register form error')
     }
     submitLoading.value = true
     store.dispatch('memberRegister', form)
@@ -129,12 +129,12 @@ const onRegister = (formEl) => {
         store.dispatch('memberProfile')
           .then(() => {
             router.replace({ path: props.redirect || '/member/profile' })
-            ElMessage.success('register success')
+            ElMessage.success('Register success')
           })
       })
       .catch((error) => {
-        ElMessage.error('register error')
-        console.error('register error', error)
+        ElMessage.error('Register error')
+        console.error('Register error', error)
       })
       .finally(() => {
         submitLoading.value = false

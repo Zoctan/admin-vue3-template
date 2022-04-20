@@ -186,8 +186,8 @@ const getLogList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get log list error')
-        console.error('get log list error', error)
+        ElMessage.error('Get log list error')
+        console.error('Get log list error', error)
         reject(error)
       })
       .finally(() => {
@@ -215,11 +215,11 @@ const onRemove = (logId) => {
   removeLog({ id: logId })
     .then(async () => {
       await getLogList()
-      ElMessage.success('remove log success')
+      ElMessage.success('Remove log success')
     })
     .catch((error) => {
-      ElMessage.error('remove log error')
-      console.error('remove log error', error)
+      ElMessage.error('Remove log error')
+      console.error('Remove log error', error)
     })
 }
 </script>

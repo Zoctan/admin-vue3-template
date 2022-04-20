@@ -76,50 +76,64 @@
       </el-form>
     </div>
     <div class="upload-box">
-      <el-upload ref="imageUploadRef" drag :action="getUploadUrl()" :limit="1" :file-list="imageUploadList"
-        :on-change="handleImageChange" :on-exceed="handleImageExceed" :before-upload="beforeImageUpload"
-        :on-success="handleImageSuccess" :on-progress="handleImageProgress" :on-error="handleImageError"
-        :on-remove="handleImageRemove" :auto-upload="false">
+      <el-upload ref="uploadRef" drag :action="uploadUrl()" :http-request="uploadMehod" :limit="1"
+        :file-list="uploadList" :on-change="handleUploadChange" :on-success="handleUploadSuccess"
+        :on-error="handleUploadError" :on-exceed="handleUploadExceed" :before-upload="beforeUpload"
+        :on-progress="handleUploadProgress" :on-remove="handleUploadRemove" :auto-upload="false">
         <el-icon class="el-icon--upload">
           <upload-filled />
         </el-icon>
         <div class="el-upload__text">
-          Drop image file here or
+          Drop file here or
           <em>Click to choose</em>
         </div>
         <template #tip>
-          <div class="el-upload__tip">Image file with a size less than 100MB</div>
+          <div class="el-upload__tip">File with a size less than 100MB</div>
         </template>
       </el-upload>
-      <el-button type="success" :loading="onAddImageLoading" :disabled="onAddImageDisabled" @click="onAddImage">
+      <el-button type="success" :loading="onAddLoading" :disabled="onAddDisabled" @click="uploadRef.submit()">
         Upload to server
       </el-button>
+      <el-progress style="width: 200px;margin-top: 8px" :text-inside="true" :stroke-width="20"
+        :percentage="progressPercent" />
+    </div>
+    <div class="file-list">
+      <div class="block">
+        <span class="demonstration">Watermark</span>
+        <el-image :src="optionForm.watermarkConfig.path" />
+      </div>
+      <template v-for="item in uploadedList" :key="item.name">
+        <div class="block">
+          <span class="demonstration">Uploaded</span>
+          <el-image :src="item.url" :alt="item.name" />
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
-import { uploadUrl, remove as removeUploadFile } from '@/api/upload'
-import { useStore } from 'vuex'
+import { ref, reactive } from 'vue'
 import { genFileId } from 'element-plus'
+import { uploadUrl, add as uploadFile, remove as removeUploadFile } from 'api/upload'
+import { object2FormData } from 'utils/url'
 
-const store = useStore()
-const accessToken = computed(() => store.getters.token.accessToken)
-
-const imageUploadRef = ref(null)
-const imageUploadList = ref([])
-const onAddImageLoading = ref(false)
-const onAddImageDisabled = ref(true)
+const uploadRef = ref(null)
+const uploadList = ref([])
+const uploadedList = ref([])
+const progressPercent = ref(0)
+const onAddLoading = ref(false)
+const onAddDisabled = ref(true)
 const optionFormRef = ref(null)
 const optionForm = reactive({
+  type: 'image',
   useTimeDir: false,
   useRandomName: false,
   overwrite: false,
   reizeConfig: {
     enable: false,
-    width: null,
-    height: null
+    width: 0,
+    height: 0
   },
   compressConfig: {
     enable: false,
@@ -127,29 +141,40 @@ const optionForm = reactive({
   },
   watermarkConfig: {
     enable: false,
-    path: '',
+    path: 'http://127.0.0.1/php-seed/upload/?filename=watermark.png&type=image',
     x: 0,
     y: 0,
-    position: 'top-left',
+    position: 'bottom-right',
   }
 })
 const watermarkPositionList = ref(['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right'])
 
-const getUploadUrl = () => {
+const uploadMehod = async (params) => {
+  progressPercent.value = 0
+  console.debug('uploadMehod params', params)
 
-  return uploadUrl({ type: 'image', overwrite: true, Authorization: accessToken })
+  const file = params.file
+  const form = new FormData()
+  form.append('file', file)
+  object2FormData(optionForm, form)
+
+  progressPercent.value = 50
+
+  return uploadFile(form, progressEvent => {
+    progressPercent.value = Math.floor((progressEvent.loaded * 100) / progressEvent.total)
+  })
 }
 
-const handleImageExceed = (files) => {
-  if (imageUploadRef.value) {
-    imageUploadRef.value.clearFiles()
+const handleUploadExceed = (files) => {
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
     const file = files[0]
     file.uid = genFileId()
-    imageUploadRef.value.handleStart(file)
+    uploadRef.value.handleStart(file)
   }
 }
 
-const beforeImageUpload = (file) => {
+const beforeUpload = (file) => {
   if (file.type.indexOf('image/') < 0) {
     ElMessage.error('File must be image format!')
     return false
@@ -165,43 +190,43 @@ const beforeImageUpload = (file) => {
   return true
 }
 
-const handleImageSuccess = (response, uploadFile, uploadFiles) => {
-  onAddImageDisabled.value = true
-  if (response.errno !== 0) {
-    imageUploadRef.value.clearFiles()
-    console.error('upload image error', response.msg)
-    return ElMessage.error('upload image error')
+const handleUploadSuccess = (response, uploadFile, uploadFiles) => {
+  console.debug('handleUploadSuccess', response)
+  progressPercent.value = 100
+  onAddDisabled.value = true
+  uploadList.value = []
+  uploadRef.value.clearFiles()
+  uploadedList.value = uploadedList.value.concat(response.data)
+  ElMessage.success('Upload success')
+}
+
+const handleUploadError = (error, uploadFile, uploadFiles) => {
+  progressPercent.value = 0
+  uploadRef.value.clearFiles()
+  ElMessage.error('Upload error')
+  console.error('Upload error', error)
+}
+
+const handleUploadProgress = (event, uploadFile, uploadFiles) => {
+}
+
+const handleUploadChange = (uploadFile, uploadFiles) => {
+  if (uploadList.value.length > 0) {
+    onAddDisabled.value = false
   }
-  return ElMessage.success('upload image success')
 }
 
-const handleImageError = (error, uploadFile, uploadFiles) => {
-}
-
-const handleImageProgress = (event, uploadFile, uploadFiles) => {
-}
-
-const handleImageChange = (uploadFile, uploadFiles) => {
-  if (imageUploadList.value.length > 0) {
-    onAddImageDisabled.value = false
-  }
-}
-
-const onAddImage = () => {
-  imageUploadRef.value.submit()
-}
-
-const handleImageRemove = (file) => {
+const handleUploadRemove = (file) => {
   if (!file) {
-    return ElMessage.error('no image')
+    return ElMessage.error('no file')
   }
   removeUploadFile({ type: 'image', filename: file.name })
     .then(() => {
-      ElMessage.success('remove image success')
+      ElMessage.success('Remove success')
     })
     .catch((error) => {
-      ElMessage.error('remove image error')
-      console.error('remove image error', error)
+      ElMessage.error('Remove error')
+      console.error('Remove error', error)
     })
 }
 </script>
@@ -210,7 +235,6 @@ const handleImageRemove = (file) => {
 .app-container {
   display: flex;
   align-items: center;
-
 
   .option {
     display: flex;
@@ -227,7 +251,34 @@ const handleImageRemove = (file) => {
     display: flex;
     align-items: center;
     flex-direction: column;
-    flex: 3;
+    flex: 1;
+  }
+
+  .file-list {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex: 1;
+
+    .block {
+      padding: 30px 0;
+      text-align: center;
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+
+      .demonstration {
+        display: block;
+        color: var(--el-text-color-secondary);
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+
+      .el-image {
+        width: 200px;
+      }
+    }
+
   }
 }
 </style>

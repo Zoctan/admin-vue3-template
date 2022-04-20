@@ -175,8 +175,8 @@ const getPairList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get pair list error')
-        console.error('get pair list error', error)
+        ElMessage.error('Get pair list error')
+        console.error('Get pair list error', error)
         reject(error)
       })
       .finally(() => {
@@ -232,7 +232,7 @@ const showAddPairDialog = () => {
 
 const onAddPair = () => {
   if (!checkPairValue(pairForm.pair.value)) {
-    return ElMessage.error('value is not a valid json string')
+    return ElMessage.error('Value is not a valid json string')
   }
   submitPairLoading.value = true
   submitPairDisabled.value = true
@@ -240,11 +240,11 @@ const onAddPair = () => {
     .then(async () => {
       await getPairList()
       dialogPairVisible.value = false
-      ElMessage.success('add pair success')
+      ElMessage.success('Add pair success')
     })
     .catch((error) => {
-      ElMessage.error('add pair error')
-      console.error('add pair error', error)
+      ElMessage.error('Add pair error')
+      console.error('Add pair error', error)
     })
     .finally(() => {
       submitPairLoading.value = false
@@ -268,7 +268,7 @@ const showUpdatePairDialog = (pairId) => {
 
 const onUpdatePair = () => {
   if (!checkPairValue(pairForm.pair.value)) {
-    return ElMessage.error('value is not a valid json string')
+    return ElMessage.error('Value is not a valid json string')
   }
   submitPairLoading.value = true
   submitPairDisabled.value = true
@@ -276,11 +276,11 @@ const onUpdatePair = () => {
     .then(async () => {
       await getPairList()
       dialogPairVisible.value = false
-      ElMessage.success('update pair success')
+      ElMessage.success('Update pair success')
     })
     .catch((error) => {
-      ElMessage.error('update pair error')
-      console.error('update pair error', error)
+      ElMessage.error('Update pair error')
+      console.error('Update pair error', error)
     })
     .finally(() => {
       submitPairLoading.value = false
@@ -293,11 +293,11 @@ const onRemove = (pairId) => {
   removePair({ id: pairId })
     .then(async () => {
       await getPairList()
-      ElMessage.success('remove pair success')
+      ElMessage.success('Remove pair success')
     })
     .catch((error) => {
-      ElMessage.error('remove pair error')
-      console.error('remove pair error', error)
+      ElMessage.error('Remove pair error')
+      console.error('Remove pair error', error)
     })
 }
 </script>

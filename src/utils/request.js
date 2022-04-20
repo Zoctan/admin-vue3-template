@@ -13,8 +13,13 @@ let requests = []
 // fullscreen loading instance
 let loadingInstance = null
 
-function retryAdapterEnhancer(adapter, options) {
-    const { times = 1, delay = 3000 } = options
+// retry config
+const retryConfig = {
+    times: 2,
+    delay: 1000,
+}
+const retryAdapterEnhancer = (adapter, options) => {
+    const { times = retryConfig.times, delay = retryConfig.delay } = options
     return async (config) => {
         const { retryTimes = times, retryDelay = delay } = config
         let retryCount = 0
@@ -42,21 +47,18 @@ const setGetConfig = (config) => {
     config.baseURL = baseUrl
     const accessToken = store.getters.token && store.getters.token.accessToken ? store.getters.token.accessToken : ''
     config.headers['Authorization'] = accessToken
+    if (config.method === 'post' && !config.headers['Content-type']) {
+        // will send preflight request (OPTIONS), needs back-end response correctly
+        config.headers['Content-type'] = 'application/json;charset=UTF-8'
+    }
     return config
 }
 
 const instance = axios.create({
     withCredentials: false,
     timeout: 5000,
-    adapter: retryAdapterEnhancer(axios.defaults.adapter, {
-        retryDelay: 1000,
-    }),
+    adapter: retryAdapterEnhancer(axios.defaults.adapter, retryConfig),
 })
-
-instance.defaults.headers.post = {
-    // will send preflight request (OPTIONS), needs back-end response correctly
-    'Content-type': 'application/json;charset=UTF-8'
-}
 
 instance.interceptors.request.use(
     (config) => {

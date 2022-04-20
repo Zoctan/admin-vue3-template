@@ -198,6 +198,9 @@ import { list as listMember, detail as getMemberDetail, updateDetail as updateMe
 import { list as listRole, addMemberRole, removeMemberRole } from 'api/role'
 import { getName as getFakeName } from 'api/fake'
 
+const store = useStore()
+const member = computed(() => store.getters.member.member)
+
 const memberStatusMap = ref([])
 const memberLockMap = ref([])
 const memberGenderMap = ref([])
@@ -209,9 +212,6 @@ onMounted(async () => {
   memberGenderMap.value = dataList[2].value
   await getMemberList()
 })
-
-const store = useStore()
-const member = computed(() => store.getters.member.member)
 
 const memberListLoading = ref(false)
 const memberList = ref([])
@@ -299,8 +299,8 @@ const getRoleList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get role list error')
-        console.error('get role list error', error)
+        ElMessage.error('Get role list error')
+        console.error('Get role list error', error)
         reject(error)
       })
   })
@@ -323,8 +323,8 @@ const getMemberList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get member list error')
-        console.error('get member list error', error)
+        ElMessage.error('Get member list error')
+        console.error('Get member list error', error)
         reject(error)
       })
       .finally(() => {
@@ -379,8 +379,8 @@ const getFakeUsername = () => {
       memberForm.member.username = response.data
     })
     .catch((error) => {
-      ElMessage.error('get fake username error')
-      console.error('get fake username error', error)
+      ElMessage.error('Get fake username error')
+      console.error('Get fake username error', error)
     })
     .finally(() => {
       getFakeUsernameLoading.value = false
@@ -401,11 +401,11 @@ const onAddMember = () => {
   addMember(memberForm)
     .then(() => {
       dialogMemberVisible.value = false
-      ElMessage.success('add member success')
+      ElMessage.success('Add member success')
     })
     .catch((error) => {
-      ElMessage.error('add member error')
-      console.error('add member error', error)
+      ElMessage.error('Add member error')
+      console.error('Add member error', error)
     })
     .finally(() => {
       submitMemberLoading.value = false
@@ -417,11 +417,11 @@ const onAddMember = () => {
 const validateUsername = (rule, value, callback) => {
   if (!value) {
     submitMemberDisabled.value = true
-    callback(new Error('please input username'))
+    callback(new Error('Please input username'))
   } else {
     if (value.length < 3) {
       submitMemberDisabled.value = true
-      callback(new Error('username length must be over 3'))
+      callback(new Error('Username length must be over 3'))
     } else {
       submitMemberDisabled.value = false
       callback()
@@ -432,7 +432,7 @@ const validatePassword = (rule, value, callback) => {
   if (value) {
     if (value.length < 3) {
       submitMemberDisabled.value = true
-      callback(new Error('password length must be over 3'))
+      callback(new Error('Password length must be over 3'))
     } else {
       submitMemberDisabled.value = false
       callback()
@@ -442,11 +442,11 @@ const validatePassword = (rule, value, callback) => {
 const validateNickname = (rule, value, callback) => {
   if (!value) {
     submitMemberDisabled.value = true
-    callback(new Error('please input nickname'))
+    callback(new Error('Please input nickname'))
   } else {
     if (value.length < 3) {
       submitMemberDisabled.value = true
-      callback(new Error('nickname length must be over 3'))
+      callback(new Error('Nickname length must be over 3'))
     } else {
       submitMemberDisabled.value = false
       callback()
@@ -474,8 +474,8 @@ const showUpdateMemberDialog = (memberId) => {
       dialogMemberVisible.value = true
     })
     .catch((error) => {
-      ElMessage.error('get member detail error')
-      console.error('get member detail error', error)
+      ElMessage.error('Get member detail error')
+      console.error('Get member detail error', error)
     })
 }
 
@@ -486,11 +486,11 @@ const onUpdateMember = () => {
     .then(async () => {
       await getMemberList()
       dialogMemberVisible.value = false
-      ElMessage.success('update member detail success')
+      ElMessage.success('Update member detail success')
     })
     .catch((error) => {
-      ElMessage.error('update member detail error')
-      console.error('update member detail error', error)
+      ElMessage.error('Update member detail error')
+      console.error('Update member detail error', error)
     })
     .finally(() => {
       submitMemberLoading.value = false
@@ -523,8 +523,8 @@ const showUpdateMemberRoleDialog = (memberId) => {
       dialogUpdateMemberRoleVisible.value = true
     })
     .catch((error) => {
-      ElMessage.error('get member detail error')
-      console.error('get member detail error', error)
+      ElMessage.error('Get member detail error')
+      console.error('Get member detail error', error)
     })
 }
 
@@ -536,7 +536,7 @@ const handleRoleChange = (value) => {
   for (let i = 0; i < memberRoleForm.roleList.length; i++) {
     if (memberRoleForm.roleList[i].id === roleId) {
       roleSelectIdList.value = []
-      return ElMessage.error('member already assumed this role')
+      return ElMessage.error('Member already assumed this role')
     }
   }
   memberRoleForm.roleId = roleId
@@ -552,11 +552,11 @@ const onRemoveMemberRole = (index) => {
     .then(() => {
       isMemberRoleUpdate = true
       memberRoleForm.roleList.splice(index, 1)
-      ElMessage.success('remove member role success')
+      ElMessage.success('Remove member role success')
     })
     .catch((error) => {
-      ElMessage.error('remove member role error')
-      console.error('remove member role error', error)
+      ElMessage.error('Remove member role error')
+      console.error('Remove member role error', error)
     })
     .finally(() => {
       submitMemberRoleLoading.value = false
@@ -575,11 +575,11 @@ const onAddMemberRole = () => {
       isMemberRoleUpdate = true
       roleSelectIdList.value = []
       memberRoleForm.roleList.push(response.data)
-      ElMessage.success('add member role success')
+      ElMessage.success('Add member role success')
     })
     .catch((error) => {
-      ElMessage.error('add member role error')
-      console.error('add member role error', error)
+      ElMessage.error('Add member role error')
+      console.error('Add member role error', error)
     })
     .finally(() => {
       submitMemberRoleLoading.value = false
@@ -602,11 +602,11 @@ const onRemove = (memberId) => {
   removeMember({ id: memberId })
     .then(async () => {
       await getMemberList()
-      ElMessage.success('remove member success')
+      ElMessage.success('Remove member success')
     })
     .catch((error) => {
-      ElMessage.error('remove member error')
-      console.error('remove member error', error)
+      ElMessage.error('Remove member error')
+      console.error('Remove member error', error)
     })
 }
 </script>

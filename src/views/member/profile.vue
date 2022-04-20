@@ -30,7 +30,7 @@
         </template>
         {{ member.memberData.nickname }}
       </el-descriptions-item>
-      <el-descriptions-item>
+      <el-descriptions-item v-if="memberGenderMap.length > 0">
         <template #label>
           <div class="cell-item">
             <el-icon>
@@ -40,7 +40,7 @@
         </template>
         {{ memberGenderMap[member.memberData.gender].label }}
       </el-descriptions-item>
-      <el-descriptions-item>
+      <el-descriptions-item v-if="memberStatusMap.length > 0">
         <template #label>
           <div class="cell-item">
             <el-icon>
@@ -66,7 +66,7 @@
           }}</el-tag>
         </template>
       </el-descriptions-item>
-      <el-descriptions-item>
+      <el-descriptions-item v-if="memberLockMap.length > 0">
         <template #label>
           <div class="cell-item">
             <el-icon>
@@ -153,11 +153,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { resetForm } from 'utils/form'
-import { memberStatusMap, memberLockMap, memberGenderMap } from 'utils'
+import Pair from 'utils/Pair'
 import { updateProfile, validateOldPassword as validateMemberOldPassword, updatePassword, } from 'api/member'
+
+const memberStatusMap = ref([])
+const memberLockMap = ref([])
+const memberGenderMap = ref([])
+
+onMounted(async () => {
+  const dataList = await Pair.getValueByKey(['memberStatusMap', 'memberLockMap', 'memberGenderMap'])
+  memberStatusMap.value = dataList[0].value
+  memberLockMap.value = dataList[1].value
+  memberGenderMap.value = dataList[2].value
+})
 
 const store = useStore()
 
@@ -177,11 +188,11 @@ const profileForm = reactive({
 const validateNickname = (rule, value, callback) => {
   if (!value) {
     submitProfileDisabled.value = true
-    return callback(new Error('please input nickname'))
+    return callback(new Error('Please input nickname'))
   } else {
     if (value.length < 3) {
       submitProfileDisabled.value = true
-      callback(new Error('nickname length must be over 3'))
+      callback(new Error('Nickname length must be over 3'))
     } else {
       submitProfileDisabled.value = false
       callback()
@@ -197,16 +208,16 @@ const onUpdateProfile = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      ElMessage.error('profile form error')
+      ElMessage.error('Profile form error')
     }
     submitProfileLoading.value = true
     updateProfile(profileForm)
       .then(() => {
-        ElMessage.success('update profile success')
+        ElMessage.success('Update profile success')
       })
       .catch((error) => {
-        ElMessage.error('update profile error')
-        console.error('update profile error', error)
+        ElMessage.error('Update profile error')
+        console.error('Update profile error', error)
       })
       .finally(() => {
         submitProfileLoading.value = false
@@ -230,7 +241,7 @@ const passwordForm = reactive({
 const validateOldPassword = (rule, value, callback) => {
   if (!value) {
     submitPasswordDisabled.value = true
-    callback(new Error('please input old password'))
+    callback(new Error('Please input old password'))
   } else {
     validateMemberOldPassword({ oldPassword: value })
       .then(() => {
@@ -245,11 +256,11 @@ const validateOldPassword = (rule, value, callback) => {
 const validateNewPassword = (rule, value, callback) => {
   if (!value) {
     submitPasswordDisabled.value = true
-    callback(new Error('please input new password'))
+    callback(new Error('Please input new password'))
   } else {
     if (value.length < 3) {
       submitPasswordDisabled.value = true
-      callback(new Error('new password length must be over 3'))
+      callback(new Error('New password length must be over 3'))
     } else {
       if (passwordForm.checkPassword !== '') {
         if (!passwordFormRef.value) return
@@ -263,11 +274,11 @@ const validateNewPassword = (rule, value, callback) => {
 const validateCheckPassword = (rule, value, callback) => {
   if (!value) {
     submitPasswordDisabled.value = true
-    callback(new Error('please input password again'))
+    callback(new Error('Please input password again'))
   } else {
     if (value !== passwordForm.newPassword) {
       submitPasswordDisabled.value = true
-      callback(new Error('two password inputed are not same'))
+      callback(new Error('Two password inputed are not same'))
     } else {
       submitPasswordDisabled.value = false
       callback()
@@ -291,16 +302,16 @@ const onUpdatePassword = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      return ElMessage.error('password form error')
+      return ElMessage.error('Password form error')
     }
     submitPasswordLoading.value = true
     updatePassword(passwordForm)
       .then(() => {
-        ElMessage.success('update password success')
+        ElMessage.success('Update password success')
       })
       .catch((error) => {
-        ElMessage.error('update password error')
-        console.error('update password error', error)
+        ElMessage.error('Update password error')
+        console.error('Update password error', error)
       })
       .finally(() => {
         submitPasswordLoading.value = false

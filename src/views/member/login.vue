@@ -55,11 +55,11 @@ const form = reactive({
 const validateUsername = (rule, value, callback) => {
   if (!value) {
     submitDisabled.value = true
-    callback(new Error('please input username'))
+    callback(new Error('Please input username'))
   } else {
     if (value.length < 3) {
       submitDisabled.value = true
-      callback(new Error('username length must be over 3'))
+      callback(new Error('Username length must be over 3'))
     } else {
       submitDisabled.value = false
       callback()
@@ -69,11 +69,11 @@ const validateUsername = (rule, value, callback) => {
 const validatePassword = (rule, value, callback) => {
   if (!value) {
     submitDisabled.value = true
-    callback(new Error('please input password'))
+    callback(new Error('Please input password'))
   } else {
     if (value.length < 3) {
       submitDisabled.value = true
-      callback(new Error('password length must be over 3'))
+      callback(new Error('Password length must be over 3'))
     } else {
       submitDisabled.value = false
       callback()
@@ -92,7 +92,7 @@ const onLogin = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (!valid) {
-      return ElMessage.error('login form error')
+      return ElMessage.error('Login form error')
     }
     submitLoading.value = true
     store.dispatch('memberLogin', form)
@@ -101,12 +101,12 @@ const onLogin = (formEl) => {
         store.dispatch('memberProfile')
           .then(() => {
             router.replace({ path: props.redirect || '/' })
-            ElMessage.success('login success')
+            ElMessage.success('Login success')
           })
       })
       .catch(error => {
-        ElMessage.error('login error')
-        console.error('login error', error)
+        ElMessage.error('Login error')
+        console.error('Login error', error)
       })
       .finally(() => {
         submitLoading.value = false

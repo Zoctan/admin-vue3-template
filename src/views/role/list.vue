@@ -180,6 +180,9 @@ import Pair from 'utils/Pair'
 import { add as addRole, list as listRole, listParent as listParentRole, detail as getRoleDetail, update as updateRole, remove as removeRole } from 'api/role'
 import { add as addRule, list as listRule, update as updateRule, removeList as removeRuleList } from 'api/rule'
 
+const store = useStore()
+const member = computed(() => store.getters.member)
+
 const roleHasAllRuleMap = ref([])
 const roleLockMap = ref([])
 
@@ -189,9 +192,6 @@ onMounted(async () => {
   roleLockMap.value = dataList[1].value
   await getRoleList()
 })
-
-const store = useStore()
-const member = computed(() => store.getters.member)
 
 const ruleList = ref([])
 const roleListLoading = ref(false)
@@ -211,6 +211,8 @@ const restSearchLoading = ref(false)
 const restSearchDisabled = ref(false)
 const searchFormRef = ref(null)
 const searchForm = reactive({
+  // search child role by member role id list
+  parentIdList: member.value.roleList.find(role => role.name === 'SuperAdmin') ? null : member.value.roleList.map(role => role.id),
   role: {
     id: null,
     name: null,
@@ -306,8 +308,8 @@ const getRuleList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get rule list error')
-        console.error('get rule list error', error)
+        ElMessage.error('Get rule list error')
+        console.error('Get rule list error', error)
         reject(error)
       })
   })
@@ -340,11 +342,11 @@ const onAddRule = () => {
     .then(async () => {
       await getRuleList()
       innerDialogRuleVisible.value = false
-      ElMessage.success('add rule success')
+      ElMessage.success('Add rule success')
     })
     .catch((error) => {
-      ElMessage.error('add rule error')
-      console.error('add rule error', error)
+      ElMessage.error('Add rule error')
+      console.error('Add rule error', error)
     })
     .finally(() => {
       submitRuleLoading.value = false
@@ -367,11 +369,11 @@ const onUpdateRule = () => {
     .then(async () => {
       await getRuleList()
       innerDialogRuleVisible.value = false
-      ElMessage.success('update rule success')
+      ElMessage.success('Update rule success')
     })
     .catch((error) => {
-      ElMessage.error('update rule error')
-      console.error('update rule error', error)
+      ElMessage.error('Update rule error')
+      console.error('Update rule error', error)
     })
     .finally(() => {
       submitRuleLoading.value = false
@@ -391,11 +393,11 @@ const onRemoveRule = (node) => {
   removeRuleList({ ruleIdList: ruleIdList })
     .then(async () => {
       await getRuleList()
-      ElMessage.success('remove rule success')
+      ElMessage.success('Remove rule success')
     })
     .catch((error) => {
-      ElMessage.error('remove rule error')
-      console.error('remove rule error', error)
+      ElMessage.error('Remove rule error')
+      console.error('Remove rule error', error)
     })
     .finally(() => {
       submitRuleLoading.value = false
@@ -421,8 +423,8 @@ const getRoleList = () => {
         resolve(response)
       })
       .catch((error) => {
-        ElMessage.error('get role list error')
-        console.error('get role list error', error)
+        ElMessage.error('Get role list error')
+        console.error('Get role list error', error)
         reject(error)
       })
       .finally(() => {
@@ -488,11 +490,11 @@ const onAddRole = () => {
     .then(async () => {
       await getRoleList()
       dialogRoleVisible.value = false
-      ElMessage.success('add role success')
+      ElMessage.success('Add role success')
     })
     .catch((error) => {
-      ElMessage.error('add role error')
-      console.error('add role error', error)
+      ElMessage.error('Add role error')
+      console.error('Add role error', error)
     })
     .finally(() => {
       submitRoleLoading.value = false
@@ -524,14 +526,14 @@ const showUpdateRoleDialog = async (roleId) => {
             dialogRoleVisible.value = true
           })
           .catch((error) => {
-            ElMessage.error('list parent role error')
-            console.error('list parent role error', error)
+            ElMessage.error('List parent role error')
+            console.error('List parent role error', error)
           })
       }
     })
     .catch((error) => {
-      ElMessage.error('get role detail error')
-      console.error('get role detail error', error)
+      ElMessage.error('Get role detail error')
+      console.error('Get role detail error', error)
     })
 }
 
@@ -544,11 +546,11 @@ const onUpdateRole = () => {
     .then(async () => {
       await getRoleList()
       dialogRoleVisible.value = false
-      ElMessage.success('update role success')
+      ElMessage.success('Update role success')
     })
     .catch((error) => {
-      ElMessage.error('update role error')
-      console.error('update role error', error)
+      ElMessage.error('Update role error')
+      console.error('Update role error', error)
     })
     .finally(() => {
       submitRoleLoading.value = false
@@ -561,11 +563,11 @@ const onRemove = (roleId) => {
   removeRole({ id: roleId })
     .then(async () => {
       await getRoleList()
-      ElMessage.success('remove role success')
+      ElMessage.success('Remove role success')
     })
     .catch((error) => {
-      ElMessage.error('remove role error')
-      console.error('remove role error', error)
+      ElMessage.error('Remove role error')
+      console.error('Remove role error', error)
     })
 }
 </script>
