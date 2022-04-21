@@ -5,7 +5,7 @@
         <el-form-item>
           <el-button type="info" icon="menu" @click="dialogRuleVisible = true">Rule Manage</el-button>
           <el-button type="success" icon="refresh" circle @click="getRoleList"></el-button>
-          <el-button type="primary" icon="plus" circle @click="showAddRoleDialog"></el-button>
+          <el-button type="primary" icon="plus" circle v-permission="'role:add'" @click="showAddRoleDialog"></el-button>
         </el-form-item>
         <el-form-item label="RoleName" prop="role.name">
           <el-input v-model="searchForm.role.name" />
@@ -93,14 +93,14 @@
         </el-form-item>
         <el-form-item label="Has All Rule" prop="role.has_all_rule" required>
           <el-select v-model="roleForm.role.has_all_rule">
-            <el-option v-for="item in roleHasAllRuleMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === roleForm.role.has_all_rule" />
+            <el-option v-for="item in roleHasAllRuleMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === roleForm.role.has_all_rule" />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="role.lock" required>
           <el-select v-model="roleForm.role.lock">
-            <el-option v-for="item in roleLockMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === roleForm.role.lock" />
+            <el-option v-for="item in roleLockMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === roleForm.role.lock" />
           </el-select>
         </el-form-item>
         <el-form-item label="Rule" v-if="roleForm.role.has_all_rule === 0">

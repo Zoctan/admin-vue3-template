@@ -4,7 +4,8 @@
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
           <el-button type="success" icon="refresh" circle @click="getMemberList"></el-button>
-          <el-button type="primary" icon="plus" circle @click="showAddMemberDialog"></el-button>
+          <el-button type="primary" icon="plus" circle v-permission="'member:add'" @click="showAddMemberDialog">
+          </el-button>
         </el-form-item>
         <el-form-item label="Username" prop="member.username">
           <el-input v-model="searchForm.member.username" />
@@ -119,35 +120,35 @@
       <el-form ref="memberFormRef" :model="memberForm" :rules="memberFormRules" status-icon label-position="left"
         label-width="100px">
         <el-form-item label="Username" prop="member.username">
-          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="memberForm.member.username">
-            <template #append>
-              <el-button icon="refresh-right" @click="getFakeUsername" :loading="getFakeUsernameLoading"
-                :disabled="getFakeUsernameDisabled" />
-            </template>
-          </el-input>
+          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="memberForm.member.username" />
         </el-form-item>
         <el-form-item label="Password" prop="member.password">
           <el-input type="text" autocomplete="off" prefix-icon="lock" v-model="memberForm.member.password" />
         </el-form-item>
         <el-form-item label="Status" prop="member.status">
           <el-select v-model="memberForm.member.status">
-            <el-option v-for="item in memberStatusMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === memberForm.member.status" />
+            <el-option v-for="item in memberStatusMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === memberForm.member.status" />
           </el-select>
         </el-form-item>
         <el-form-item label="Lock" prop="member.lock">
           <el-select v-model="memberForm.member.lock">
-            <el-option v-for="item in memberLockMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === memberForm.member.lock" />
+            <el-option v-for="item in memberLockMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === memberForm.member.lock" />
           </el-select>
         </el-form-item>
         <el-form-item label="Nickname" prop="memberData.nickname">
-          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="memberForm.memberData.nickname" />
+          <el-input type="text" autocomplete="off" prefix-icon="user" v-model="memberForm.memberData.nickname">
+            <template #append>
+              <el-button icon="refresh-right" @click="getFakeNickname" :loading="getFakeNicknameLoading"
+                :disabled="getFakeNicknameDisabled" />
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item label="Gender" prop="memberData.gender">
           <el-select v-model="memberForm.memberData.gender">
-            <el-option v-for="item in memberGenderMap" :key="item.id" :label="item.label" :value="item.id"
-              :disabled="item.id === memberForm.memberData.gender" />
+            <el-option v-for="item in memberGenderMap" :key="item.value" :label="item.label" :value="item.value"
+              :disabled="item.value === memberForm.memberData.gender" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -349,8 +350,8 @@ const dialogMemberStatus = ref('add')
 const dialogMemberVisible = ref(false)
 const submitMemberLoading = ref(false)
 const submitMemberDisabled = ref(false)
-const getFakeUsernameLoading = ref(false)
-const getFakeUsernameDisabled = ref(false)
+const getFakeNicknameLoading = ref(false)
+const getFakeNicknameDisabled = ref(false)
 const memberFormRef = ref(null)
 const defaultMemberForm = () => {
   return {
@@ -371,20 +372,20 @@ const defaultMemberForm = () => {
 const memberForm = reactive(defaultMemberForm())
 
 // ------- add member -------
-const getFakeUsername = () => {
-  getFakeUsernameLoading.value = true
-  getFakeUsernameDisabled.value = true
+const getFakeNickname = () => {
+  getFakeNicknameLoading.value = true
+  getFakeNicknameDisabled.value = true
   getFakeName()
     .then((response) => {
-      memberForm.member.username = response.data
+      memberForm.memberData.nickname = response.data
     })
     .catch((error) => {
-      ElMessage.error('Get fake username error')
-      console.error('Get fake username error', error)
+      ElMessage.error('Get fake nickname error')
+      console.error('Get fake nickname error', error)
     })
     .finally(() => {
-      getFakeUsernameLoading.value = false
-      getFakeUsernameDisabled.value = false
+      getFakeNicknameLoading.value = false
+      getFakeNicknameDisabled.value = false
     })
 }
 
@@ -399,7 +400,8 @@ const onAddMember = () => {
   submitMemberLoading.value = true
   submitMemberDisabled.value = true
   addMember(memberForm)
-    .then(() => {
+    .then(async () => {
+      await getMemberList()
       dialogMemberVisible.value = false
       ElMessage.success('Add member success')
     })

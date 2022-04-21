@@ -103,7 +103,7 @@ import { list as listLog, remove as removeLog } from 'api/log'
 const logLevelMap = ref([])
 
 onMounted(async () => {
-  logLevelMap.value = await Pair.getValueByKey('logLevelMap').value
+  logLevelMap.value = (await Pair.getValueByKey('logLevelMap')).value
   await getLogList()
 })
 

@@ -15,7 +15,7 @@ let loadingInstance = null
 
 // retry config
 const retryConfig = {
-    times: 2,
+    times: 1,
     delay: 1000,
 }
 const retryAdapterEnhancer = (adapter, options) => {

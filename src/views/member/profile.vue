@@ -110,8 +110,8 @@
       </el-form-item>
       <el-form-item label="Gender" prop="gender" required>
         <el-select v-model="profileForm.gender">
-          <el-option v-for="item in memberGenderMap" :key="item.id" :label="item.label" :value="item.id"
-            :disabled="item.id === profileForm.gender" />
+          <el-option v-for="item in memberGenderMap" :key="item.value" :label="item.label" :value="item.value"
+            :disabled="item.value === profileForm.gender" />
         </el-select>
       </el-form-item>
     </el-form>

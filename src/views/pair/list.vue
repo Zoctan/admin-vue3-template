@@ -4,7 +4,7 @@
       <el-form :inline="true" ref="searchFormRef" :model="searchForm">
         <el-form-item>
           <el-button type="success" icon="refresh" circle @click="getPairList"></el-button>
-          <el-button type="primary" icon="plus" circle @click="showAddPairDialog"></el-button>
+          <el-button type="primary" icon="plus" circle v-permission="'pair:add'" @click="showAddPairDialog"></el-button>
         </el-form-item>
         <el-form-item label="Description" prop="pair.description">
           <el-input v-model="searchForm.pair.description" />

@@ -28,7 +28,7 @@ export default class Permission {
         return notAccessCallback && notAccessCallback()
       }
     }
-
+    
     if (value instanceof Array) {
       if (value.length === 0) {
         return this.exist()
@@ -39,15 +39,15 @@ export default class Permission {
       }
     }
 
-    if (value instanceof String) {
-      return _check([value], joint)
-    }
-
     if (value instanceof Object) {
       const { joint, list } = value
       if (list.length > 0) {
         return _check(list, joint)
       }
+    }
+
+    if ((typeof value) === 'string') {
+      return _check([value], joint)
     }
   }
 

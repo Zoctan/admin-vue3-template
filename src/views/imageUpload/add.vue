@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <div class="option">
+    <div class="option-container">
       <el-form ref="optionFormRef" :model="optionForm" status-icon label-position="left" label-width="140px">
         <el-form-item label="UseTimeDir" prop="useTimeDir">
           <el-radio-group v-model="optionForm.useTimeDir">
@@ -57,9 +57,6 @@
                 <el-radio-button :label="false" />
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="Path" prop="watermarkConfig.path">
-              <el-input v-model="optionForm.watermarkConfig.path" clearable />
-            </el-form-item>
             <el-form-item label="X" prop="watermarkConfig.x">
               <el-input v-model="optionForm.watermarkConfig.x" clearable />
             </el-form-item>
@@ -71,11 +68,15 @@
                 <el-option v-for="item in watermarkPositionList" :key="item" :label="item" :value="item" />
               </el-select>
             </el-form-item>
+            <div class="block" v-if="optionForm.watermarkConfig.path">
+              <span class="demonstration">Watermark</span>
+              <el-image :src="optionForm.watermarkConfig.path" />
+            </div>
           </el-collapse-item>
         </el-collapse>
       </el-form>
     </div>
-    <div class="upload-box">
+    <div class="upload-container">
       <el-upload ref="uploadRef" drag :action="uploadUrl()" :http-request="uploadMehod" :limit="1"
         :file-list="uploadList" :on-change="handleUploadChange" :on-success="handleUploadSuccess"
         :on-error="handleUploadError" :on-exceed="handleUploadExceed" :before-upload="beforeUpload"
@@ -96,18 +97,15 @@
       </el-button>
       <el-progress style="width: 200px;margin-top: 8px" :text-inside="true" :stroke-width="20"
         :percentage="progressPercent" />
-    </div>
-    <div class="file-list">
-      <div class="block">
-        <span class="demonstration">Watermark</span>
-        <el-image :src="optionForm.watermarkConfig.path" />
+
+      <div class="down-container">
+        <template v-for="item in uploadedList" :key="item.name">
+          <div class="block">
+            <span class="demonstration">{{ item.name }}</span>
+            <el-image :src="item.url" :alt="item.name" />
+          </div>
+        </template>
       </div>
-      <template v-for="item in uploadedList" :key="item.name">
-        <div class="block">
-          <span class="demonstration">Uploaded</span>
-          <el-image :src="item.url" :alt="item.name" />
-        </div>
-      </template>
     </div>
   </div>
 </template>
@@ -141,7 +139,7 @@ const optionForm = reactive({
   },
   watermarkConfig: {
     enable: false,
-    path: 'http://127.0.0.1/php-seed/upload/?filename=watermark.png&type=image',
+    path: 'http://127.0.0.1/php-seed/upload/?filename=logo.png&type=image',
     x: 0,
     y: 0,
     position: 'bottom-right',
@@ -236,7 +234,7 @@ const handleUploadRemove = (file) => {
   display: flex;
   align-items: center;
 
-  .option {
+  .option-container {
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -247,38 +245,36 @@ const handleUploadRemove = (file) => {
     }
   }
 
-  .upload-box {
+  .upload-container {
     display: flex;
     align-items: center;
     flex-direction: column;
-    flex: 1;
+    flex: 2;
+
+    .down-container {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+    }
   }
 
-  .file-list {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    flex: 1;
+  .block {
+    padding: 0 10px;
+    text-align: center;
+    display: inline-block;
+    box-sizing: border-box;
+    vertical-align: top;
 
-    .block {
-      padding: 30px 0;
-      text-align: center;
-      display: inline-block;
-      box-sizing: border-box;
-      vertical-align: top;
-
-      .demonstration {
-        display: block;
-        color: var(--el-text-color-secondary);
-        font-size: 14px;
-        margin-bottom: 20px;
-      }
-
-      .el-image {
-        width: 200px;
-      }
+    .demonstration {
+      display: block;
+      color: var(--el-text-color-secondary);
+      font-size: 14px;
     }
 
+    .el-image {
+      width: 200px;
+    }
   }
 }
 </style>
