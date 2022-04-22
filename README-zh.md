@@ -28,9 +28,9 @@ git clone https://github.com/Zoctan/admin-seed-template.git
 npm install
 
 # 修改 src/router/index.js：
-// 不使用域名（部署在本地，并用127.0.0.1访问）
+# 不使用域名（部署在本地，并用127.0.0.1访问）
 history: createWebHashHistory()
-// 使用域名（部署在本地或服务器，设绑定了域名）
+# 使用域名（部署在本地或服务器，绑定了域名）
 history: createWebHistory()
 
 # 打包，把 dist 文件夹放到 WWW 目录下
@@ -87,13 +87,13 @@ vite.config.js：配置
 
 # 文档参考
 
-- [Axios 基于 promise 网络请求库](https://axios-http.com/zh/docs/intro)
-- [Vant 移动端 Vue 组件库](https://vant-contrib.gitee.io/vant/#/zh-CN)
+- [Axios：基于 promise 网络请求库](https://axios-http.com/zh/docs/intro)
+- [Element Plus：Vue3 组件库](https://element-plus.gitee.io/zh-CN/)
 - [Vue3 构建用户界面的渐进式框架](https://v3.cn.vuejs.org/guide/introduction.html)
-- [Vite 下一代前端开发与构建工具](https://vitejs.cn/guide)
-- [Vuex 专为 Vue.js 应用程序开发的状态管理模式 + 库](https://vuex.vuejs.org/zh)
-- [Vue Router 是 Vue.js 的官方路由](https://router.vuejs.org/zh)
-- [NProgress 进度条](https://github.com/rstacruz/nprogress)
+- [Vite：下一代前端开发与构建工具](https://vitejs.cn/guide)
+- [Vuex：专为 Vue.js 应用程序开发的状态管理模式 + 库](https://vuex.vuejs.org/zh)
+- [Vue Router：Vue.js 的官方路由](https://router.vuejs.org/zh)
+- [NProgress：进度条](https://github.com/rstacruz/nprogress)
 
 # 依赖
 
