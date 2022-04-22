@@ -1,13 +1,13 @@
-# ADMIN-SEED
+# ADMIN-SEED-Template
 
 前后端分离的多用户-多角色后台权限管理 Vue 3 + Vite 模版。
 
-![stars](https://img.shields.io/github/stars/Zoctan/admin-seed.svg?style=flat-square&label=Stars)
-![license](https://img.shields.io/github/license/Zoctan/admin-seed.svg?style=flat-square)
+![stars](https://img.shields.io/github/stars/Zoctan/admin-seed-template.svg?style=flat-square&label=Stars)
+![license](https://img.shields.io/github/license/Zoctan/admin-seed-template.svg?style=flat-square)
 
 简体中文 | [English](./README.md)
 
-如果想使用本项目，而又不想使用后端项目 [PHP-SEED](https://github.com/Zoctan/php-seed)，用其他语言实现和后端项目一致的接口吧，很简单的！
+如果想使用本项目，而又不想使用后端项目 [PHP-SEED-Template](https://github.com/Zoctan/php-seed-template)，用其他语言实现和后端项目一致的接口吧，很简单的！
 
 欢迎小伙伴 star 和 issues ~ 谢谢 :）
 
@@ -22,7 +22,7 @@
 
 ```
 # 克隆项目
-git clone https://github.com/Zoctan/admin-seed.git
+git clone https://github.com/Zoctan/admin-seed-template.git
 
 # 安装依赖
 npm install
