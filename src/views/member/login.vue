@@ -8,11 +8,11 @@
       <el-form ref="formRef" :model="form" :rules="rules" status-icon label-position="left" label-width="100px">
         <el-form-item label="Username" prop="username" required>
           <el-input type="text" autocomplete="on" prefix-icon="user" v-model="form.username"
-            placeholder="please input username" />
+            placeholder="Please input username" />
         </el-form-item>
         <el-form-item label="Password" prop="password" required>
           <el-input type="password" autocomplete="on" prefix-icon="lock" v-model="form.password"
-            placeholder="please input password" show-password />
+            placeholder="Please input password" show-password />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="submitLoading" :disabled="submitDisabled" @click="onLogin(formRef)">Login

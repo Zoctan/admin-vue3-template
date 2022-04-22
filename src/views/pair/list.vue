@@ -239,8 +239,8 @@ const onAddPair = () => {
   addPair(pairForm)
     .then(async () => {
       await getPairList()
-      dialogPairVisible.value = false
       ElMessage.success('Add pair success')
+      dialogPairVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Add pair error')
@@ -275,8 +275,8 @@ const onUpdatePair = () => {
   updatePair(pairForm)
     .then(async () => {
       await getPairList()
-      dialogPairVisible.value = false
       ElMessage.success('Update pair success')
+      dialogPairVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Update pair error')

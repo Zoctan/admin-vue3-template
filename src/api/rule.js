@@ -18,14 +18,6 @@ export function list(data) {
   })
 }
 
-export function updateList(data) {
-  return request({
-    url: `/${group}/updateList`,
-    method: 'PUT',
-    data: data
-  })
-}
-
 export function update(data) {
   return request({
     url: `/${group}/update`,

@@ -402,8 +402,8 @@ const onAddMember = () => {
   addMember(memberForm)
     .then(async () => {
       await getMemberList()
-      dialogMemberVisible.value = false
       ElMessage.success('Add member success')
+      dialogMemberVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Add member error')
@@ -487,8 +487,8 @@ const onUpdateMember = () => {
   updateMemberDetail(memberForm)
     .then(async () => {
       await getMemberList()
-      dialogMemberVisible.value = false
       ElMessage.success('Update member detail success')
+      dialogMemberVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Update member detail error')

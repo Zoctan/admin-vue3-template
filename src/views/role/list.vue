@@ -341,8 +341,8 @@ const onAddRule = () => {
   addRule(ruleForm)
     .then(async () => {
       await getRuleList()
-      innerDialogRuleVisible.value = false
       ElMessage.success('Add rule success')
+      innerDialogRuleVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Add rule error')
@@ -368,8 +368,8 @@ const onUpdateRule = () => {
   updateRule(ruleForm)
     .then(async () => {
       await getRuleList()
-      innerDialogRuleVisible.value = false
       ElMessage.success('Update rule success')
+      innerDialogRuleVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Update rule error')
@@ -489,8 +489,8 @@ const onAddRole = () => {
   addRole(roleForm)
     .then(async () => {
       await getRoleList()
-      dialogRoleVisible.value = false
       ElMessage.success('Add role success')
+      dialogRoleVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Add role error')
@@ -545,8 +545,8 @@ const onUpdateRole = () => {
   updateRole(roleForm)
     .then(async () => {
       await getRoleList()
-      dialogRoleVisible.value = false
       ElMessage.success('Update role success')
+      dialogRoleVisible.value = false
     })
     .catch((error) => {
       ElMessage.error('Update role error')
