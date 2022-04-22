@@ -16,7 +16,7 @@ export default {
 
   mutations: {
     SET_ROUTERS: (state, routers) => {
-      // 路由合并，成为本成员最终可以访问的路由
+      // Combine routes that this member can access
       state.accessedRouters = constRouters.concat(routers)
       state.accessedAsyncRouters = routers
     },
@@ -43,7 +43,8 @@ export default {
 }
 
 /**
- * 通过路由上的 meta.permission 判断是否与当前成员权限匹配
+ * Determine whether it matches the current member permissions through the meta.permission on the route
+ * 
  * @param route
  */
 function checkPermission(route) {
@@ -62,7 +63,8 @@ function checkPermission(route) {
 }
 
 /**
- * 递归路由表，返回符合成员角色权限的路由表
+ * Recursive routing table, return routing table that conforms to member role permissions
+ * 
  * @param asyncRouters
  */
 function filterAsyncRouter(asyncRouters) {
@@ -73,7 +75,7 @@ function filterAsyncRouter(asyncRouters) {
       return false
     }
     if (route.children && route.children.length > 0) {
-      // 如果这个路由下面还有下一级的话，递归调用
+      // If there is a next level below this route, recursively call
       route.children = filterAsyncRouter(route.children)
       return route.children && route.children.length > 0
     }

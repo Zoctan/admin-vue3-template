@@ -1,9 +1,9 @@
 <template>
   <template v-for="router in routers" :key="router.name">
     <template v-if="!router.meta.hidden">
-      <!-- 一级菜单 -->
+      <!-- Level 1 menu -->
       <template v-if="!router.meta.dropDown">
-        <!-- 如果当前路由路径是该菜单路径，禁止重复点击 -->
+        <!-- If the current routing path is the menu path, repeated clicks are prohibited -->
         <el-menu-item :index="resolvePath(router)" :disabled="$route.path === resolvePath(router)">
           <el-icon v-if="router.meta.icon">
             <component :is="router.meta.icon"></component>
@@ -13,7 +13,7 @@
           </template>
         </el-menu-item>
       </template>
-      <!-- 二级以上菜单 -->
+      <!-- Level 2>= menu -->
       <template v-else>
         <el-sub-menu :index="resolvePath(router)">
           <template #title>
@@ -22,7 +22,7 @@
             </el-icon>
             <span>{{ router.name }}</span>
           </template>
-          <!-- 多重子菜单 -->
+          <!-- Multiple submenus -->
           <template v-for="child in router.children" :key="child.name">
             <SideBarItem :routers="[child]" :basePath="getBasePath(router.path)" />
           </template>
@@ -53,8 +53,6 @@ const getBasePath = (routePath) => {
 }
 
 const resolvePath = (router) => {
-  // console.debug('router.name', router.name)
-  // console.debug('basePath', props.basePath)
   let routePath = router.path
   if (router.children && router.children.length === 1) {
     // only one child

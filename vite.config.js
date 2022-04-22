@@ -25,7 +25,7 @@ export default ({ command, mode }) => {
   return defineConfig({
     plugins: [
       vue(),
-      // 自动导入 Element
+      // auto import Element Plus
       AutoImport({
         resolvers: [ElementPlusResolver()],
       }),
@@ -44,13 +44,12 @@ export default ({ command, mode }) => {
     },
     server: {
       host: process.env.VITE_HOST,
-      // 服务端口号
+      // server port number
       port: process.env.VITE_PORT,
-      // 服务启动时是否自动打开浏览器
+      // Whether to automatically open the browser when the server starting
       open: true,
-      // 允许跨域
+      // Allow cross domain
       cors: true,
-      // 是否开启 https
       https: false,
     },
     base: process.env.VITE_BASE_URL,

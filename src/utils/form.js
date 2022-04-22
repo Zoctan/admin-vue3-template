@@ -1,6 +1,6 @@
 export const resetForm = (formEl) => {
   if (!formEl) return
-  // 重置回初始状态，如果表单初始化了数据，就是那个原始数据，而不是清空
+  // Reset back to the initial state, if the form initializes the data, it is the original data, not empty
   formEl.resetFields()
 }
 
@@ -14,7 +14,7 @@ export const allEmpty = (obj, excludeKey = []) => {
       flag = flag && allEmpty(obj[key], excludeKey)
     } else {
       if (obj[key] !== null && obj[key] !== '') {
-        console.debug('allEmpty', `flag => ${false}, key => ${key}, value => ${obj[key]}`)
+        // console.debug('allEmpty', `flag => ${false}, key => ${key}, value => ${obj[key]}`)
         return false
       }
     }
