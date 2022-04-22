@@ -65,25 +65,25 @@ vite.config.js：配置
 
 ![登录](https://github.com/Zoctan/admin-seed/blob/master/README/Login.png)
 
-![用户角色控制](https://github.com/Zoctan/admin-seed/blob/master/README/Member Manage-update role.png)
+![用户角色控制](https://github.com/Zoctan/admin-seed/blob/master/README/MemberManageUpdateRole.png)
 
-![用户管理-列表](https://github.com/Zoctan/admin-seed/blob/master/README/Member Manage-list.png)
+![用户管理-列表](https://github.com/Zoctan/admin-seed/blob/master/README/MemberManageList.png)
 
-![用户管理-添加](https://github.com/Zoctan/admin-seed/blob/master/README/Member Manage-add.png)
+![用户管理-添加](https://github.com/Zoctan/admin-seed/blob/master/README/MemberManageAdd.png)
 
-![角色管理-列表](https://github.com/Zoctan/admin-seed/blob/master/README/Role Manage-list.png)
+![角色管理-列表](https://github.com/Zoctan/admin-seed/blob/master/README/RoleManageList.png)
 
-![角色管理-添加](https://github.com/Zoctan/admin-seed/blob/master/README/Role Manage-add.png)
+![角色管理-添加](https://github.com/Zoctan/admin-seed/blob/master/README/RoleManageAdd.png)
 
-![角色管理-更新](https://github.com/Zoctan/admin-seed/blob/master/README/Role Manage-update.png)
+![角色管理-更新](https://github.com/Zoctan/admin-seed/blob/master/README/RoleManageUpdate.png)
 
-![角色管理-规则](https://github.com/Zoctan/admin-seed/blob/master/README/Role Manage-rule.png)
+![角色管理-规则](https://github.com/Zoctan/admin-seed/blob/master/README/RoleManageRule.png)
 
-![上传](https://github.com/Zoctan/admin-seed/blob/master/README/Image Upload.png)
+![上传](https://github.com/Zoctan/admin-seed/blob/master/README/ImageUpload.png)
 
-![键值对-列表](https://github.com/Zoctan/admin-seed/blob/master/README/Pair-list.png)
+![键值对-列表](https://github.com/Zoctan/admin-seed/blob/master/README/PairList.png)
 
-![日志-列表](https://github.com/Zoctan/admin-seed/blob/master/README/Log-list.png)
+![日志-列表](https://github.com/Zoctan/admin-seed/blob/master/README/LogList.png)
 
 # 文档参考
 
