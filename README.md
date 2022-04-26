@@ -1,15 +1,15 @@
-# ADMIN-SEED-Template
+# admin-vue3-template
 
 A Vue 3 + Vite template for multi-user and multi-role background permission management with front and back ends separated.
 
-![stars](https://img.shields.io/github/stars/Zoctan/admin-seed-template.svg?style=flat-square&label=Stars)
-![license](https://img.shields.io/github/license/Zoctan/admin-seed-template.svg?style=flat-square)
+![stars](https://img.shields.io/github/stars/Zoctan/admin-vue3-template.svg?style=flat-square&label=Stars)
+![license](https://img.shields.io/github/license/Zoctan/admin-vue3-template.svg?style=flat-square)
 
 English | [简体中文](./README-zh.md)
 
-Front-end project with back-end project [PHP-SEED-Template](https://github.com/Zoctan/php-seed-template).
+Front-end project with back-end project [php-seed-template](https://github.com/Zoctan/php-seed-template).
 
-If you want to use this project but don't want to use the back-end project [PHP-SEED-Template](https://github.com/Zoctan/php-seed-template), use other languages to implement the same interface as the back-end project,Very simple!
+If you want to use this project but don't want to use the back-end project [php-seed-template](https://github.com/Zoctan/php-seed-template), use other languages to implement the same interface as the back-end project,Very simple!
 
 Welcome friends to star and issues ~ thank you :)
 
@@ -24,7 +24,7 @@ Welcome friends to star and issues ~ thank you :)
 
 ```
 # clone project
-git clone https://github.com/Zoctan/admin-seed-template.git
+git clone https://github.com/Zoctan/admin-vue3-template.git
 
 # install dependencies
 npm install
@@ -65,27 +65,27 @@ vite.config.js: vite configuration
 
 # Preview
 
-![Login](https://github.com/Zoctan/admin-seed-template/blob/main/README/Login.jpg)
+![Login](https://github.com/Zoctan/admin-vue3-template/blob/main/README/Login.jpg)
 
-![Update Member Role](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageUpdateRole.jpg)
+![Update Member Role](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageUpdateRole.jpg)
 
-![Member Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageList.jpg)
+![Member Manage-List](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageList.jpg)
 
-![Member Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageAdd.jpg)
+![Member Manage-Add](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageAdd.jpg)
 
-![Role Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageList.jpg)
+![Role Manage-List](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageList.jpg)
 
-![Role Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageAdd.jpg)
+![Role Manage-Add](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageAdd.jpg)
 
-![Role Manage-Update](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageUpdate.jpg)
+![Role Manage-Update](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageUpdate.jpg)
 
-![Role Manage-Rule](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageRule.jpg)
+![Role Manage-Rule](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageRule.jpg)
 
-![Upload](https://github.com/Zoctan/admin-seed-template/blob/main/README/ImageUpload.jpg)
+![Upload](https://github.com/Zoctan/admin-vue3-template/blob/main/README/ImageUpload.jpg)
 
-![Pair-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/PairList.jpg)
+![Pair-List](https://github.com/Zoctan/admin-vue3-template/blob/main/README/PairList.jpg)
 
-![Log-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/LogList.jpg)
+![Log-List](https://github.com/Zoctan/admin-vue3-template/blob/main/README/LogList.jpg)
 
 # Documentation reference
 

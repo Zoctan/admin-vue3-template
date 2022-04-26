@@ -1,15 +1,15 @@
-# ADMIN-SEED-Template
+# admin-vue3-template
 
 前后端分离的多用户-多角色后台权限管理 Vue 3 + Vite 模版。
 
-![stars](https://img.shields.io/github/stars/Zoctan/admin-seed-template.svg?style=flat-square&label=Stars)
-![license](https://img.shields.io/github/license/Zoctan/admin-seed-template.svg?style=flat-square)
+![stars](https://img.shields.io/github/stars/Zoctan/admin-vue3-template.svg?style=flat-square&label=Stars)
+![license](https://img.shields.io/github/license/Zoctan/admin-vue3-template.svg?style=flat-square)
 
 简体中文 | [English](./README.md)
 
-配合后端项目 [PHP-SEED-Template](https://github.com/Zoctan/php-seed-template) 的前端项目。
+配合后端项目 [php-seed-template](https://github.com/Zoctan/php-seed-template) 的前端项目。
 
-如果想使用本项目，而又不想使用后端项目 [PHP-SEED-Template](https://github.com/Zoctan/php-seed-template)，用其他语言实现和后端项目一致的接口吧，很简单的！
+如果想使用本项目，而又不想使用后端项目 [php-seed-template](https://github.com/Zoctan/php-seed-template)，用其他语言实现和后端项目一致的接口吧，很简单的！
 
 欢迎小伙伴 star 和 issues ~ 谢谢 :）
 
@@ -24,7 +24,7 @@
 
 ```
 # 克隆项目
-git clone https://github.com/Zoctan/admin-seed-template.git
+git clone https://github.com/Zoctan/admin-vue3-template.git
 
 # 安装依赖
 npm install
@@ -65,27 +65,27 @@ vite.config.js：配置
 
 # 预览
 
-![登录](https://github.com/Zoctan/admin-seed-template/blob/main/README/Login.jpg)
+![登录](https://github.com/Zoctan/admin-vue3-template/blob/main/README/Login.jpg)
 
-![用户角色控制](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageUpdateRole.jpg)
+![用户角色控制](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageUpdateRole.jpg)
 
-![用户管理-列表](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageList.jpg)
+![用户管理-列表](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageList.jpg)
 
-![用户管理-添加](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageAdd.jpg)
+![用户管理-添加](https://github.com/Zoctan/admin-vue3-template/blob/main/README/MemberManageAdd.jpg)
 
-![角色管理-列表](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageList.jpg)
+![角色管理-列表](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageList.jpg)
 
-![角色管理-添加](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageAdd.jpg)
+![角色管理-添加](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageAdd.jpg)
 
-![角色管理-更新](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageUpdate.jpg)
+![角色管理-更新](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageUpdate.jpg)
 
-![角色管理-规则](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageRule.jpg)
+![角色管理-规则](https://github.com/Zoctan/admin-vue3-template/blob/main/README/RoleManageRule.jpg)
 
-![上传](https://github.com/Zoctan/admin-seed-template/blob/main/README/ImageUpload.jpg)
+![上传](https://github.com/Zoctan/admin-vue3-template/blob/main/README/ImageUpload.jpg)
 
-![键值对-列表](https://github.com/Zoctan/admin-seed-template/blob/main/README/PairList.jpg)
+![键值对-列表](https://github.com/Zoctan/admin-vue3-template/blob/main/README/PairList.jpg)
 
-![日志-列表](https://github.com/Zoctan/admin-seed-template/blob/main/README/LogList.jpg)
+![日志-列表](https://github.com/Zoctan/admin-vue3-template/blob/main/README/LogList.jpg)
 
 # 文档参考
 

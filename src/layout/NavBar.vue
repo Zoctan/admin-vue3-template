@@ -8,10 +8,10 @@
 
     <div class="rightbar">
       <el-link icon="link">
-        <a href="https://github.com/Zoctan/admin-seed" target="_blank">Github</a>
+        <a href="https://github.com/Zoctan/admin-vue3-template" target="_blank">Github</a>
       </el-link>
       <el-link icon="question-filled">
-        <a href="https://github.com/Zoctan/admin-seed/issues" target="_blank">Issues</a>
+        <a href="https://github.com/Zoctan/admin-vue3-template/issues" target="_blank">Issues</a>
       </el-link>
       <template v-if="memberData">
         <el-dropdown class>

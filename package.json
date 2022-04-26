@@ -1,20 +1,20 @@
 {
-  "name": "admin-seed",
+  "name": "admin-vue3",
   "private": true,
   "version": "1.0.0",
   "author": "Zoctan <zoctan@163.com> (https://github.com/Zoctan)",
-  "description": "Vue admin project seed",
+  "description": "Vue3 admin project",
   "keywords": [
-    "Vue.js",
+    "Vue3",
     "admin"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Zoctan/admin-seed"
+    "url": "https://github.com/Zoctan/admin-vue3-template"
   },
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Zoctan/admin-seed/issues",
+    "url": "https://github.com/Zoctan/admin-vue3-template/issues",
     "email": "zoctan@163.com"
   },
   "contributors": [],
