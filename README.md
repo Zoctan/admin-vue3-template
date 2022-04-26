@@ -67,25 +67,25 @@ vite.config.js: vite configuration
 
 ![Login](https://github.com/Zoctan/admin-seed-template/blob/main/README/Login.jpg)
 
-![Update Member Role](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageUpdateRole.png)
+![Update Member Role](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageUpdateRole.jpg)
 
-![Member Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageList.png)
+![Member Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageList.jpg)
 
-![Member Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageAdd.png)
+![Member Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/MemberManageAdd.jpg)
 
-![Role Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageList.png)
+![Role Manage-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageList.jpg)
 
-![Role Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageAdd.png)
+![Role Manage-Add](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageAdd.jpg)
 
-![Role Manage-Update](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageUpdate.png)
+![Role Manage-Update](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageUpdate.jpg)
 
-![Role Manage-Rule](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageRule.png)
+![Role Manage-Rule](https://github.com/Zoctan/admin-seed-template/blob/main/README/RoleManageRule.jpg)
 
-![Upload](https://github.com/Zoctan/admin-seed-template/blob/main/README/ImageUpload.png)
+![Upload](https://github.com/Zoctan/admin-seed-template/blob/main/README/ImageUpload.jpg)
 
-![Pair-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/PairList.png)
+![Pair-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/PairList.jpg)
 
-![Log-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/LogList.png)
+![Log-List](https://github.com/Zoctan/admin-seed-template/blob/main/README/LogList.jpg)
 
 # Documentation reference
 
