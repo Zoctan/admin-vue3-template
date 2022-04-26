@@ -139,7 +139,7 @@ const optionForm = reactive({
   },
   watermarkConfig: {
     enable: false,
-    path: 'http://127.0.0.1/php-seed/upload/?filename=logo.png&type=image',
+    path: 'http://127.0.0.1/php-seed-template/upload/?filename=logo.png&type=image',
     x: 0,
     y: 0,
     position: 'bottom-right',
