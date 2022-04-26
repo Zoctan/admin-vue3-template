@@ -7,9 +7,9 @@ A Vue 3 + Vite template for multi-user and multi-role background permission mana
 
 English | [简体中文](./README-zh.md)
 
-Front-end project with back-end project [php-seed-template](https://github.com/Zoctan/php-seed-template).
+Front-end project with back-end project [php-seed](https://github.com/Zoctan/php-seed).
 
-If you want to use this project but don't want to use the back-end project [php-seed-template](https://github.com/Zoctan/php-seed-template), use other languages to implement the same interface as the back-end project,Very simple!
+If you want to use this project but don't want to use the back-end project [php-seed](https://github.com/Zoctan/php-seed), use other languages to implement the same interface as the back-end project,Very simple!
 
 Welcome friends to star and issues ~ thank you :)
 

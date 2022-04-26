@@ -7,9 +7,9 @@
 
 简体中文 | [English](./README.md)
 
-配合后端项目 [php-seed-template](https://github.com/Zoctan/php-seed-template) 的前端项目。
+配合后端项目 [php-seed](https://github.com/Zoctan/php-seed) 的前端项目。
 
-如果想使用本项目，而又不想使用后端项目 [php-seed-template](https://github.com/Zoctan/php-seed-template)，用其他语言实现和后端项目一致的接口吧，很简单的！
+如果想使用本项目，而又不想使用后端项目 [php-seed](https://github.com/Zoctan/php-seed)，用其他语言实现和后端项目一致的接口吧，很简单的！
 
 欢迎小伙伴 star 和 issues ~ 谢谢 :）
 
