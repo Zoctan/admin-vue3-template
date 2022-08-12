@@ -135,7 +135,8 @@ const optionForm = reactive({
   },
   compressConfig: {
     enable: false,
-    quality: 75
+    quality: 75,
+    newFile: true
   },
   watermarkConfig: {
     enable: false,

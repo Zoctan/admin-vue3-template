@@ -1,5 +1,5 @@
 export const getParam = (data) => {
-    let url = '';
+    let url = ''
     for (const key in data) {
         let value = data[key] !== undefined ? data[key] : ''
         url += `&${key}=${encodeURIComponent(value)}`
