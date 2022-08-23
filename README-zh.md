@@ -30,9 +30,9 @@ git clone https://github.com/Zoctan/admin-vue3-template.git
 npm install
 
 # 修改 src/router/index.js：
-# 不使用域名（部署在本地，并用127.0.0.1访问）
+# 带#
 history: createWebHashHistory()
-# 使用域名（部署在本地或服务器，绑定了域名）
+# 不带#
 history: createWebHistory()
 
 # 打包，把 dist 文件夹放到 WWW 目录下
